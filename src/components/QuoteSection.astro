@@ -1,0 +1,85 @@
+---
+---
+<section
+  class="wi-section wi-quote"
+  th:if="${theme.config?.home?.home_quote_enabled == true and theme.config?.home?.home_quote_content}"
+>
+  <div class="wi-container">
+    <div class="wi-quote__inner">
+      <span class="wi-quote__mark wi-quote__mark--open" aria-hidden="true">"</span>
+      <blockquote
+        class="wi-quote__text"
+        th:text="${theme.config?.home?.home_quote_content}"
+      ></blockquote>
+      <span class="wi-quote__mark wi-quote__mark--close" aria-hidden="true">"</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wi-quote__inner {
+    position: relative;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-xl);
+    background: var(--mist-pink);
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid var(--rule);
+  }
+
+  .wi-quote__mark {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 5rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.25;
+    position: absolute;
+    user-select: none;
+  }
+
+  .wi-quote__mark--open {
+    top: -0.1em;
+    left: var(--space-lg);
+  }
+
+  .wi-quote__mark--close {
+    bottom: -0.5em;
+    right: var(--space-lg);
+  }
+
+  .wi-quote__text {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: var(--font-sans);
+    font-size: var(--text-xl);
+    font-style: italic;
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+    letter-spacing: var(--tracking-normal);
+  }
+
+  @media (max-width: 640px) {
+    .wi-quote__inner {
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    .wi-quote__mark {
+      font-size: 3.5rem;
+    }
+
+    .wi-quote__mark--open {
+      left: var(--space-md);
+    }
+
+    .wi-quote__mark--close {
+      right: var(--space-md);
+    }
+
+    .wi-quote__text {
+      font-size: var(--text-lg);
+    }
+  }
+</style>

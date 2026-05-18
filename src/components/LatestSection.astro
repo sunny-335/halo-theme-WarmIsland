@@ -1,0 +1,307 @@
+---
+---
+
+<section
+  class="wi-section"
+  th:if="${theme.config?.home?.home_latest_enabled != false}"
+>
+  <div class="wi-container">
+    <div class="wi-section__header">
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_latest_title ?: '最新文章'}">最新文章</h2>
+    </div>
+    <div
+      class="wi-latest"
+      th:classappend="|wi-latest--${theme.config?.home?.home_latest_style ?: 'magazine'}|"
+    >
+      <a
+        th:each="post,iterStat : ${posts.items}"
+        th:href="@{${post.status.permalink}}"
+        class="wi-latest__card"
+        th:classappend="${iterStat.index lt 2} ? 'wi-latest__card--hero' : ''"
+      >
+        <div
+          class="wi-latest__cover"
+          th:if="${!#strings.isEmpty(post.spec.cover)}"
+        >
+          <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-latest__image" />
+        </div>
+        <div class="wi-latest__body">
+          <div class="wi-latest__meta">
+            <span
+              class="wi-latest__category"
+              th:if="${!#lists.isEmpty(post.categories)}"
+              th:text="${post.categories[0].spec.displayName}"
+            ></span>
+            <time
+              class="wi-latest__date"
+              th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+            ></time>
+          </div>
+          <h3
+            class="wi-latest__title"
+            th:text="${post.spec.title}"
+          ></h3>
+          <p
+            class="wi-latest__excerpt"
+            th:if="${post.status.excerpt}"
+            th:text="${post.status.excerpt}"
+          ></p>
+        </div>
+      </a>
+    </div>
+    <nav
+      th:if="${posts.totalPages gt 1}"
+      class="wi-pagination"
+      aria-label="Pagination"
+    >
+      <a
+        th:if="${posts.hasPrevious()}"
+        th:href="@{${posts.prevUrl}}"
+        class="wi-pagination__prev"
+        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
+      >&larr; 较新</a>
+      <span
+        class="wi-pagination__info"
+        th:text="|${posts.page} / ${posts.totalPages}|"
+      ></span>
+      <a
+        th:if="${posts.hasNext()}"
+        th:href="@{${posts.nextUrl}}"
+        class="wi-pagination__next"
+        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
+      >较旧 &rarr;</a>
+    </nav>
+  </div>
+</section>
+
+<style>
+  .wi-section__header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .wi-section__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: var(--tracking-tight);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .wi-section__title::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .wi-latest {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .wi-latest--magazine {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .wi-latest--magazine .wi-latest__card {
+    grid-column: span 2;
+  }
+
+  .wi-latest--magazine .wi-latest__card--hero {
+    grid-column: span 3;
+  }
+
+  .wi-latest--magazine .wi-latest__card--hero .wi-latest__cover {
+    aspect-ratio: 16 / 9;
+  }
+
+  .wi-latest--magazine .wi-latest__card--hero .wi-latest__title {
+    font-size: var(--text-xl);
+  }
+
+  .wi-latest--grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .wi-latest--list .wi-latest__card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .wi-latest--list .wi-latest__cover {
+    width: 240px;
+    flex-shrink: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .wi-latest--list .wi-latest__body {
+    justify-content: center;
+  }
+
+  .wi-latest__card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-latest__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .wi-latest__cover {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .wi-latest__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+    border-radius: 0;
+  }
+
+  .wi-latest__card:hover .wi-latest__image {
+    transform: scale(1.03);
+  }
+
+  .wi-latest__body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1;
+  }
+
+  .wi-latest__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .wi-latest__category {
+    font-size: var(--text-xs);
+    color: var(--accent);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .wi-latest__category::after {
+    content: '·';
+    margin-left: var(--space-sm);
+    color: var(--ink-3);
+  }
+
+  .wi-latest__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .wi-latest__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-latest__card:hover .wi-latest__title {
+    color: var(--accent);
+  }
+
+  .wi-latest__excerpt {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .wi-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: var(--space-xl);
+    margin-top: var(--space-xl);
+    border-top: 1px solid var(--rule);
+    font-size: var(--text-sm);
+  }
+
+  .wi-pagination__prev,
+  .wi-pagination__next {
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-pagination__prev:hover,
+  .wi-pagination__next:hover {
+    color: var(--accent);
+  }
+
+  .wi-pagination__info {
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 1023px) {
+    .wi-latest--magazine {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wi-latest--magazine .wi-latest__card {
+      grid-column: span 1;
+    }
+
+    .wi-latest--magazine .wi-latest__card--hero {
+      grid-column: span 2;
+    }
+
+    .wi-latest--grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .wi-latest--magazine,
+    .wi-latest--grid {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-latest--magazine .wi-latest__card--hero {
+      grid-column: span 1;
+    }
+
+    .wi-latest--list .wi-latest__card {
+      flex-direction: column;
+    }
+
+    .wi-latest--list .wi-latest__cover {
+      width: 100%;
+    }
+  }
+</style>

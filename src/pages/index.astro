@@ -1,31 +1,565 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import HeroSection from "../components/HeroSection.astro";
 ---
 
-<Layout>
+<Layout home>
   <Fragment slot="head">
     <title th:text="${site.title}"></title>
   </Fragment>
 
-  <th:block th:replace="~{fragments/post-list}"></th:block>
+  <HeroSection />
 
-  <nav
-    th:if="${posts.totalPages gt 1}"
-    class="pagination"
-    aria-label="Pagination"
+  <section
+    class="wi-home-pinned"
+    th:if="${posts != null and !#lists.isEmpty(posts.items)}"
   >
-    <a
-      th:if="${posts.hasPrevious()}"
-      th:href="@{${posts.prevUrl}}"
-      class="pagination__prev">&larr; 较新</a
-    >
-    <span
-      class="pagination__info"
-      th:text="|${posts.page} / ${posts.totalPages}|"></span>
-    <a
-      th:if="${posts.hasNext()}"
-      th:href="@{${posts.nextUrl}}"
-      class="pagination__next">较旧 &rarr;</a
-    >
-  </nav>
+    <div class="wi-container">
+      <div class="wi-section__header">
+        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_pinned_title ?: '置顶'}">置顶</h2>
+      </div>
+      <div class="wi-pinned">
+        <a
+          th:each="post : ${posts.items}"
+          th:if="${post.spec.pinned}"
+          th:href="@{${post.status.permalink}}"
+          class="wi-pinned__card"
+        >
+          <div
+            class="wi-pinned__cover"
+            th:if="${!#strings.isEmpty(post.spec.cover)}"
+          >
+            <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-pinned__image" />
+          </div>
+          <div class="wi-pinned__body">
+            <div class="wi-pinned__meta">
+              <span
+                class="wi-pinned__category"
+                th:if="${!#lists.isEmpty(post.categories)}"
+                th:text="${post.categories[0].spec.displayName}"
+              ></span>
+              <time
+                class="wi-pinned__date"
+                th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+              ></time>
+            </div>
+            <h3
+              class="wi-pinned__title"
+              th:text="${post.spec.title}"
+            ></h3>
+            <p
+              class="wi-pinned__excerpt"
+              th:if="${post.status.excerpt}"
+              th:text="${post.status.excerpt}"
+            ></p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wi-home-posts" id="wi-home-posts">
+    <div class="wi-container">
+      <div class="wi-flow" id="wi-post-grid">
+        <a
+          th:each="post : ${posts.items}"
+          th:if="${!post.spec.pinned}"
+          th:href="@{${post.status.permalink}}"
+          class="wi-flow__card"
+          th:classappend="${!#strings.isEmpty(post.spec.cover)} ? 'wi-flow__card--with-cover' : ''"
+        >
+          <div class="wi-flow__body">
+            <div class="wi-flow__meta">
+              <span
+                class="wi-flow__category"
+                th:if="${!#lists.isEmpty(post.categories)}"
+                th:text="${post.categories[0].spec.displayName}"
+              ></span>
+              <time
+                class="wi-flow__date"
+                th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+              ></time>
+            </div>
+            <h3
+              class="wi-flow__title"
+              th:text="${post.spec.title}"
+            ></h3>
+            <p
+              class="wi-flow__excerpt"
+              th:if="${post.status.excerpt}"
+              th:text="${post.status.excerpt}"
+              th:style="'-webkit-line-clamp:' + (${theme.config?.home?.home_excerpt_lines ?: 3})"
+            ></p>
+          </div>
+          <div
+            class="wi-flow__cover"
+            th:if="${!#strings.isEmpty(post.spec.cover)}"
+          >
+            <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-flow__image" />
+          </div>
+        </a>
+      </div>
+
+      <nav
+        th:if="${posts.totalPages gt 1 and theme.config?.home?.home_post_loading != 'infinite_scroll'}"
+        class="wi-pagination"
+        id="wi-post-pagination"
+        aria-label="Pagination"
+      >
+        <a
+          th:if="${posts.hasPrevious()}"
+          th:href="@{${posts.prevUrl}}"
+          class="wi-pagination__prev"
+          th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
+        >&larr; 较新</a>
+        <span
+          class="wi-pagination__info"
+          th:text="|${posts.page} / ${posts.totalPages}|"
+        ></span>
+        <a
+          th:if="${posts.hasNext()}"
+          th:href="@{${posts.nextUrl}}"
+          class="wi-pagination__next"
+          th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
+        >较旧 &rarr;</a>
+      </nav>
+
+      <div
+        th:if="${posts.hasNext() and theme.config?.home?.home_post_loading == 'infinite_scroll'}"
+        id="wi-infinite-scroll-sentinel"
+        th:attr="data-next-url=${posts.nextUrl}, data-all-loaded-text=${theme.config?.home?.home_label_all_loaded ?: '已加载全部文章'}"
+      >
+        <div class="wi-infinite-scroll__loader">
+          <div class="wi-infinite-scroll__spinner"></div>
+          <span th:text="${theme.config?.home?.home_label_loading ?: '加载中...'}">加载中...</span>
+        </div>
+      </div>
+
+      <div
+        th:if="${!posts.hasNext() and posts.totalPages gt 1 and theme.config?.home?.home_post_loading == 'infinite_scroll'}"
+        class="wi-infinite-scroll__end"
+      >
+        <span th:text="${theme.config?.home?.home_label_all_loaded ?: '已加载全部文章'}">已加载全部文章</span>
+      </div>
+    </div>
+  </section>
 </Layout>
+
+<script is:inline>
+  (function () {
+    var sentinel = document.getElementById("wi-infinite-scroll-sentinel");
+    if (!sentinel) return;
+
+    var grid = document.getElementById("wi-post-grid");
+    var loading = false;
+    var nextUrl = sentinel.getAttribute("data-next-url");
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        if (entries[0].isIntersecting && !loading && nextUrl) {
+          loading = true;
+          var loader = sentinel.querySelector(".wi-infinite-scroll__loader");
+          if (loader) loader.style.display = "flex";
+
+          fetch(nextUrl)
+            .then(function (res) {
+              if (!res.ok) throw new Error("Fetch failed");
+              return res.text();
+            })
+            .then(function (html) {
+              var parser = new DOMParser();
+              var doc = parser.parseFromString(html, "text/html");
+
+              var newCards = doc.querySelectorAll("#wi-post-grid .wi-flow__card");
+              for (var i = 0; i < newCards.length; i++) {
+                var card = newCards[i];
+                card.style.opacity = "0";
+                card.style.transform = "translateY(20px)";
+                grid.appendChild(card);
+                (function (c) {
+                  requestAnimationFrame(function () {
+                    c.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+                    c.style.opacity = "1";
+                    c.style.transform = "translateY(0)";
+                  });
+                })(card);
+              }
+
+              var newSentinel = doc.getElementById("wi-infinite-scroll-sentinel");
+              if (newSentinel && newSentinel.getAttribute("data-next-url")) {
+                nextUrl = newSentinel.getAttribute("data-next-url");
+              } else {
+                nextUrl = null;
+                observer.disconnect();
+                sentinel.style.display = "none";
+                var endMsg = document.createElement("div");
+                endMsg.className = "wi-infinite-scroll__end";
+                endMsg.innerHTML = "<span>" + allLoadedText + "</span>";
+                sentinel.parentNode.appendChild(endMsg);
+              }
+
+              loading = false;
+              if (loader) loader.style.display = "none";
+            })
+            .catch(function () {
+              loading = false;
+              if (loader) loader.style.display = "none";
+            });
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    observer.observe(sentinel);
+  })();
+</script>
+
+<style>
+  .wi-home-pinned {
+    padding-block: 2rem;
+    background: var(--bg);
+  }
+
+  .wi-home-pinned:not(:has(.wi-pinned__card)) {
+    display: none;
+  }
+
+  .wi-section__header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .wi-section__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: var(--tracking-tight);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .wi-section__title::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .wi-pinned {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .wi-pinned__card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-pinned__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .wi-pinned__card:first-child:nth-last-child(1) {
+    grid-column: 1 / -1;
+  }
+
+  .wi-pinned__card:first-child:nth-last-child(1) .wi-pinned__cover {
+    aspect-ratio: 21 / 9;
+  }
+
+  .wi-pinned__card:first-child:nth-last-child(1) .wi-pinned__title {
+    font-size: var(--text-2xl);
+  }
+
+  .wi-pinned__cover {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .wi-pinned__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+    border-radius: 0;
+  }
+
+  .wi-pinned__card:hover .wi-pinned__image {
+    transform: scale(1.03);
+  }
+
+  .wi-pinned__body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1;
+  }
+
+  .wi-pinned__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .wi-pinned__category {
+    font-size: var(--text-xs);
+    color: var(--accent);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .wi-pinned__category::after {
+    content: '·';
+    margin-left: var(--space-sm);
+    color: var(--ink-3);
+  }
+
+  .wi-pinned__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .wi-pinned__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-pinned__card:hover .wi-pinned__title {
+    color: var(--accent);
+  }
+
+  .wi-pinned__excerpt {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .wi-pinned {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-pinned__card:first-child:nth-last-child(1) .wi-pinned__cover {
+      aspect-ratio: 16 / 9;
+    }
+
+    .wi-pinned__card:first-child:nth-last-child(1) .wi-pinned__title {
+      font-size: var(--text-xl);
+    }
+  }
+
+  .wi-home-posts {
+    padding-block: 2rem;
+    background: var(--bg);
+  }
+
+  .wi-flow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .wi-flow__card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-flow__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .wi-flow__card--with-cover .wi-flow__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wi-flow__cover {
+    width: 240px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .wi-flow__image {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+    border-radius: 0;
+  }
+
+  .wi-flow__card:hover .wi-flow__image {
+    transform: scale(1.03);
+  }
+
+  .wi-flow__body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1;
+    justify-content: center;
+  }
+
+  .wi-flow__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .wi-flow__category {
+    font-size: var(--text-xs);
+    color: var(--accent);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .wi-flow__category::after {
+    content: '·';
+    margin-left: var(--space-sm);
+    color: var(--ink-3);
+  }
+
+  .wi-flow__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .wi-flow__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-flow__card:hover .wi-flow__title {
+    color: var(--accent);
+  }
+
+  .wi-flow__excerpt {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-block-end: 0;
+  }
+
+  .wi-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: var(--space-xl);
+    margin-top: var(--space-xl);
+    border-top: 1px solid var(--rule);
+    font-size: var(--text-sm);
+  }
+
+  .wi-pagination__prev,
+  .wi-pagination__next {
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-pagination__prev:hover,
+  .wi-pagination__next:hover {
+    color: var(--accent);
+  }
+
+  .wi-pagination__info {
+    color: var(--ink-3);
+  }
+
+  .wi-infinite-scroll__loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-xl) 0;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+  }
+
+  .wi-infinite-scroll__spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--rule);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: wi-spin 0.6s linear infinite;
+  }
+
+  @keyframes wi-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .wi-infinite-scroll__end {
+    text-align: center;
+    padding: var(--space-xl) 0;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+  }
+
+  @media (max-width: 640px) {
+    .wi-flow__card {
+      flex-direction: column;
+    }
+
+    .wi-flow__cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+    }
+  }
+</style>

@@ -1,52 +1,120 @@
 ---
-import "../styles/global.css";
+import "../styles/main.scss";
+import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
+import ScrollReveal from "../components/ScrollReveal.vue";
+import CursorGlow from "../components/CursorGlow.vue";
+import MobileMenu from "../components/MobileMenu.astro";
 
 interface Props {
   pageTitle?: string;
   contentClass?: string;
+  wide?: boolean;
+  home?: boolean;
 }
 
-const { pageTitle, contentClass } = Astro.props;
-
-const hasHeading = Boolean(pageTitle);
+const { pageTitle, contentClass, wide, home } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh" th:lang="${theme.config?.basic?.language ?: #locale.language}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <script is:inline>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline th:attr="data-scheme=${theme.config?.style?.color_scheme}">
       (function () {
-        var stored = localStorage.getItem("theme");
-        var prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        if (stored === "dark" || (!stored && prefersDark)) {
+        var stored = localStorage.getItem("wi-theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var scheme = null;
+        if (document.currentScript && document.currentScript.getAttribute("data-scheme")) {
+          scheme = document.currentScript.getAttribute("data-scheme");
+        }
+        var isDark = false;
+        if (stored === "dark") {
+          isDark = true;
+        } else if (stored === "light") {
+          isDark = false;
+        } else if (scheme === "dark") {
+          isDark = true;
+        } else if (scheme === "light") {
+          isDark = false;
+        } else if (!stored && prefersDark) {
+          isDark = true;
+        }
+        if (isDark) {
           document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute("data-color-scheme", "dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.setAttribute("data-color-scheme", "light");
         }
       })();
     </script>
+    <link
+      rel="icon"
+      th:href="${theme.config?.basic?.favicon ?: '/favicon.ico'}"
+    />
+    <link rel="alternate" type="application/rss+xml" th:title="${site.title}" th:href="@{/feed.xml}" />
+    <style th:if="${theme.config?.style?.accent_color}" th:utext="${':root { --accent: ' + theme.config?.style?.accent_color + '; --accent-hover: ' + theme.config?.style?.accent_color + '; }'}"></style>
+    <style th:if="${theme.config?.style?.custom_css}" th:utext="${theme.config?.style?.custom_css}"></style>
     <slot name="head" />
   </head>
-  <body>
-    <Header />
-    <main class="layout-main">
-      <article class="page-shell">
-        {
-          hasHeading && (
-            <header class="page-heading">
-              {pageTitle && <h1>{pageTitle}</h1>}
-            </header>
-          )
-        }
-        <div class:list={["page-content", contentClass]}>
+  <body class="wi-body">
+    <Navbar />
+    <main class:list={["wi-main", { "wi-main--wide": wide || home, "wi-main--home": home }]}>
+      {home ? (
+        <slot />
+      ) : (
+        <div class:list={["wi-content-wrap", { "wi-content-wrap--wide": wide }]}>
           <slot />
         </div>
-      </article>
+      )}
     </main>
     <Footer />
+    <MobileMenu />
+    <ScrollReveal client:load />
+    <CursorGlow th:if="${theme.config?.animation?.animation_cursor_glow}" client:load />
   </body>
 </html>
+
+<style is:global>
+html {
+  min-height: 100vh;
+}
+
+html.wi-theme-transition,
+html.wi-theme-transition *,
+html.wi-theme-transition *::before,
+html.wi-theme-transition *::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
+}
+
+.wi-body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wi-main {
+  flex: 1;
+}
+
+.wi-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity var(--duration-normal, 300ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1)),
+    transform var(--duration-normal, 300ms) var(--ease-out-expo, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.wi-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+html.wi-no-animations .wi-reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+</style>

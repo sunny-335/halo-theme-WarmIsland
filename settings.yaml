@@ -1,0 +1,436 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: warm-island-setting
+spec:
+  forms:
+    - group: basic
+      label: 基础设置
+      formSchema:
+        - $formkit: text
+          name: owner_name
+          label: 站点名称
+        - $formkit: textarea
+          name: site_description
+          label: 站点描述
+        - $formkit: attachment
+          name: logo
+          label: 自定义 Logo
+        - $formkit: attachment
+          name: favicon
+          label: 自定义 Favicon
+        - $formkit: text
+          name: label_search
+          label: 搜索按钮标签
+          value: 搜索
+        - $formkit: text
+          name: label_theme_switch
+          label: 主题切换标签
+          value: 切换主题
+        - $formkit: text
+          name: label_archives_title
+          label: 归档页标题
+          value: 归档
+    - group: style
+      label: 总体样式
+      formSchema:
+        - $formkit: radio
+          name: color_scheme
+          label: 配色方案
+          options:
+            - label: 跟随系统
+              value: system
+            - label: 浅色
+              value: light
+            - label: 深色
+              value: dark
+          value: system
+        - $formkit: color
+          name: accent_color
+          label: 强调色
+          value: "#d4764e"
+        - $formkit: select
+          name: border_radius
+          label: 圆角风格
+          options:
+            - label: Small
+              value: small
+            - label: Medium
+              value: medium
+            - label: Large
+              value: large
+          value: medium
+        - $formkit: code
+          name: custom_css
+          label: 自定义 CSS
+          language: css
+        - $formkit: select
+          name: layout_container_width
+          label: 容器宽度
+          options:
+            - label: Narrow
+              value: narrow
+            - label: Medium
+              value: medium
+            - label: Wide
+              value: wide
+          value: medium
+        - $formkit: switch
+          name: layout_sidebar
+          label: 启用侧边栏
+          value: false
+        - $formkit: switch
+          name: animation_enabled
+          label: 启用动效
+          value: true
+        - $formkit: switch
+          name: animation_breath
+          label: 呼吸动画
+          value: true
+        - $formkit: switch
+          name: animation_scroll_reveal
+          label: 滚动渐入
+          value: true
+        - $formkit: switch
+          name: animation_cursor_glow
+          label: 光感跟随
+          value: false
+    - group: navbar
+      label: 导航栏
+      formSchema:
+        - $formkit: select
+          name: navbar_style
+          label: 导航栏样式
+          options:
+            - label: Glass
+              value: glass
+            - label: Minimal
+              value: minimal
+            - label: Float
+              value: float
+          value: glass
+        - $formkit: switch
+          name: navbar_show_search
+          label: 显示搜索按钮
+          value: true
+        - $formkit: switch
+          name: navbar_show_theme_switch
+          label: 显示主题切换
+          value: true
+    - group: hero
+      label: Hero 首屏
+      formSchema:
+        - $formkit: switch
+          name: hero_enabled
+          label: 启用 Hero 模块
+          value: true
+        - $formkit: text
+          name: hero_title
+          label: 主标题（留空则使用站点标题）
+        - $formkit: text
+          name: hero_subtitle
+          label: 副标题（留空则使用站点副标题）
+        - $formkit: select
+          name: hero_description_mode
+          label: 描述文案来源
+          options:
+            - label: 无
+              value: none
+            - label: 一言
+              value: hitokoto
+            - label: 自定义
+              value: custom
+          value: hitokoto
+        - $formkit: url
+          name: hero_hitokoto_api
+          label: 一言 API 地址
+          value: https://v1.hitokoto.cn/
+        - $formkit: checkbox
+          name: hero_hitokoto_categories
+          label: 一言句子类型
+          options:
+            - label: 动画
+              value: a
+            - label: 漫画
+              value: b
+            - label: 游戏
+              value: c
+            - label: 文学
+              value: d
+            - label: 原创
+              value: e
+            - label: 来自网络
+              value: f
+            - label: 其他
+              value: g
+            - label: 影视
+              value: h
+            - label: 诗词
+              value: i
+            - label: 哲学
+              value: k
+            - label: 抖机灵
+              value: l
+          value:
+            - d
+            - i
+            - k
+        - $formkit: textarea
+          name: hero_custom_description
+          label: 自定义描述文案
+          if: "$get(hero_description_mode).value === 'custom'"
+        - $formkit: attachment
+          name: hero_background_image
+          label: 背景图片
+    - group: home
+      label: 首页
+      formSchema:
+        - $formkit: text
+          name: home_pinned_title
+          label: 置顶模块标题
+          value: 置顶
+        - $formkit: number
+          name: home_excerpt_lines
+          label: 文章简介显示行数
+          value: 3
+        - $formkit: select
+          name: home_post_loading
+          label: 文章加载方式
+          options:
+            - label: 分页
+              value: pagination
+            - label: 下滑加载
+              value: infinite_scroll
+          value: pagination
+        - $formkit: text
+          name: home_label_newer
+          label: 分页-较新标签
+          value: 较新
+        - $formkit: text
+          name: home_label_older
+          label: 分页-较旧标签
+          value: 较旧
+        - $formkit: text
+          name: home_label_loading
+          label: 无限滚动-加载中文案
+          value: 加载中...
+        - $formkit: text
+          name: home_label_all_loaded
+          label: 无限滚动-全部加载文案
+          value: 已加载全部文章
+        - $formkit: text
+          name: home_latest_title
+          label: 最新文章模块标题
+          value: 最新文章
+        - $formkit: text
+          name: home_label_view_all
+          label: 查看全部标签
+          value: 查看全部
+        - $formkit: text
+          name: home_label_no_posts
+          label: 暂无文章文案
+          value: 暂无文章。
+        - $formkit: text
+          name: home_label_post_count
+          label: 文章数量文案（{total}为占位符）
+          value: 共 {total} 篇文章
+    - group: article
+      label: 文章
+      formSchema:
+        - $formkit: switch
+          name: article_show_cover
+          label: 显示封面图
+          value: true
+        - $formkit: switch
+          name: article_show_date
+          label: 显示发布日期
+          value: true
+        - $formkit: switch
+          name: article_show_category
+          label: 显示分类
+          value: true
+        - $formkit: switch
+          name: article_show_tags
+          label: 显示标签
+          value: true
+        - $formkit: switch
+          name: article_show_nav
+          label: 显示上下篇导航
+          value: true
+        - $formkit: switch
+          name: article_show_toc
+          label: 显示文章目录
+          value: true
+        - $formkit: select
+          name: article_toc_position
+          label: 目录位置
+          options:
+            - label: 左侧
+              value: left
+            - label: 右侧
+              value: right
+          value: left
+        - $formkit: switch
+          name: article_show_word_count
+          label: 显示字数统计
+          value: true
+        - $formkit: switch
+          name: article_show_visit_count
+          label: 显示阅读量统计
+          value: true
+        - $formkit: switch
+          name: article_show_read_time
+          label: 显示预计阅读时间
+          value: false
+        - $formkit: select
+          name: article_code_theme
+          label: 代码高亮主题
+          options:
+            - label: Warm
+              value: warm
+            - label: Cold
+              value: cold
+          value: warm
+    - group: moments
+      label: 瞬间
+      formSchema:
+        - $formkit: text
+          name: moments_page_title
+          label: 页面标题
+          value: 瞬间
+        - $formkit: select
+          name: moments_style
+          label: 展示样式
+          options:
+            - label: Timeline
+              value: timeline
+            - label: Cards
+              value: cards
+            - label: Masonry
+              value: masonry
+          value: timeline
+    - group: photos
+      label: 图库
+      formSchema:
+        - $formkit: text
+          name: photos_page_title
+          label: 页面标题
+          value: 图库
+        - $formkit: select
+          name: photos_style
+          label: 展示样式
+          options:
+            - label: Masonry
+              value: masonry
+            - label: Grid
+              value: grid
+            - label: Carousel
+              value: carousel
+          value: masonry
+        - $formkit: number
+          name: photos_columns
+          label: 列数
+          value: 3
+        - $formkit: switch
+          name: photos_show_ungrouped
+          label: 显示未分组图片
+          value: false
+          help: 开启后"全部"视图中会显示未分组的图片，未分组图片区域的标题为"全部"。
+        - $formkit: switch
+          name: photos_show_group_title
+          label: 显示分组标题
+          value: true
+          help: 关闭后"全部"视图中不再显示各分组的标题，所有图片合并展示。
+    - group: links
+      label: 友情链接
+      formSchema:
+        - $formkit: text
+          name: links_page_title
+          label: 页面标题
+          value: 友情链接
+        - $formkit: select
+          name: links_style
+          label: 展示样式
+          options:
+            - label: Grid
+              value: grid
+            - label: List
+              value: list
+            - label: Cards
+              value: cards
+          value: cards
+    - group: friends
+      label: 朋友圈
+      formSchema:
+        - $formkit: text
+          name: friends_page_title
+          label: 页面标题
+          value: 朋友圈
+    - group: equipment
+      label: 我的装备
+      formSchema:
+        - $formkit: text
+          name: equipment_page_title
+          label: 页面标题
+          value: 装备
+    - group: messageboard
+      label: 留言板
+      formSchema:
+        - $formkit: text
+          name: messageboard_title
+          label: 留言板标题
+          value: 留言板
+        - $formkit: textarea
+          name: messageboard_subtitle
+          label: 留言板副标题
+          value: 在这里留下你的足迹吧 🌙
+    - group: comment
+      label: 评论
+      formSchema:
+        - $formkit: select
+          name: comment_style
+          label: 评论样式
+          options:
+            - label: Warm
+              value: warm
+            - label: Minimal
+              value: minimal
+          value: warm
+        - $formkit: switch
+          name: comment_show_avatar
+          label: 显示头像
+          value: true
+    - group: footer
+      label: 页脚
+      formSchema:
+        - $formkit: text
+          name: footer_copyright
+          label: 版权信息（留空则使用默认格式 © 年份 站点标题）
+        - $formkit: text
+          name: footer_icp
+          label: ICP 备案号
+        - $formkit: repeater
+          name: footer_socials
+          label: 社交链接
+          children:
+            - $formkit: text
+              name: platform
+              label: 平台名称
+            - $formkit: text
+              name: icon
+              label: 图标类名（如 fa-brands fa-github）
+            - $formkit: url
+              name: url
+              label: 链接地址
+        - $formkit: switch
+          name: footer_show_powered
+          label: 显示 "Powered by Halo"
+          value: true
+        - $formkit: switch
+          name: footer_show_theme
+          label: 显示主题版本
+          value: true
+        - $formkit: code
+          name: footer_custom_html
+          label: 自定义 HTML（统计代码等）
+          language: html

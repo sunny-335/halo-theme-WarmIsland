@@ -1,0 +1,3 @@
+const fs = require('fs');
+const js = fs.readFileSync('c:\\Users\\Zhang\\Documents\\Halo\\WarmIsland\\click-like.js', 'utf8');
+console.log(Buffer.from(js).toString('base64'));

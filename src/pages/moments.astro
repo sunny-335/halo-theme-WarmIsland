@@ -1,0 +1,735 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LightGallery from "../components/LightGallery.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title th:text="|${theme.config?.moments?.moments_page_title ?: '瞬间'} - ${site.title}|"></title>
+  </Fragment>
+
+  <section class="wi-moments-page">
+    <div class="wi-container">
+      <div class="wi-moments-page__header">
+        <h1 class="wi-moments-page__title" th:text="${theme.config?.moments?.moments_page_title ?: '瞬间'}">瞬间</h1>
+        <span class="wi-page-accent"></span>
+      </div>
+
+      <th:block th:if="${pluginFinder.available('PluginMoments')}">
+        <div class="wi-moments-page__content">
+          <th:block th:if="${momentFinder != null}">
+            <th:block th:with="momentsResult = ${momentFinder.list(1, 50)}">
+              <div
+                class="wi-moments-page__timeline"
+                th:if="${theme.config?.moments?.moments_style == 'timeline' or theme.config?.moments?.moments_style == null}"
+              >
+                <th:block th:if="${momentsResult != null and not #lists.isEmpty(momentsResult.items)}">
+                  <div class="wi-moments-page__item" th:each="moment : ${momentsResult.items}">
+                    <div class="wi-moments-page__dot"></div>
+                    <div class="wi-moments-page__line"></div>
+                    <div class="wi-moments-page__card">
+                      <div class="wi-moments-page__text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
+                      <div class="wi-moments-page__media" th:if="${moment.spec.content.medium != null and !#lists.isEmpty(moment.spec.content.medium)}">
+                        <th:block th:each="media : ${moment.spec.content.medium}">
+                          <img
+                            th:if="${media.type.name == 'PHOTO'}"
+                            th:src="${media.url}"
+                            th:alt="''"
+                            class="wi-moments-page__image"
+                            loading="lazy"
+                          />
+                        </th:block>
+                      </div>
+                      <div class="wi-moments-page__footer">
+                        <time
+                          class="wi-moments-page__date"
+                          th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
+                        ></time>
+                        <div class="wi-moments-page__actions">
+                          <button
+                            class="wi-moments-page__like-btn"
+                            type="button"
+                            th:attr="data-moment-name=${moment.metadata.name}"
+                          >
+                            <svg class="wi-moments-page__like-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                            <span class="wi-moments-page__like-count" th:text="${moment.stats?.upvote ?: 0}">0</span>
+                          </button>
+                          <button
+                            class="wi-moments-page__comment-btn"
+                            type="button"
+                            th:attr="data-moment-name=${moment.metadata.name}"
+                          >
+                            <svg class="wi-moments-page__comment-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <span class="wi-moments-page__comment-count" th:text="${moment.stats?.approvedComment ?: 0}">0</span>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="wi-moments-page__comment-area" th:attr="data-moment-name=${moment.metadata.name}" style="display:none;">
+                        <halo:comment
+                          group="moment.halo.run"
+                          kind="Moment"
+                          th:attr="name=${moment.metadata.name}"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </th:block>
+                <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
+                  <div class="wi-moments-page__empty">
+                    <p>还没有瞬间，快去记录当下的心情吧 🌙</p>
+                  </div>
+                </th:block>
+              </div>
+
+              <div class="wi-moments-page__cards" th:if="${theme.config?.moments?.moments_style == 'cards'}">
+                <th:block th:if="${momentsResult != null and not #lists.isEmpty(momentsResult.items)}">
+                  <div class="wi-moments-page__card-item" th:each="moment : ${momentsResult.items}">
+                    <div class="wi-moments-page__card-text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
+                    <div class="wi-moments-page__card-media" th:if="${moment.spec.content.medium != null and !#lists.isEmpty(moment.spec.content.medium)}">
+                      <th:block th:each="media : ${moment.spec.content.medium}">
+                        <img
+                          th:if="${media.type.name == 'PHOTO'}"
+                          th:src="${media.url}"
+                          th:alt="''"
+                          class="wi-moments-page__card-image"
+                          loading="lazy"
+                        />
+                      </th:block>
+                    </div>
+                    <div class="wi-moments-page__card-footer">
+                      <time
+                        class="wi-moments-page__card-date"
+                        th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
+                      ></time>
+                      <div class="wi-moments-page__actions">
+                        <button
+                          class="wi-moments-page__like-btn"
+                          type="button"
+                          th:attr="data-moment-name=${moment.metadata.name}"
+                        >
+                          <svg class="wi-moments-page__like-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                          <span class="wi-moments-page__like-count" th:text="${moment.stats?.upvote ?: 0}">0</span>
+                        </button>
+                        <button
+                          class="wi-moments-page__comment-btn"
+                          type="button"
+                          th:attr="data-moment-name=${moment.metadata.name}"
+                        >
+                          <svg class="wi-moments-page__comment-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span class="wi-moments-page__comment-count" th:text="${moment.stats?.approvedComment ?: 0}">0</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="wi-moments-page__comment-area" th:attr="data-moment-name=${moment.metadata.name}" style="display:none;">
+                      <halo:comment
+                        group="moment.halo.run"
+                        kind="Moment"
+                        th:attr="name=${moment.metadata.name}"
+                      />
+                    </div>
+                  </div>
+                </th:block>
+                <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
+                  <div class="wi-moments-page__empty">
+                    <p>还没有瞬间，快去记录当下的心情吧 🌙</p>
+                  </div>
+                </th:block>
+              </div>
+
+              <div class="wi-moments-page__masonry" th:if="${theme.config?.moments?.moments_style == 'masonry'}">
+                <th:block th:if="${momentsResult != null and not #lists.isEmpty(momentsResult.items)}">
+                  <div class="wi-moments-page__masonry-item" th:each="moment : ${momentsResult.items}">
+                    <div class="wi-moments-page__masonry-text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
+                    <div class="wi-moments-page__masonry-media" th:if="${moment.spec.content.medium != null and !#lists.isEmpty(moment.spec.content.medium)}">
+                      <th:block th:each="media : ${moment.spec.content.medium}">
+                        <img
+                          th:if="${media.type.name == 'PHOTO'}"
+                          th:src="${media.url}"
+                          th:alt="''"
+                          class="wi-moments-page__masonry-image"
+                          loading="lazy"
+                        />
+                      </th:block>
+                    </div>
+                    <div class="wi-moments-page__masonry-footer">
+                      <time
+                        class="wi-moments-page__masonry-date"
+                        th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
+                      ></time>
+                      <div class="wi-moments-page__actions">
+                        <button
+                          class="wi-moments-page__like-btn"
+                          type="button"
+                          th:attr="data-moment-name=${moment.metadata.name}"
+                        >
+                          <svg class="wi-moments-page__like-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                          <span class="wi-moments-page__like-count" th:text="${moment.stats?.upvote ?: 0}">0</span>
+                        </button>
+                        <button
+                          class="wi-moments-page__comment-btn"
+                          type="button"
+                          th:attr="data-moment-name=${moment.metadata.name}"
+                        >
+                          <svg class="wi-moments-page__comment-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span class="wi-moments-page__comment-count" th:text="${moment.stats?.approvedComment ?: 0}">0</span>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="wi-moments-page__comment-area" th:attr="data-moment-name=${moment.metadata.name}" style="display:none;">
+                      <halo:comment
+                        group="moment.halo.run"
+                        kind="Moment"
+                        th:attr="name=${moment.metadata.name}"
+                      />
+                    </div>
+                  </div>
+                </th:block>
+                <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
+                  <div class="wi-moments-page__empty">
+                    <p>还没有瞬间，快去记录当下的心情吧 🌙</p>
+                  </div>
+                </th:block>
+              </div>
+            </th:block>
+          </th:block>
+          <th:block th:if="${momentFinder == null}">
+            <div class="wi-moments-page__empty">
+              <p>瞬间插件加载异常，请检查插件状态</p>
+            </div>
+          </th:block>
+        </div>
+      </th:block>
+
+      <th:block th:unless="${pluginFinder.available('PluginMoments')}">
+        <div class="wi-moments-page__empty">
+          <p>瞬间功能需要安装「瞬间」插件，<a href="https://www.halo.run/store/apps/app-hqbe">前往应用市场安装</a></p>
+        </div>
+      </th:block>
+    </div>
+  </section>
+
+  <LightGallery />
+</Layout>
+
+<script is:inline>
+  (function () {
+    document.addEventListener("click", function (e) {
+      var likeBtn = e.target.closest(".wi-moments-page__like-btn");
+      if (likeBtn) {
+        handleLike(likeBtn);
+        return;
+      }
+
+      var commentBtn = e.target.closest(".wi-moments-page__comment-btn");
+      if (commentBtn) {
+        toggleComment(commentBtn);
+        return;
+      }
+    });
+
+    function handleLike(btn) {
+      var momentName = btn.getAttribute("data-moment-name");
+      var likedKey = "wi-moment-liked-" + momentName;
+      var countEl = btn.querySelector(".wi-moments-page__like-count");
+
+      if (localStorage.getItem(likedKey)) return;
+      if (btn.classList.contains("wi-moments-page__like-btn--liked")) return;
+
+      fetch("/apis/api.halo.run/v1alpha1/trackers/upvote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify({
+          group: "moment.halo.run",
+          plural: "moments",
+          name: momentName,
+        }),
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error("Like failed");
+          btn.classList.add("wi-moments-page__like-btn--liked");
+          if (countEl) {
+            countEl.textContent = parseInt(countEl.textContent || "0") + 1;
+          }
+          localStorage.setItem(likedKey, "1");
+        })
+        .catch(function (err) {
+          console.error("Like error:", err);
+        });
+    }
+
+    function toggleComment(btn) {
+      var momentName = btn.getAttribute("data-moment-name");
+      var commentArea = document.querySelector(
+        '.wi-moments-page__comment-area[data-moment-name="' + momentName + '"]'
+      );
+      if (!commentArea) return;
+
+      if (commentArea.style.display === "none") {
+        commentArea.style.display = "block";
+        btn.classList.add("wi-moments-page__comment-btn--active");
+      } else {
+        commentArea.style.display = "none";
+        btn.classList.remove("wi-moments-page__comment-btn--active");
+      }
+    }
+
+    document.querySelectorAll(".wi-moments-page__like-btn").forEach(function (btn) {
+      var momentName = btn.getAttribute("data-moment-name");
+      var likedKey = "wi-moment-liked-" + momentName;
+      if (localStorage.getItem(likedKey)) {
+        btn.classList.add("wi-moments-page__like-btn--liked");
+      }
+    });
+
+    function loadMomentStats() {
+      fetch("/apis/api.moment.halo.run/v1alpha1/moments")
+        .then(function (res) {
+          if (!res.ok) return null;
+          return res.json();
+        })
+        .then(function (data) {
+          if (!data || !data.items) return;
+          data.items.forEach(function (moment) {
+            var name = moment.metadata.name;
+            var stats = moment.stats || {};
+
+            document.querySelectorAll(".wi-moments-page__like-btn").forEach(function (btn) {
+              if (btn.getAttribute("data-moment-name") === name) {
+                var countEl = btn.querySelector(".wi-moments-page__like-count");
+                if (countEl) countEl.textContent = stats.upvote || 0;
+              }
+            });
+
+            document.querySelectorAll(".wi-moments-page__comment-btn").forEach(function (btn) {
+              if (btn.getAttribute("data-moment-name") === name) {
+                var countEl = btn.querySelector(".wi-moments-page__comment-count");
+                if (countEl) countEl.textContent = stats.approvedComment || 0;
+              }
+            });
+          });
+        })
+        .catch(function () {});
+    }
+
+    loadMomentStats();
+  })();
+</script>
+
+<style>
+  .wi-moments-page {
+    padding-block: 1rem;
+  }
+
+  .wi-moments-page__header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .wi-moments-page__title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-moments-page__empty {
+    text-align: center;
+    padding: var(--space-4xl) var(--space-xl);
+    color: var(--ink-3);
+    font-size: var(--text-md);
+  }
+
+  .wi-moments-page__empty a {
+    color: var(--accent);
+  }
+
+  .wi-moments-page__timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    padding-left: var(--space-2xl);
+  }
+
+  .wi-moments-page__item {
+    position: relative;
+  }
+
+  .wi-moments-page__dot {
+    position: absolute;
+    left: calc(-1 * var(--space-2xl) - 5px);
+    top: 10px;
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--accent);
+    z-index: 2;
+  }
+
+  .wi-moments-page__line {
+    position: absolute;
+    left: calc(-1 * var(--space-2xl));
+    top: 20px;
+    bottom: calc(-1 * var(--space-xl));
+    width: 1px;
+    background: var(--rule);
+    z-index: 1;
+  }
+
+  .wi-moments-page__item:last-child .wi-moments-page__line {
+    display: none;
+  }
+
+  .wi-moments-page__card {
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: var(--space-xl);
+    transition:
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-moments-page__card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .wi-moments-page__text {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-moments-page__media {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-moments-page__image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .wi-moments-page__image:hover {
+    transform: scale(1.03);
+  }
+
+  .wi-moments-page__media:has(.wi-moments-page__image:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .wi-moments-page__media:has(.wi-moments-page__image:only-child) .wi-moments-page__image {
+    aspect-ratio: auto;
+    max-height: 300px;
+    max-width: 400px;
+  }
+
+  .wi-moments-page__media:has(.wi-moments-page__image:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-moments-page__media:has(.wi-moments-page__image:nth-child(4)) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .wi-moments-page__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+
+  .wi-moments-page__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-moments-page__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .wi-moments-page__like-btn,
+  .wi-moments-page__comment-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid var(--rule);
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--ink-3);
+    font-size: var(--text-xs);
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .wi-moments-page__like-btn:hover,
+  .wi-moments-page__comment-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .wi-moments-page__like-btn--liked {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+    cursor: default;
+  }
+
+  .wi-moments-page__like-btn--liked .wi-moments-page__like-icon {
+    fill: var(--accent);
+  }
+
+  .wi-moments-page__comment-btn--active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  }
+
+  .wi-moments-page__like-icon,
+  .wi-moments-page__comment-icon {
+    flex-shrink: 0;
+  }
+
+  .wi-moments-page__like-count,
+  .wi-moments-page__comment-count {
+    line-height: 1;
+  }
+
+  .wi-moments-page__comment-area {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--rule);
+  }
+
+  .wi-moments-page__comment-area halo\:comment {
+    display: block;
+    width: 100%;
+  }
+
+  .wi-moments-page__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .wi-moments-page__card-item {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: var(--space-xl);
+    transition:
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-moments-page__card-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+  }
+
+  .wi-moments-page__card-text {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-moments-page__card-media {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-moments-page__card-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .wi-moments-page__card-image:hover {
+    transform: scale(1.03);
+  }
+
+  .wi-moments-page__card-media:has(.wi-moments-page__card-image:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .wi-moments-page__card-media:has(.wi-moments-page__card-image:only-child) .wi-moments-page__card-image {
+    aspect-ratio: auto;
+    max-height: 300px;
+    max-width: 400px;
+  }
+
+  .wi-moments-page__card-media:has(.wi-moments-page__card-image:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-moments-page__card-media:has(.wi-moments-page__card-image:nth-child(4)) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .wi-moments-page__card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+
+  .wi-moments-page__card-date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-moments-page__masonry {
+    columns: 2;
+    column-gap: var(--space-lg);
+  }
+
+  .wi-moments-page__masonry-item {
+    break-inside: avoid;
+    margin-bottom: var(--space-lg);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: var(--space-xl);
+    transition:
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-moments-page__masonry-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .wi-moments-page__masonry-text {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-moments-page__masonry-media {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-moments-page__masonry-image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .wi-moments-page__masonry-image:hover {
+    transform: scale(1.03);
+  }
+
+  .wi-moments-page__masonry-media:has(.wi-moments-page__masonry-image:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .wi-moments-page__masonry-media:has(.wi-moments-page__masonry-image:only-child) .wi-moments-page__masonry-image {
+    aspect-ratio: auto;
+    max-height: 300px;
+  }
+
+  .wi-moments-page__masonry-media:has(.wi-moments-page__masonry-image:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-moments-page__masonry-media:has(.wi-moments-page__masonry-image:nth-child(4)) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .wi-moments-page__masonry-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+
+  .wi-moments-page__masonry-date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  @media (max-width: 768px) {
+    .wi-moments-page__timeline {
+      padding-left: var(--space-xl);
+    }
+
+    .wi-moments-page__dot {
+      left: calc(-1 * var(--space-xl) - 5px);
+    }
+
+    .wi-moments-page__line {
+      left: calc(-1 * var(--space-xl));
+    }
+
+    .wi-moments-page__masonry {
+      columns: 1;
+    }
+
+    .wi-moments-page__cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wi-moments-page__timeline {
+      padding-left: var(--space-lg);
+    }
+
+    .wi-moments-page__dot {
+      left: calc(-1 * var(--space-lg) - 5px);
+    }
+
+    .wi-moments-page__line {
+      left: calc(-1 * var(--space-lg));
+    }
+
+    .wi-moments-page__media,
+    .wi-moments-page__card-media,
+    .wi-moments-page__masonry-media {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+  }
+</style>

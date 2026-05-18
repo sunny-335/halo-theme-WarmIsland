@@ -1,0 +1,13 @@
+- [x] moments.astro 页面使用 `momentFinder.list(1, 50)` 替代 `momentFinder.list()`
+- [x] moments.astro 页面使用 `moment.spec.content.medium` 替代 `moment.spec.media`
+- [x] MomentsSection.astro 组件使用 `momentFinder.list(1, limit)` 替代 `momentFinder.list()`
+- [x] photos.astro 页面使用 `photoFinder.groupBy()` 替代 `photoFinder.listGroups()` + `listByGroupName()`
+- [x] PhotosSection.astro 组件使用 `photoFinder.groupBy()` 替代 `photoFinder.listGroups()` + `listByGroupName()`
+- [x] TimelineSection.astro 不使用 Groovy 闭包语法 `.groupBy { ... }`
+- [x] Navbar.astro 使用 `menuItem.spec.target` 替代 `menuItem.spec.target?.value`
+- [x] Header.astro 使用 `menuItem.spec.target` 替代 `menuItem.spec.target?.value`
+- [x] 构建成功（pnpm build 无错误）
+- [x] 部署后访问 / 首页无白屏
+- [x] 部署后访问 /photos 无白屏
+- [x] 部署后访问 /moments 无白屏
+- [x] 控制台无 ERR_INCOMPLETE_CHUNKED_ENCODING 错误

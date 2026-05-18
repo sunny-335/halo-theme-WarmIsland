@@ -1,26 +1,1053 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import LightGallery from "../components/LightGallery.astro";
 ---
 
-<Layout contentClass="prose">
+<Layout>
   <Fragment slot="head">
     <title th:text="|${post.spec.title} - ${site.title}|"></title>
   </Fragment>
 
-  <div class="page-heading">
-    <h1 th:text="${post.spec.title}"></h1>
-    <p class="page-meta">
-      <span th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
-      ></span>
-    </p>
+  <div class="wi-reading-progress" id="wi-reading-progress"></div>
+
+  <article class="wi-post">
+    <header class="wi-post__header">
+      <div
+        th:if="${!#strings.isEmpty(post.spec.cover)}"
+        class="wi-post__cover-wrap"
+      >
+        <img
+          class="wi-post__cover"
+          th:src="${post.spec.cover}"
+          th:alt="${post.spec.title}"
+        />
+      </div>
+
+      <h1
+        class="wi-post__title"
+        th:text="${post.spec.title}"
+      ></h1>
+      <span class="wi-page-accent"></span>
+
+      <div class="wi-post__meta">
+        <time
+          th:if="${theme.config?.article?.article_show_date}"
+          th:datetime="${post.spec.publishTime}"
+          th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+        ></time>
+        <th:block th:if="${post.contributors != null and post.contributors.size() > 0}">
+          <span class="wi-post__meta-sep">·</span>
+          <span class="wi-post__author">
+            <img
+              th:if="${post.contributors[0].avatar}"
+              th:src="${post.contributors[0].avatar}"
+              th:alt="${post.contributors[0].displayName}"
+              class="wi-post__author-avatar"
+            />
+            <span th:text="${post.contributors[0].displayName}"></span>
+          </span>
+        </th:block>
+        <th:block
+          th:if="${theme.config?.article?.article_show_category && post.categories != null && post.categories.size() > 0}"
+        >
+          <span class="wi-post__meta-sep">·</span>
+          <span class="wi-post__meta-categories">
+            <a
+              th:each="cat : ${post.categories}"
+              th:href="@{${cat.status.permalink}}"
+              th:text="${cat.spec.displayName}"
+            ></a>
+          </span>
+        </th:block>
+        <th:block
+          th:if="${theme.config?.article?.article_show_tags && post.tags != null && post.tags.size() > 0}"
+        >
+          <span class="wi-post__meta-sep">·</span>
+          <span class="wi-post__meta-tags">
+            <a
+              th:each="tag : ${post.tags}"
+              th:href="@{${tag.status.permalink}}"
+              th:text="${tag.spec.displayName}"
+            ></a>
+          </span>
+        </th:block>
+        <th:block
+          th:if="${(theme.config?.article?.article_show_word_count ?: true) or (theme.config?.article?.article_show_visit_count ?: true) or (theme.config?.article?.article_show_read_time ?: false)}"
+        >
+          <span class="wi-post__meta-sep">·</span>
+          <span class="wi-post__stats">
+            <span
+              th:if="${theme.config?.article?.article_show_word_count ?: true}"
+              class="wi-post__stat-item"
+              id="wi-word-count"
+            >-- 字</span>
+            <span
+              th:if="${theme.config?.article?.article_show_visit_count ?: true}"
+              class="wi-post__stat-item"
+            >
+              <th:block th:text="${post.stats?.visit ?: 0}"></th:block> 阅读
+            </span>
+            <span
+              th:if="${theme.config?.article?.article_show_read_time ?: false}"
+              class="wi-post__stat-item"
+              id="wi-read-time"
+            >-- 分钟</span>
+          </span>
+        </th:block>
+      </div>
+    </header>
+
+    <div
+      class="wi-post__body"
+      id="wi-post-body"
+      th:utext="${post.content.content}"
+    ></div>
+
+    <aside
+      th:if="${theme.config?.article?.article_show_toc ?: true}"
+      class="wi-toc"
+      id="wi-toc"
+      th:attr="data-position=${theme.config?.article?.article_toc_position ?: 'left'}"
+    >
+      <div class="wi-toc__header">
+        <span class="wi-toc__title">目录</span>
+      </div>
+      <nav class="wi-toc__nav" id="wi-toc-nav"></nav>
+    </aside>
+
+    <div class="wi-post__like">
+      <button
+        class="wi-like-btn"
+        type="button"
+        th:attr="data-post-name=${post.metadata.name}"
+      >
+        <svg class="wi-like-btn__icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        <span class="wi-like-btn__count" th:text="${post.stats.upvote}">0</span>
+      </button>
+    </div>
+
+    <th:block th:if="${theme.config?.article?.article_show_nav}">
+      <nav class="wi-post__nav" aria-label="Post navigation">
+        <th:block
+          th:with="cursor = ${postFinder.cursor(post.metadata.name)}"
+        >
+          <a
+            th:if="${cursor.hasPrevious()}"
+            th:href="@{${cursor.previous.status.permalink}}"
+            class="wi-post__nav-link wi-post__nav-link--prev"
+          >
+            <span class="wi-post__nav-label">上一篇</span>
+            <span
+              class="wi-post__nav-title"
+              th:text="${cursor.previous.spec.title}"
+            ></span>
+          </a>
+          <span
+            th:if="${!cursor.hasPrevious()}"
+            class="wi-post__nav-link wi-post__nav-link--prev wi-post__nav-link--empty"
+          ></span>
+          <a
+            th:if="${cursor.hasNext()}"
+            th:href="@{${cursor.next.status.permalink}}"
+            class="wi-post__nav-link wi-post__nav-link--next"
+          >
+            <span class="wi-post__nav-label">下一篇</span>
+            <span
+              class="wi-post__nav-title"
+              th:text="${cursor.next.spec.title}"
+            ></span>
+          </a>
+          <span
+            th:if="${!cursor.hasNext()}"
+            class="wi-post__nav-link wi-post__nav-link--next wi-post__nav-link--empty"
+          ></span>
+        </th:block>
+      </nav>
+    </th:block>
+
+    <div class="wi-post__comment">
+      <halo:comment
+        th:if="${haloCommentEnabled}"
+        group="content.halo.run"
+        kind="Post"
+        th:attr="name=${post.metadata.name}"
+      ></halo:comment>
+    </div>
+  </article>
+
+  <button
+    th:if="${theme.config?.article?.article_show_toc ?: true}"
+    class="wi-toc-fab"
+    id="wi-toc-fab"
+    type="button"
+    aria-label="打开目录"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"/><line x1="8" x2="21" y1="12" y2="12"/><line x1="8" x2="21" y1="18" y2="18"/><line x1="3" x2="3.01" y1="6" y2="6"/><line x1="3" x2="3.01" y1="12" y2="12"/><line x1="3" x2="3.01" y1="18" y2="18"/></svg>
+  </button>
+
+  <div
+    th:if="${theme.config?.article?.article_show_toc ?: true}"
+    class="wi-toc-drawer"
+    id="wi-toc-drawer"
+  >
+    <div class="wi-toc-drawer__overlay"></div>
+    <div class="wi-toc-drawer__panel">
+      <div class="wi-toc-drawer__header">
+        <span class="wi-toc-drawer__title">目录</span>
+        <button class="wi-toc-drawer__close" type="button" aria-label="关闭目录">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <nav class="wi-toc-drawer__nav" id="wi-toc-drawer-nav"></nav>
+    </div>
   </div>
 
-  <th:block th:utext="${post.content.content}"></th:block>
+  <LightGallery />
 
-  <halo:comment
-    group="content.halo.run"
-    kind="Post"
-    th:attr="name=${post.metadata.name}"
-  >
-  </halo:comment>
+  <script is:inline>
+    (function () {
+      var progressBar = document.getElementById("wi-reading-progress");
+      if (progressBar) {
+        var article = document.querySelector(".wi-post");
+        if (article) {
+          window.addEventListener("scroll", function () {
+            var rect = article.getBoundingClientRect();
+            var articleHeight = article.offsetHeight;
+            var scrolled = -rect.top;
+            var progress = Math.min(Math.max(scrolled / (articleHeight - window.innerHeight), 0), 1);
+            progressBar.style.width = (progress * 100) + "%";
+          }, { passive: true });
+        }
+      }
+
+      var body = document.getElementById("wi-post-body");
+      if (!body) return;
+
+      var showWordCount = document.getElementById("wi-word-count");
+      var showReadTime = document.getElementById("wi-read-time");
+
+      if (showWordCount || showReadTime) {
+        var text = (body.textContent || body.innerText || "").trim();
+        var charCount = text.replace(/\s/g, "").length;
+        var readMinutes = Math.max(1, Math.ceil(charCount / 500));
+
+        if (showWordCount) {
+          showWordCount.textContent = charCount + " 字";
+        }
+        if (showReadTime) {
+          showReadTime.textContent = readMinutes + " 分钟";
+        }
+      }
+
+      function buildTocHtml(headings) {
+        var groups = [];
+        var currentGroup = null;
+
+        headings.forEach(function (h, i) {
+          var id = "wi-heading-" + i;
+          h.id = id;
+          var level = parseInt(h.tagName.charAt(1), 10);
+
+          if (level === 2 || !currentGroup) {
+            currentGroup = { h2: { id: id, text: h.textContent.trim() }, children: [] };
+            groups.push(currentGroup);
+          } else {
+            currentGroup.children.push({ id: id, text: h.textContent.trim(), level: level });
+          }
+        });
+
+        var html = "";
+        groups.forEach(function (group) {
+          html += '<div class="wi-toc__group" data-h2="' + group.h2.id + '">';
+          html += '<a class="wi-toc__link wi-toc__link--h2" href="#' + group.h2.id + '">' + group.h2.text + '</a>';
+          if (group.children.length > 0) {
+            html += '<div class="wi-toc__sub">';
+            group.children.forEach(function (child) {
+              html += '<a class="wi-toc__link wi-toc__link--h' + child.level + '" href="#' + child.id + '">' + child.text + '</a>';
+            });
+            html += '</div>';
+          }
+          html += '</div>';
+        });
+
+        return html;
+      }
+
+      var tocNav = document.getElementById("wi-toc-nav");
+      var tocAside = document.getElementById("wi-toc");
+      if (tocNav && tocAside) {
+        var headings = body.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        if (headings.length === 0) {
+          tocAside.style.display = "none";
+        } else {
+          tocNav.innerHTML = buildTocHtml(headings);
+
+          var tocGroups = tocNav.querySelectorAll(".wi-toc__group");
+          var tocLinks = tocNav.querySelectorAll(".wi-toc__link");
+
+          tocGroups.forEach(function (group) {
+            var h2Link = group.querySelector(".wi-toc__link--h2");
+            if (h2Link) {
+              h2Link.addEventListener("click", function (e) {
+                e.preventDefault();
+                var isExpanded = group.classList.contains("wi-toc__group--expanded");
+                tocGroups.forEach(function (g) { g.classList.remove("wi-toc__group--expanded"); });
+                if (!isExpanded) {
+                  group.classList.add("wi-toc__group--expanded");
+                }
+                var targetId = h2Link.getAttribute("href").substring(1);
+                var target = document.getElementById(targetId);
+                if (target) {
+                  target.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              });
+            }
+          });
+
+          var observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  tocLinks.forEach(function (l) { l.classList.remove("wi-toc__link--active"); });
+                  tocGroups.forEach(function (g) { g.classList.remove("wi-toc__group--active"); g.classList.remove("wi-toc__group--expanded"); });
+
+                  var activeLink = tocNav.querySelector('a[href="#' + entry.target.id + '"]');
+                  if (activeLink) {
+                    activeLink.classList.add("wi-toc__link--active");
+                    var parentGroup = activeLink.closest(".wi-toc__group");
+                    if (parentGroup) {
+                      parentGroup.classList.add("wi-toc__group--active");
+                    }
+                  }
+                }
+              });
+            },
+            { rootMargin: "-80px 0px -60% 0px", threshold: 0.1 }
+          );
+          headings.forEach(function (h) { observer.observe(h); });
+
+          var position = tocAside.getAttribute("data-position") || "left";
+          var tocWidth = 220;
+          var gap = 24;
+
+          function positionToc() {
+            var bodyRect = body.getBoundingClientRect();
+            var vw = window.innerWidth;
+
+            if (vw < 1280) {
+              tocAside.style.display = "none";
+              return;
+            }
+
+            tocAside.style.display = "";
+
+            if (position === "left") {
+              var leftEdge = bodyRect.left;
+              if (leftEdge > tocWidth + gap) {
+                tocAside.style.left = (leftEdge - tocWidth - gap) + "px";
+                tocAside.style.right = "auto";
+              } else {
+                tocAside.style.display = "none";
+              }
+            } else {
+              var rightEdge = bodyRect.right;
+              if (vw - rightEdge > tocWidth + gap) {
+                tocAside.style.right = (vw - rightEdge - tocWidth - gap) + "px";
+                tocAside.style.left = "auto";
+              } else {
+                tocAside.style.display = "none";
+              }
+            }
+          }
+
+          positionToc();
+          window.addEventListener("resize", positionToc);
+          window.addEventListener("scroll", function () {
+            requestAnimationFrame(positionToc);
+          });
+        }
+      }
+
+      var tocFab = document.getElementById("wi-toc-fab");
+      var tocDrawer = document.getElementById("wi-toc-drawer");
+      var tocDrawerNav = document.getElementById("wi-toc-drawer-nav");
+
+      if (tocFab && tocDrawer && tocDrawerNav && tocNav) {
+        tocDrawerNav.innerHTML = tocNav.innerHTML;
+
+        tocFab.addEventListener("click", function () {
+          tocDrawer.classList.add("wi-toc-drawer--open");
+          document.body.style.overflow = "hidden";
+        });
+
+        var drawerClose = tocDrawer.querySelector(".wi-toc-drawer__close");
+        var drawerOverlay = tocDrawer.querySelector(".wi-toc-drawer__overlay");
+
+        function closeDrawer() {
+          tocDrawer.classList.remove("wi-toc-drawer--open");
+          document.body.style.overflow = "";
+        }
+
+        if (drawerClose) drawerClose.addEventListener("click", closeDrawer);
+        if (drawerOverlay) drawerOverlay.addEventListener("click", closeDrawer);
+
+        var drawerGroups = tocDrawerNav.querySelectorAll(".wi-toc__group");
+        tocDrawerNav.querySelectorAll(".wi-toc__link").forEach(function (link) {
+          link.addEventListener("click", function (e) {
+            var h2Link = link.classList.contains("wi-toc__link--h2");
+            if (h2Link) {
+              e.preventDefault();
+              var group = link.closest(".wi-toc__group");
+              if (group) {
+                var isExpanded = group.classList.contains("wi-toc__group--expanded");
+                drawerGroups.forEach(function (g) { g.classList.remove("wi-toc__group--expanded"); });
+                if (!isExpanded) {
+                  group.classList.add("wi-toc__group--expanded");
+                }
+              }
+              var targetId = link.getAttribute("href").substring(1);
+              var target = document.getElementById(targetId);
+              if (target) {
+                target.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+            }
+            closeDrawer();
+          });
+        });
+      }
+
+      var btn = document.querySelector(".wi-like-btn");
+      if (!btn) return;
+      var postName = btn.getAttribute("data-post-name");
+      var likedKey = "wi-liked-" + postName;
+      var countEl = btn.querySelector(".wi-like-btn__count");
+
+      if (localStorage.getItem(likedKey)) {
+        btn.classList.add("wi-like-btn--liked");
+      }
+
+      btn.addEventListener("click", function () {
+        if (btn.classList.contains("wi-like-btn--liked")) return;
+
+        fetch("/apis/api.halo.run/v1alpha1/trackers/upvote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json;charset=UTF-8" },
+          body: JSON.stringify({
+            group: "content.halo.run",
+            plural: "posts",
+            name: postName,
+          }),
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error("Like failed");
+            btn.classList.add("wi-like-btn--liked", "wi-like-btn--animate");
+            if (countEl) {
+              countEl.textContent = parseInt(countEl.textContent || "0") + 1;
+            }
+            localStorage.setItem(likedKey, "1");
+            setTimeout(function () {
+              btn.classList.remove("wi-like-btn--animate");
+            }, 500);
+          })
+          .catch(function (err) {
+            console.error("Like error:", err);
+          });
+      });
+    })();
+  </script>
 </Layout>
+
+<style>
+  .wi-reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 101;
+    transition: width 0.1s linear;
+  }
+
+  .wi-post {
+    display: grid;
+    gap: 1rem;
+    padding-block: 1rem;
+  }
+
+  .wi-post__header {
+    display: grid;
+    gap: var(--space-lg);
+    padding: var(--space-lg) 0 var(--space-md);
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+  }
+
+  .wi-post__cover-wrap {
+    margin-inline: calc(-1 * var(--space-xl));
+  }
+
+  .wi-post__cover {
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .wi-post__title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-post__meta a {
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-post__meta a:hover {
+    color: var(--accent);
+  }
+
+  .wi-post__meta-sep {
+    color: var(--ink-3);
+  }
+
+  .wi-post__author {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .wi-post__author-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .wi-post__meta-categories a + a::before {
+    content: ", ";
+  }
+
+  .wi-post__meta-tags a + a::before {
+    content: ", ";
+  }
+
+  .wi-post__stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .wi-post__stat-item + .wi-post__stat-item::before {
+    content: "·";
+    margin-right: 0.4rem;
+    color: var(--ink-3);
+  }
+
+  .wi-post__body {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    font-size: 1rem;
+    line-height: 1.75;
+    color: #3d3530;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  html.dark .wi-post__body {
+    color: #d4cdc4;
+  }
+
+  .wi-post__body * {
+    max-width: 100%;
+  }
+
+  .wi-post__body :is(pre, code, table) {
+    overflow-x: auto;
+  }
+
+  .wi-post__body :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-sans);
+    margin-top: 1.8em;
+    margin-bottom: 0.5em;
+    scroll-margin-top: 80px;
+  }
+
+  .wi-post__body h2 {
+    font-size: 1.5rem;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+  }
+
+  .wi-post__body h3 {
+    font-size: 1.25rem;
+  }
+
+  .wi-post__body .ai-summary,
+  .wi-post__body [class*="ai-summary"],
+  .wi-post__body [class*="ai-abstract"],
+  .wi-post__body .abstract {
+    margin-bottom: 15px;
+  }
+
+  .wi-post__body p {
+    margin-block-end: 1.2em;
+  }
+
+  .wi-post__body img {
+    border-radius: 8px;
+    margin-block: 1.5em;
+  }
+
+  .wi-post__body a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .wi-post__body ul,
+  .wi-post__body ol {
+    padding-inline-start: 1.5em;
+    margin-block-end: 1.2em;
+  }
+
+  .wi-post__body li {
+    margin-block-end: 0.6em;
+  }
+
+  .wi-post__body pre {
+    margin-block: 1.5em;
+  }
+
+  .wi-post__body blockquote {
+    margin-block: 2em;
+  }
+
+  .wi-toc {
+    display: none;
+  }
+
+  @media (min-width: 1280px) {
+    .wi-toc {
+      display: block;
+      position: fixed;
+      top: 80px;
+      width: 220px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      z-index: 10;
+    }
+  }
+
+  .wi-toc__header {
+    display: flex;
+    align-items: center;
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-toc__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-toc__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .wi-toc-fab {
+    display: none;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    background: var(--bg-raised);
+    color: var(--ink-2);
+    cursor: pointer;
+    z-index: 20;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .wi-toc-fab:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 1279px) {
+    .wi-toc-fab {
+      display: inline-flex;
+    }
+  }
+
+  .wi-toc-drawer {
+    display: none;
+  }
+
+  .wi-toc-drawer--open {
+    display: block;
+  }
+
+  .wi-toc-drawer__overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 50;
+  }
+
+  .wi-toc-drawer__panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 60vh;
+    background: var(--bg);
+    border-top: 1px solid var(--rule);
+    border-radius: 16px 16px 0 0;
+    padding: 1.25rem;
+    z-index: 51;
+    overflow-y: auto;
+    transform: translateY(0);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .wi-toc-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-toc-drawer__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .wi-toc-drawer__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: none;
+    color: var(--ink-3);
+    cursor: pointer;
+  }
+
+  .wi-toc-drawer__close:hover {
+    color: var(--accent);
+  }
+
+  .wi-toc-drawer__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .wi-toc-drawer__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .wi-post__like {
+    display: flex;
+    justify-content: center;
+    padding-top: 0;
+  }
+
+  .wi-like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.5rem;
+    border: 1px solid var(--rule);
+    border-radius: 9999px;
+    background: var(--bg-raised);
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition:
+      background 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .wi-like-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg));
+  }
+
+  .wi-like-btn:active {
+    transform: scale(0.95);
+  }
+
+  .wi-like-btn--liked {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+    cursor: default;
+  }
+
+  .wi-like-btn--liked .wi-like-btn__icon {
+    fill: var(--accent);
+  }
+
+  .wi-like-btn__icon {
+    transition: fill 0.2s ease, transform 0.3s ease;
+  }
+
+  .wi-like-btn--animate .wi-like-btn__icon {
+    animation: likeHeartbeat 0.4s ease;
+  }
+
+  @keyframes likeHeartbeat {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.3); }
+    60% { transform: scale(0.9); }
+    100% { transform: scale(1); }
+  }
+
+  .wi-post__comment {
+    width: 100%;
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  halo\:comment {
+    display: block;
+    width: 100%;
+  }
+
+  .wi-post__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--rule);
+  }
+
+  .wi-post__nav-link {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-decoration: none;
+    max-width: 45%;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-post__nav-link--next {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .wi-post__nav-link--empty {
+    visibility: hidden;
+  }
+
+  .wi-post__nav-label {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+  }
+
+  .wi-post__nav-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink-2);
+    line-height: var(--leading-snug);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-post__nav-link:hover .wi-post__nav-title {
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .wi-post__cover-wrap {
+      margin-inline: calc(-1 * var(--space-md));
+    }
+
+    .wi-post__cover {
+      border-radius: 8px;
+      max-height: 280px;
+    }
+
+    .wi-post__nav {
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+
+    .wi-post__nav-link {
+      max-width: 100%;
+    }
+
+    .wi-post__nav-link--next {
+      text-align: left;
+    }
+  }
+</style>
+
+<style is:global>
+  .wi-post__body figure {
+    margin-block: 1.5em;
+  }
+
+  .wi-post__body figcaption {
+    color: #545164;
+    font-size: 0.875rem;
+    text-align: center;
+    margin-top: -0.8em;
+    margin-bottom: 1.2em;
+    line-height: 1.5;
+  }
+
+  html.dark .wi-post__body figcaption {
+    color: #8a8494;
+  }
+
+  .wi-toc__group {
+    position: relative;
+  }
+
+  .wi-toc__sub {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.25s ease;
+  }
+
+  .wi-toc__group--active .wi-toc__sub,
+  .wi-toc__group--expanded .wi-toc__sub {
+    max-height: 500px;
+    opacity: 1;
+  }
+
+  .wi-toc__link {
+    display: block;
+    padding: 4px 0;
+    font-size: var(--text-xs);
+    line-height: var(--leading-snug);
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-left: 2px solid transparent;
+  }
+
+  .wi-toc__link:hover {
+    color: var(--accent);
+  }
+
+  .wi-toc__link--active {
+    color: var(--accent);
+    font-weight: 600;
+    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  .wi-toc__link--h2 {
+    padding-left: 0;
+    padding-right: 4px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .wi-toc__link--h2::before {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--ink-3);
+    margin-right: 6px;
+    vertical-align: middle;
+    transition: background 0.15s ease;
+  }
+
+  .wi-toc__link--active.wi-toc__link--h2::before {
+    background: var(--accent);
+  }
+
+  .wi-toc__link--h3 {
+    padding-left: 16px;
+  }
+
+  .wi-toc__link--h4 {
+    padding-left: 32px;
+  }
+
+  .wi-toc__link--h5 {
+    padding-left: 48px;
+  }
+
+  .wi-toc__link--h6 {
+    padding-left: 64px;
+  }
+
+  .wi-toc__sub .wi-toc__link--active {
+    border-left-color: var(--accent);
+  }
+
+  .wi-toc__sub .wi-toc__link--h3.wi-toc__link--active { padding-left: 14px; }
+  .wi-toc__sub .wi-toc__link--h4.wi-toc__link--active { padding-left: 30px; }
+  .wi-toc__sub .wi-toc__link--h5.wi-toc__link--active { padding-left: 46px; }
+  .wi-toc__sub .wi-toc__link--h6.wi-toc__link--active { padding-left: 62px; }
+
+  .wi-toc-drawer__nav .wi-toc__link {
+    font-size: var(--text-sm);
+    padding: 6px 0;
+  }
+</style>

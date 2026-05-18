@@ -1,0 +1,643 @@
+---
+import Layout from "../layouts/Layout.astro";
+import LightGallery from "../components/LightGallery.astro";
+---
+
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${title ?: (theme.config?.photos?.photos_page_title ?: '图库')} - ${site.title}|"></title>
+  </Fragment>
+
+  <section class="wi-photos-page">
+    <div class="wi-container">
+      <div class="wi-photos-page__header">
+        <h1
+          class="wi-photos-page__title"
+          th:text="${theme.config?.photos?.photos_page_title ?: '图库'}"
+        >
+          图库
+        </h1>
+        <span class="wi-page-accent"></span>
+      </div>
+
+      <th:block th:if="${pluginFinder.available('PluginPhotos')}">
+        <th:block th:if="${groups != null}" th:with="currentGroup=${'' + param.group}, showGroupTitle=${theme.config?.photos?.photos_show_group_title != false}, showUngrouped=${theme.config?.photos?.photos_show_ungrouped == true}">
+          <nav
+            class="wi-photos-page__groups"
+            th:if="${groups != null and !#lists.isEmpty(groups)}"
+          >
+            <a
+              th:href="@{${photoUrl.list()}}"
+              class="wi-photos-page__group-link"
+              th:classappend="${#strings.isEmpty(currentGroup)} ? 'wi-photos-page__group-link--active' : ''"
+            >
+              全部
+            </a>
+            <a
+              th:each="group : ${groups}"
+              th:href="@{${photoUrl.list(group.metadata.name)}}"
+              th:text="${group.spec.displayName}"
+              class="wi-photos-page__group-link"
+              th:classappend="${#strings.equals(currentGroup, group.metadata.name)} ? 'wi-photos-page__group-link--active' : ''"
+            ></a>
+          </nav>
+
+          <th:block th:if="${!#lists.isEmpty(groups) or (showUngrouped and photos != null and !#lists.isEmpty(photos.items))}">
+          <th:block th:if="${#strings.isEmpty(currentGroup)}">
+            <th:block th:if="${showGroupTitle}">
+              <div class="wi-photos-page__all-groups">
+              <th:block th:if="${showUngrouped and photos != null and !#lists.isEmpty(photos.items)}">
+                <div class="wi-photos-page__section">
+                  <h2 class="wi-photos-page__section-title">全部</h2>
+                  <div
+                    class="wi-photos-page__grid"
+                    th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
+                  >
+                    <th:block th:each="photo : ${photos.items}">
+                      <div
+                        class="wi-photos-page__item"
+                        th:if="${#strings.isEmpty(photo.spec.groupName)}"
+                      >
+                        <a
+                          th:href="${photo.spec.url}"
+                          class="wi-photos-page__link"
+                          th:attr="data-src=${photo.spec.url}, data-sub-html=${photo.spec.displayName ?: ''}, data-exif=${photo.exif != null ? (photo.exif.make ?: '') + '|' + (photo.exif.model ?: '') + '|' + (photo.exif.lensModel ?: '') + '|' + (photo.exif.fNumber ?: '') + '|' + (photo.exif.exposureTime ?: '') + '|' + (photo.exif.iso ?: '') + '|' + (photo.exif.focalLength ?: '') + '|' + (photo.exif.focalLengthIn35mm ?: '') : ''}"
+                        >
+                          <img
+                            th:src="${photo.spec.cover ?: photo.spec.url}"
+                            th:alt="${photo.spec.displayName ?: ''}"
+                            class="wi-photos-page__image"
+                            loading="lazy"
+                          />
+                          <div class="wi-photos-page__overlay">
+                            <span
+                              class="wi-photos-page__caption"
+                              th:if="${photo.spec.displayName}"
+                              th:text="${photo.spec.displayName}"
+                            ></span>
+                          </div>
+                        </a>
+                      </div>
+                    </th:block>
+                  </div>
+                </div>
+              </th:block>
+
+              <th:block th:each="group : ${groups}">
+                <div
+                  class="wi-photos-page__section"
+                  th:if="${!#lists.isEmpty(group.photos)}"
+                >
+                  <h2
+                    class="wi-photos-page__section-title"
+                    th:if="${group.spec?.displayName != null}"
+                    th:text="${group.spec?.displayName}"
+                  ></h2>
+                  <div
+                    class="wi-photos-page__grid"
+                    th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
+                  >
+                    <div
+                      class="wi-photos-page__item"
+                      th:each="photo : ${group.photos}"
+                    >
+                      <a
+                        th:href="${photo.spec.url}"
+                        class="wi-photos-page__link"
+                        th:attr="data-src=${photo.spec.url}, data-sub-html=${photo.spec.displayName ?: ''}, data-exif=${photo.exif != null ? (photo.exif.make ?: '') + '|' + (photo.exif.model ?: '') + '|' + (photo.exif.lensModel ?: '') + '|' + (photo.exif.fNumber ?: '') + '|' + (photo.exif.exposureTime ?: '') + '|' + (photo.exif.iso ?: '') + '|' + (photo.exif.focalLength ?: '') + '|' + (photo.exif.focalLengthIn35mm ?: '') : ''}"
+                      >
+                        <img
+                          th:src="${photo.spec.cover ?: photo.spec.url}"
+                          th:alt="${photo.spec.displayName ?: ''}"
+                          class="wi-photos-page__image"
+                          loading="lazy"
+                        />
+                        <div class="wi-photos-page__overlay">
+                          <span
+                            class="wi-photos-page__caption"
+                            th:if="${photo.spec.displayName}"
+                            th:text="${photo.spec.displayName}"
+                          ></span>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </th:block>
+              </div>
+            </th:block>
+
+            <th:block th:if="${!showGroupTitle}">
+              <div
+                class="wi-photos-page__grid"
+                th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
+              >
+                <th:block th:if="${showUngrouped and photos != null and !#lists.isEmpty(photos.items)}">
+                  <th:block th:each="photo : ${photos.items}">
+                    <div
+                      class="wi-photos-page__item"
+                      th:if="${#strings.isEmpty(photo.spec.groupName)}"
+                    >
+                      <a
+                        th:href="${photo.spec.url}"
+                        class="wi-photos-page__link"
+                        th:attr="data-src=${photo.spec.url}, data-sub-html=${photo.spec.displayName ?: ''}, data-exif=${photo.exif != null ? (photo.exif.make ?: '') + '|' + (photo.exif.model ?: '') + '|' + (photo.exif.lensModel ?: '') + '|' + (photo.exif.fNumber ?: '') + '|' + (photo.exif.exposureTime ?: '') + '|' + (photo.exif.iso ?: '') + '|' + (photo.exif.focalLength ?: '') + '|' + (photo.exif.focalLengthIn35mm ?: '') : ''}"
+                      >
+                        <img
+                          th:src="${photo.spec.cover ?: photo.spec.url}"
+                          th:alt="${photo.spec.displayName ?: ''}"
+                          class="wi-photos-page__image"
+                          loading="lazy"
+                        />
+                        <div class="wi-photos-page__overlay">
+                          <span
+                            class="wi-photos-page__caption"
+                            th:if="${photo.spec.displayName}"
+                            th:text="${photo.spec.displayName}"
+                          ></span>
+                        </div>
+                      </a>
+                    </div>
+                  </th:block>
+                </th:block>
+
+                <th:block th:each="group : ${groups}">
+                  <div
+                    class="wi-photos-page__item"
+                    th:each="photo : ${group.photos}"
+                  >
+                    <a
+                      th:href="${photo.spec.url}"
+                      class="wi-photos-page__link"
+                      th:attr="data-src=${photo.spec.url}, data-sub-html=${photo.spec.displayName ?: ''}, data-exif=${photo.exif != null ? (photo.exif.make ?: '') + '|' + (photo.exif.model ?: '') + '|' + (photo.exif.lensModel ?: '') + '|' + (photo.exif.fNumber ?: '') + '|' + (photo.exif.exposureTime ?: '') + '|' + (photo.exif.iso ?: '') + '|' + (photo.exif.focalLength ?: '') + '|' + (photo.exif.focalLengthIn35mm ?: '') : ''}"
+                    >
+                      <img
+                        th:src="${photo.spec.cover ?: photo.spec.url}"
+                        th:alt="${photo.spec.displayName ?: ''}"
+                        class="wi-photos-page__image"
+                        loading="lazy"
+                      />
+                      <div class="wi-photos-page__overlay">
+                        <span
+                          class="wi-photos-page__caption"
+                          th:if="${photo.spec.displayName}"
+                          th:text="${photo.spec.displayName}"
+                        ></span>
+                      </div>
+                    </a>
+                  </div>
+                </th:block>
+              </div>
+            </th:block>
+          </th:block>
+
+          <th:block th:if="${!#strings.isEmpty(currentGroup)}">
+            <th:block th:each="group : ${groups}">
+              <th:block th:if="${#strings.equals(currentGroup, group.metadata.name)}">
+                <div
+                  class="wi-photos-page__section"
+                  th:if="${!#lists.isEmpty(group.photos)}"
+                >
+                  <h2
+                    class="wi-photos-page__section-title"
+                    th:if="${group.spec?.displayName != null}"
+                    th:text="${group.spec?.displayName}"
+                  ></h2>
+                  <div
+                    class="wi-photos-page__grid"
+                    th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
+                  >
+                    <div
+                      class="wi-photos-page__item"
+                      th:each="photo : ${group.photos}"
+                    >
+                      <a
+                        th:href="${photo.spec.url}"
+                        class="wi-photos-page__link"
+                        th:attr="data-src=${photo.spec.url}, data-sub-html=${photo.spec.displayName ?: ''}, data-exif=${photo.exif != null ? (photo.exif.make ?: '') + '|' + (photo.exif.model ?: '') + '|' + (photo.exif.lensModel ?: '') + '|' + (photo.exif.fNumber ?: '') + '|' + (photo.exif.exposureTime ?: '') + '|' + (photo.exif.iso ?: '') + '|' + (photo.exif.focalLength ?: '') + '|' + (photo.exif.focalLengthIn35mm ?: '') : ''}"
+                      >
+                        <img
+                          th:src="${photo.spec.cover ?: photo.spec.url}"
+                          th:alt="${photo.spec.displayName ?: ''}"
+                          class="wi-photos-page__image"
+                          loading="lazy"
+                        />
+                        <div class="wi-photos-page__overlay">
+                          <span
+                            class="wi-photos-page__caption"
+                            th:if="${photo.spec.displayName}"
+                            th:text="${photo.spec.displayName}"
+                          ></span>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div class="wi-photos-page__empty" th:if="${#lists.isEmpty(group.photos)}">
+                  <p>该分组暂无图片</p>
+                </div>
+              </th:block>
+            </th:block>
+          </th:block>
+          </th:block>
+
+          <div class="wi-photos-page__empty" th:if="${#lists.isEmpty(groups) and !(showUngrouped and photos != null and !#lists.isEmpty(photos.items))}">
+            <p>暂无图片</p>
+          </div>
+        </th:block>
+
+        <th:block th:if="${groups == null}">
+          <div class="wi-photos-page__empty">
+            <p>图库插件加载异常，请检查插件状态</p>
+          </div>
+        </th:block>
+      </th:block>
+
+      <th:block th:unless="${pluginFinder.available('PluginPhotos')}">
+        <div class="wi-photos-page__empty">
+          <p>
+            图库功能需要安装「图库」插件，<a
+              href="https://www.halo.run/store/apps/app-PgHgw"
+              >前往应用市场安装</a
+            >
+          </p>
+        </div>
+      </th:block>
+    </div>
+  </section>
+
+  <LightGallery />
+</Layout>
+
+<style>
+  .wi-photos-page {
+    padding-block: 1rem;
+  }
+
+  .wi-photos-page__header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .wi-photos-page__title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-photos-page__groups {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-photos-page__group-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--ink-2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--ease-out-expo),
+      background var(--duration-fast) var(--ease-out-expo),
+      border-color var(--duration-fast) var(--ease-out-expo),
+      transform var(--duration-fast) var(--ease-out-expo);
+  }
+
+  .wi-photos-page__group-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .wi-photos-page__group-link--active {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .wi-photos-page__group-link--active:hover {
+    color: var(--bg);
+    background: var(--accent);
+    transform: none;
+  }
+
+  .wi-photos-page__section {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-photos-page__section:last-child {
+    margin-bottom: 0;
+  }
+
+  .wi-photos-page__section-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--ink-2);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-photos-page__empty {
+    text-align: center;
+    padding: var(--space-4xl) var(--space-xl);
+    color: var(--ink-3);
+    font-size: var(--text-md);
+  }
+
+  .wi-photos-page__empty a {
+    color: var(--accent);
+  }
+
+  .wi-photos-page__grid {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  .wi-photos-page__grid[data-style="masonry"] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 10px;
+  }
+
+  .wi-photos-page__grid[data-style="masonry"][data-columns="2"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-photos-page__grid[data-style="masonry"][data-columns="4"] {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .wi-photos-page__grid[data-style="grid"] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .wi-photos-page__grid[data-style="grid"][data-columns="2"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-photos-page__grid[data-style="grid"][data-columns="4"] {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .wi-photos-page__grid[data-style="grid"] .wi-photos-page__image {
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .wi-photos-page__grid[data-style="carousel"] {
+    grid-template-columns: unset;
+    display: flex;
+    gap: var(--space-md);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: var(--space-md);
+    padding-bottom: var(--space-md);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+  }
+
+  .wi-photos-page__grid[data-style="carousel"]::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .wi-photos-page__grid[data-style="carousel"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .wi-photos-page__grid[data-style="carousel"]::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 9999px;
+  }
+
+  .wi-photos-page__grid[data-style="carousel"] .wi-photos-page__item {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    width: calc(100% / 3 - var(--space-md) * 2 / 3);
+  }
+
+  .wi-photos-page__grid[data-style="carousel"][data-columns="2"] .wi-photos-page__item {
+    width: calc(100% / 2 - var(--space-md) / 2);
+  }
+
+  .wi-photos-page__grid[data-style="carousel"][data-columns="4"] .wi-photos-page__item {
+    width: calc(100% / 4 - var(--space-md) * 3 / 4);
+  }
+
+  .wi-photos-page__grid[data-style="carousel"] .wi-photos-page__image {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .wi-photos-page__item {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .wi-photos-page__link {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+
+  .wi-photos-page__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    transition:
+      transform var(--duration-slow) var(--ease-out-expo),
+      filter var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-photos-page__link:hover .wi-photos-page__image {
+    transform: scale(1.05);
+    filter: brightness(0.92);
+  }
+
+  .wi-photos-page__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: var(--space-lg) var(--space-md);
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.45) 0%,
+      transparent 50%
+    );
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-out-expo);
+    pointer-events: none;
+  }
+
+  .wi-photos-page__link:hover .wi-photos-page__overlay {
+    opacity: 1;
+  }
+
+  .wi-photos-page__caption {
+    font-size: var(--text-sm);
+    color: #fff;
+    text-align: center;
+    line-height: var(--leading-snug);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .wi-photos-page__grid[data-style="masonry"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wi-photos-page__grid[data-style="grid"] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wi-photos-page__grid[data-style="carousel"] .wi-photos-page__item {
+      width: calc(100% / 2 - var(--space-md) / 2);
+    }
+
+    .wi-photos-page__groups {
+      gap: 6px;
+    }
+
+    .wi-photos-page__group-link {
+      padding: 4px 12px;
+      font-size: var(--text-xs);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wi-photos-page__grid[data-style="masonry"] {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .wi-photos-page__grid[data-style="grid"] {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .wi-photos-page__grid[data-style="carousel"] .wi-photos-page__item {
+      width: 75%;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var rafPending = false;
+
+    function layoutMasonry() {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(function () {
+        rafPending = false;
+        var grids = document.querySelectorAll(
+          '.wi-photos-page__grid[data-style="masonry"]'
+        );
+        grids.forEach(function (grid) {
+          var items = grid.querySelectorAll('.wi-photos-page__item');
+          if (items.length === 0) return;
+
+          var rowGap = parseInt(getComputedStyle(grid).rowGap) || 8;
+          var rowHeight = 10;
+
+          items.forEach(function (item) {
+            var img = item.querySelector('.wi-photos-page__image');
+            if (!img) return;
+
+            var ratio = 0;
+            var w = img.getAttribute('width');
+            var h = img.getAttribute('height');
+            if (w && h && parseInt(w) > 0 && parseInt(h) > 0) {
+              ratio = parseInt(h) / parseInt(w);
+            } else if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+              ratio = img.naturalHeight / img.naturalWidth;
+            }
+            if (!ratio || ratio <= 0) return;
+
+            var itemWidth = item.getBoundingClientRect().width;
+            var rowSpan = Math.ceil(
+              (itemWidth * ratio + rowGap) / (rowHeight + rowGap)
+            );
+
+            item.style.gridRowEnd = 'span ' + rowSpan;
+          });
+        });
+      });
+    }
+
+    function observeImages() {
+      var images = document.querySelectorAll(
+        '.wi-photos-page__grid[data-style="masonry"] .wi-photos-page__image'
+      );
+      if (images.length === 0) return;
+
+      images.forEach(function (img) {
+        if (img.complete && img.naturalHeight > 0) {
+          layoutMasonry();
+        } else {
+          img.addEventListener('load', layoutMasonry);
+          img.addEventListener('error', layoutMasonry);
+        }
+      });
+    }
+
+    if (typeof ResizeObserver !== 'undefined') {
+      var ro = new ResizeObserver(function () {
+        layoutMasonry();
+      });
+      var observeGrids = function () {
+        var grids = document.querySelectorAll(
+          '.wi-photos-page__grid[data-style="masonry"]'
+        );
+        grids.forEach(function (grid) {
+          ro.observe(grid);
+        });
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          observeGrids();
+          observeImages();
+        });
+      } else {
+        observeGrids();
+        observeImages();
+      }
+    } else {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', observeImages);
+      } else {
+        observeImages();
+      }
+    }
+
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(layoutMasonry, 150);
+    });
+  })();
+</script>

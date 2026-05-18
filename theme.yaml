@@ -1,18 +1,30 @@
 apiVersion: theme.halo.run/v1alpha1
 kind: Theme
 metadata:
-  name: astro-starter
+  name: warm-island
 spec:
-  displayName: Astro Starter
+  displayName: WarmIsland 暖屿
   author:
-    name: Your Name
-    website: https://github.com/YourName
-  description: A starter theme for Halo.
-  logo: https://www.halo.run/logo
-  homepage: https://github.com/halo-sigs/theme-astro-starter
-  issues: https://github.com/halo-sigs/theme-astro-starter/issues
+    name: WarmIsland
+    website: https://github.com/warm-island
+  description: 一座深夜里温暖、安静、治愈的小岛 — 具有独特气质的生活博客主题
+  logo: /themes/warm-island/assets/logo.png
+  homepage: https://github.com/warm-island/theme-warm-island
+  issues: https://github.com/warm-island/theme-warm-island/issues
+  settingName: "warm-island-setting"
+  configMapName: "warm-island-configMap"
+  customTemplates:
+    page:
+      - name: MessageBoard
+        description: 留言板
+        screenshot:
+        file: page_messageboard.html
+      - name: Equipment
+        description: 装备
+        screenshot:
+        file: equipment.html
   version: "1.0.0"
-  requires: ">=2.0.0"
+  requires: ">=2.24.0"
   license:
     - name: "GPL-3.0"
       url: "https://www.gnu.org/licenses/gpl-3.0.en.html"

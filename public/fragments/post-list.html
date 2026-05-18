@@ -1,19 +1,21 @@
-<ul class="post-feed__list" role="list">
-  <li th:each="post : ${posts.items}" class="post-feed__item">
-    <a class="post-feed__link" th:href="@{${post.status.permalink}}">
-      <div class="post-feed__body">
-        <p
-          class="post-feed__date"
-          th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
-        ></p>
-        <h2 class="post-feed__title" th:text="${post.spec.title}"></h2>
-        <p class="post-feed__excerpt" th:text="${post.status.excerpt}"></p>
+<ul class="wi-post-feed" role="list">
+  <li th:each="post : ${posts.items}" class="wi-post-feed__item">
+    <a class="wi-post-feed__link" th:href="@{${post.status.permalink}}">
+      <div class="wi-post-feed__image-wrap" th:unless="${#strings.isEmpty(post.spec.cover)}">
+        <img
+          class="wi-post-feed__image"
+          th:src="${post.spec.cover}"
+          th:srcset="|${thumbnail.gen(post.spec.cover, 's')} 400w,
+                      ${thumbnail.gen(post.spec.cover, 'm')} 800w,
+                      ${thumbnail.gen(post.spec.cover, 'l')} 1200w|"
+          sizes="(max-width: 768px) 100vw, 400px"
+        />
       </div>
-      <img
-        th:unless="${#strings.isEmpty(post.spec.cover)}"
-        class="post-feed__image"
-        th:src="${post.spec.cover}"
-      />
+      <div class="wi-post-feed__body">
+        <p class="wi-post-feed__date" th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"></p>
+        <h2 class="wi-post-feed__title" th:text="${post.spec.title}"></h2>
+        <p class="wi-post-feed__excerpt" th:text="${post.status.excerpt}"></p>
+      </div>
     </a>
   </li>
 </ul>

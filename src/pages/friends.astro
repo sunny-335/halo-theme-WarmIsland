@@ -1,0 +1,310 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${theme.config?.friends?.friends_page_title ?: '朋友圈'} - ${site.title}|"></title>
+  </Fragment>
+
+  <section
+    class="wi-friends-page"
+    th:if="${pluginFinder.available('plugin-friends')}"
+  >
+    <div class="wi-container">
+      <div class="wi-friends-page__header">
+        <h1
+          class="wi-friends-page__title"
+          th:text="${theme.config?.friends?.friends_page_title ?: '朋友圈'}"
+        >
+          朋友圈
+        </h1>
+        <span class="wi-page-accent"></span>
+      </div>
+
+      <div class="wi-friends-page__flow">
+        <div
+          class="wi-friends-page__item"
+          th:each="friend : ${friends.items}"
+          th:with="spec = ${friend.spec}"
+        >
+          <div class="wi-friends-page__card">
+            <div class="wi-friends-page__author">
+              <img
+                th:if="${spec.logo}"
+                th:src="${spec.logo}"
+                th:alt="${spec.author}"
+                class="wi-friends-page__avatar"
+              />
+              <div
+                th:unless="${spec.logo}"
+                class="wi-friends-page__avatar wi-friends-page__avatar--placeholder"
+              >
+                <span
+                  th:text="${#strings.substring(spec.author ?: '', 0, 1)}"
+                ></span>
+              </div>
+              <div class="wi-friends-page__author-info">
+                <a
+                  th:if="${spec.author}"
+                  th:href="${spec.authorUrl}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="wi-friends-page__author-name"
+                  th:text="${spec.author}"
+                ></a>
+                <span
+                  class="wi-friends-page__author-bio"
+                  th:if="${spec.pubDate}"
+                  th:text="${#temporals.format(spec.pubDate, 'yyyy-MM-dd')}"
+                ></span>
+              </div>
+            </div>
+            <div class="wi-friends-page__post">
+              <a
+                th:if="${spec.postLink}"
+                th:href="${spec.postLink}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="wi-friends-page__post-title"
+                th:text="${spec.title}"
+              ></a>
+              <p
+                class="wi-friends-page__post-content"
+                th:if="${spec.description}"
+                th:text="${spec.description}"
+              ></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="wi-friends-page__pagination"
+        th:if="${friends.hasPrevious() || friends.hasNext()}"
+      >
+        <a
+          th:if="${friends.hasPrevious()}"
+          th:href="@{${friends.prevUrl}}"
+          class="wi-friends-page__page-link"
+        >
+          ← 上一页
+        </a>
+        <span
+          class="wi-friends-page__page-info"
+          th:text="${friends.page} + ' / ' + ${friends.totalPages}"
+        ></span>
+        <a
+          th:if="${friends.hasNext()}"
+          th:href="@{${friends.nextUrl}}"
+          class="wi-friends-page__page-link"
+        >
+          下一页 →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="wi-friends-page"
+    th:unless="${pluginFinder.available('plugin-friends')}"
+  >
+    <div class="wi-container">
+      <div class="wi-friends-page__header">
+        <h1 class="wi-friends-page__title">朋友圈</h1>
+        <span class="wi-page-accent"></span>
+      </div>
+      <div class="wi-friends-page__empty">
+        <p>朋友圈功能需要安装「朋友圈」插件，<a href="https://www.halo.run/store/apps/app-friends">前往应用市场安装</a></p>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .wi-friends-page {
+    padding-block: 1rem;
+  }
+
+  .wi-friends-page__header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .wi-friends-page__title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-friends-page__empty {
+    text-align: center;
+    padding: var(--space-4xl) var(--space-xl);
+    color: var(--ink-3);
+    font-size: var(--text-md);
+  }
+
+  .wi-friends-page__empty a {
+    color: var(--accent);
+  }
+
+  .wi-friends-page__flow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    max-width: 720px;
+    margin-inline: auto;
+  }
+
+  .wi-friends-page__card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: var(--space-xl);
+    transition:
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-friends-page__card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+
+  .wi-friends-page__author {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-friends-page__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .wi-friends-page__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .wi-friends-page__author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .wi-friends-page__author-name {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-friends-page__author-name:hover {
+    color: var(--accent);
+  }
+
+  .wi-friends-page__author-bio {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-friends-page__post {
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-friends-page__post-title {
+    display: block;
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    margin-bottom: var(--space-xs);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-friends-page__post-title:hover {
+    color: var(--accent);
+  }
+
+  .wi-friends-page__post-content {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-block-end: 0;
+  }
+
+  .wi-friends-page__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--rule);
+  }
+
+  .wi-friends-page__page-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: opacity var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-friends-page__page-link:hover {
+    opacity: 0.8;
+  }
+
+  .wi-friends-page__page-info {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 640px) {
+    .wi-friends-page__card {
+      padding: var(--space-lg);
+    }
+
+    .wi-friends-page__avatar {
+      width: 38px;
+      height: 38px;
+    }
+  }
+</style>

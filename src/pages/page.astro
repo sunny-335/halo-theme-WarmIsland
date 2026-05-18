@@ -1,25 +1,142 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import LightGallery from "../components/LightGallery.astro";
 ---
 
-<Layout contentClass="prose">
+<Layout>
   <Fragment slot="head">
     <title th:text="|${singlePage.spec.title} - ${site.title}|"></title>
   </Fragment>
 
-  <div class="page-heading">
-    <h1 th:text="${singlePage.spec.title}"></h1>
-    <p class="page-meta">
-      <span
-        th:text="${#dates.format(singlePage.spec.publishTime, 'yyyy-MM-dd')}"
-      ></span>
-    </p>
-  </div>
+  <article class="wi-page">
+    <header class="wi-page__header">
+      <h1
+        class="wi-page__title"
+        th:text="${singlePage.spec.title}"
+      ></h1>
+      <span class="wi-page-accent"></span>
+      <div class="wi-page__meta">
+        <time
+          th:datetime="${singlePage.spec.publishTime}"
+          th:text="${#dates.format(singlePage.spec.publishTime, 'yyyy-MM-dd')}"
+        ></time>
+      </div>
+    </header>
 
-  <div th:utext="${singlePage.content.content}"></div>
+    <div
+      class="wi-page__body"
+      th:utext="${singlePage.content.content}"
+    ></div>
 
-  <halo:comment
-    group="content.halo.run"
-    kind="SinglePage"
-    th:attr="name=${singlePage.metadata.name}"></halo:comment>
+    <div class="wi-page__comment">
+      <halo:comment
+        th:if="${haloCommentEnabled}"
+        group="content.halo.run"
+        kind="SinglePage"
+        th:attr="name=${singlePage.metadata.name}"
+      ></halo:comment>
+    </div>
+  </article>
+
+  <LightGallery />
 </Layout>
+
+<style>
+  .wi-page {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: 1rem;
+  }
+
+  .wi-page__header {
+    display: grid;
+    gap: var(--space-md);
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--rule);
+    text-align: center;
+  }
+
+  .wi-page__title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-page__meta {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-page__body {
+    max-width: var(--content-max);
+    margin-inline: auto;
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+  }
+
+  .wi-page__body :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-sans);
+    margin-top: 2em;
+    margin-bottom: 0.6em;
+  }
+
+  .wi-page__body p {
+    margin-block-end: 1.2em;
+  }
+
+  .wi-page__body img {
+    border-radius: 12px;
+    margin-block: var(--space-lg);
+  }
+
+  .wi-page__body a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .wi-page__body ul,
+  .wi-page__body ol {
+    padding-inline-start: 1.5em;
+    margin-block-end: 1.2em;
+  }
+
+  .wi-page__body li {
+    margin-block-end: 0.4em;
+  }
+
+  .wi-page__comment {
+    width: 100%;
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  halo\:comment {
+    display: block;
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .wi-page__header {
+      padding-bottom: var(--space-xl);
+    }
+  }
+</style>

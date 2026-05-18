@@ -1,0 +1,303 @@
+---
+---
+
+<section
+  class="hero"
+  th:if="${theme.config?.hero?.hero_enabled != false}"
+  th:classappend="${theme.config?.animation?.animation_breath == false} ? 'hero--no-breath'"
+>
+  <div class="hero__bg">
+    <div class="hero__orb hero__orb--1"></div>
+    <div class="hero__orb hero__orb--2"></div>
+    <div class="hero__orb hero__orb--3"></div>
+    <div
+      class="hero__bg-image"
+      th:if="${theme.config?.hero?.hero_background_image}"
+      th:style="'background-image: url(' + ${theme.config?.hero?.hero_background_image} + ')'"
+    ></div>
+  </div>
+
+  <div class="hero__content">
+    <h1
+      class="hero__title"
+      th:text="${theme.config?.hero?.hero_title != null and !#strings.isEmpty(theme.config?.hero?.hero_title) ? theme.config?.hero?.hero_title : site.title}"
+    >
+      暖屿
+    </h1>
+    <p
+      class="hero__subtitle"
+      th:text="${theme.config?.hero?.hero_subtitle != null and !#strings.isEmpty(theme.config?.hero?.hero_subtitle) ? theme.config?.hero?.hero_subtitle : site.subtitle}"
+    >
+      深夜里温暖的小岛
+    </p>
+    <p
+      class="hero__description"
+      th:if="${theme.config?.hero?.hero_description_mode == 'hitokoto'}"
+      id="wi-hitokoto"
+      th:attr="data-api=${theme.config?.hero?.hero_hitokoto_api ?: 'https://v1.hitokoto.cn/'},data-categories=${theme.config?.hero?.hero_hitokoto_categories}"
+    ></p>
+    <p
+      class="hero__description"
+      th:if="${theme.config?.hero?.hero_description_mode == 'custom'}"
+      th:text="${theme.config?.hero?.hero_custom_description}"
+    ></p>
+  </div>
+
+  <div class="hero__scroll-indicator" aria-hidden="true">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    var el = document.getElementById("wi-hitokoto");
+    if (!el) return;
+
+    var api = el.getAttribute("data-api") || "https://v1.hitokoto.cn/";
+    var categories = el.getAttribute("data-categories");
+    var url = api + "?encode=json";
+
+    if (categories) {
+      try {
+        var cats = JSON.parse(categories);
+        if (Array.isArray(cats)) {
+          cats.forEach(function (c) {
+            url += "&c=" + encodeURIComponent(c);
+          });
+        }
+      } catch (e) {}
+    }
+
+    el.style.opacity = "0.5";
+    el.textContent = "\u2026";
+
+    fetch(url)
+      .then(function (res) {
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return res.json();
+      })
+      .then(function (data) {
+        el.style.opacity = "1";
+        var text = data.hitokoto || "";
+        var from = data.from || data.from_who || "";
+        if (from) {
+          text += " \u2014\u2014 " + from;
+        }
+        el.textContent = text;
+      })
+      .catch(function () {
+        el.style.opacity = "1";
+        el.textContent = "";
+      });
+  })();
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    height: calc(100vh + 80px);
+    height: calc(100dvh + 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(
+      160deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 85%, var(--accent) 15%) 40%,
+      color-mix(in srgb, var(--bg) 90%, var(--mist-pink) 10%) 70%,
+      var(--bg) 100%
+    );
+    margin-top: -80px;
+    padding-top: 80px;
+    width: 100%;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hero__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: breathe 5s ease-in-out infinite;
+  }
+
+  .hero__orb--1 {
+    width: 420px;
+    height: 420px;
+    top: -10%;
+    right: -5%;
+    background: radial-gradient(
+      circle,
+      rgba(212, 118, 78, 0.4) 0%,
+      transparent 70%
+    );
+    animation-delay: 0s;
+    animation-duration: 5s;
+  }
+
+  .hero__orb--2 {
+    width: 350px;
+    height: 350px;
+    bottom: -8%;
+    left: -5%;
+    background: radial-gradient(
+      circle,
+      rgba(220, 140, 160, 0.3) 0%,
+      transparent 70%
+    );
+    animation-delay: -1.8s;
+    animation-duration: 6s;
+  }
+
+  .hero__orb--3 {
+    width: 300px;
+    height: 300px;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: radial-gradient(
+      circle,
+      rgba(180, 150, 200, 0.2) 0%,
+      transparent 70%
+    );
+    animation-delay: -3.2s;
+    animation-duration: 4.5s;
+  }
+
+  .hero__bg-image {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-xl);
+    gap: var(--space-lg);
+  }
+
+  .hero__title {
+    font-family: var(--font-sans);
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    line-height: var(--leading-tight);
+  }
+
+  .hero__subtitle {
+    font-family: var(--font-body);
+    font-size: var(--text-xl);
+    color: var(--ink-2);
+    letter-spacing: 0.05em;
+    line-height: var(--leading-normal);
+  }
+
+  .hero__description {
+    font-size: var(--text-lg);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    max-width: 560px;
+    text-align: center;
+    transition: opacity 0.3s ease;
+  }
+
+  .hero__scroll-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--ink-3);
+    animation: scrollHint 2s ease-in-out infinite;
+  }
+
+  .hero--no-breath .hero__orb {
+    animation: none;
+  }
+
+  html.dark .hero {
+    background: linear-gradient(
+      160deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 85%, var(--accent) 12%) 40%,
+      var(--bg) 100%
+    );
+  }
+
+  html.dark .hero__orb--1 {
+    background: radial-gradient(
+      circle,
+      rgba(232, 149, 95, 0.25) 0%,
+      transparent 70%
+    );
+  }
+
+  html.dark .hero__orb--2 {
+    background: radial-gradient(
+      circle,
+      rgba(200, 120, 140, 0.18) 0%,
+      transparent 70%
+    );
+  }
+
+  html.dark .hero__orb--3 {
+    background: radial-gradient(
+      circle,
+      rgba(160, 130, 180, 0.12) 0%,
+      transparent 70%
+    );
+  }
+
+  @media (max-width: 768px) {
+    .hero__title {
+      font-size: clamp(2.25rem, 10vw, 3.5rem);
+    }
+
+    .hero__orb--1 {
+      width: 260px;
+      height: 260px;
+    }
+
+    .hero__orb--2 {
+      width: 220px;
+      height: 220px;
+    }
+
+    .hero__orb--3 {
+      width: 180px;
+      height: 180px;
+    }
+
+    .hero__content {
+      padding: var(--space-lg);
+      gap: var(--space-md);
+    }
+
+    .hero__description {
+      max-width: 90vw;
+    }
+  }
+</style>

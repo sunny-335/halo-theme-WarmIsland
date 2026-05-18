@@ -10,9 +10,13 @@ onMounted(() => {
 });
 
 function toggle() {
+  document.documentElement.classList.add("wi-theme-transition");
   isDark.value = !isDark.value;
   document.documentElement.classList.toggle("dark", isDark.value);
-  localStorage.setItem("theme", isDark.value ? "dark" : "light");
+  localStorage.setItem("wi-theme", isDark.value ? "dark" : "light");
+  setTimeout(() => {
+    document.documentElement.classList.remove("wi-theme-transition");
+  }, 300);
 }
 </script>
 

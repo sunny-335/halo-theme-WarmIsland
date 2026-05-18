@@ -1,0 +1,113 @@
+@use 'variables' as *;
+
+.halo-search-widget {
+  .search-modal {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--glass-border);
+    border-radius: $border-radius-xl;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--space-lg) var(--space-xl);
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    outline: none;
+    transition: border-color var(--duration-fast) var(--ease-out-quart);
+
+    &::placeholder {
+      color: var(--ink-3);
+    }
+
+    &:focus {
+      border-bottom-color: var(--accent);
+    }
+  }
+
+  .search-result-item {
+    padding: var(--space-md) var(--space-xl);
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+    transition:
+      background var(--duration-fast) var(--ease-out-quart),
+      padding-left var(--duration-fast) var(--ease-out-quart);
+
+    &:hover {
+      background: var(--accent-bg);
+      padding-left: calc(var(--space-xl) + 4px);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .search-result-title {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: var(--space-xs);
+  }
+
+  .search-result-content {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .search-result-label {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .search-empty {
+    padding: var(--space-3xl) var(--space-xl);
+    text-align: center;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+  }
+
+  .search-hint {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    padding: var(--space-sm) var(--space-xl);
+    border-top: 1px solid var(--rule);
+    text-align: center;
+  }
+
+  .search-highlight {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .search-backdrop {
+    background: rgba(44, 36, 32, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+html.dark .halo-search-widget {
+  .search-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .search-result-item {
+    &:hover {
+      background: var(--accent-bg);
+    }
+  }
+}

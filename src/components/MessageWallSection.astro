@@ -1,0 +1,153 @@
+---
+---
+<section
+  class="wi-section wi-message-wall"
+  th:if="${theme.config?.home?.home_message_wall_enabled == true}"
+>
+  <div class="wi-container">
+    <div class="wi-section__header">
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_message_wall_title ?: '留言墙'}">留言墙</h2>
+      <span class="wi-section__accent"></span>
+    </div>
+
+    <div class="wi-message-wall__grid">
+      <div
+        class="wi-message-wall__card"
+        th:each="comment : ${commentFinder.list()}"
+      >
+        <div class="wi-message-wall__head">
+          <img
+            th:if="${comment.spec.owner.avatar}"
+            th:src="${comment.spec.owner.avatar}"
+            th:alt="${comment.spec.owner.displayName}"
+            class="wi-message-wall__avatar"
+          />
+          <div
+            th:unless="${comment.spec.owner.avatar}"
+            class="wi-message-wall__avatar wi-message-wall__avatar--placeholder"
+          >
+            <span th:text="${#strings.substring(comment.spec.owner.displayName, 0, 1)}"></span>
+          </div>
+          <div class="wi-message-wall__meta">
+            <span class="wi-message-wall__name" th:text="${comment.spec.owner.displayName}"></span>
+            <time
+              class="wi-message-wall__date"
+              th:text="${#dates.format(comment.metadata.creationTimestamp, 'yyyy-MM-dd')}"
+            ></time>
+          </div>
+        </div>
+        <p class="wi-message-wall__text" th:text="${comment.spec.content}"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wi-message-wall__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .wi-message-wall__card {
+    padding: var(--space-lg);
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-message-wall__card:nth-child(6n + 1) {
+    background: var(--accent-bg);
+  }
+
+  .wi-message-wall__card:nth-child(6n + 2) {
+    background: var(--mist-pink);
+  }
+
+  .wi-message-wall__card:nth-child(6n + 3) {
+    background: var(--bg-raised);
+  }
+
+  .wi-message-wall__card:nth-child(6n + 4) {
+    background: color-mix(in srgb, var(--bg) 85%, var(--accent) 15%);
+  }
+
+  .wi-message-wall__card:nth-child(6n + 5) {
+    background: color-mix(in srgb, var(--bg) 90%, var(--caramel) 10%);
+  }
+
+  .wi-message-wall__card:nth-child(6n + 6) {
+    background: var(--sea-salt);
+  }
+
+  .wi-message-wall__card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .wi-message-wall__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-message-wall__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .wi-message-wall__avatar--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .wi-message-wall__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+  }
+
+  .wi-message-wall__name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-message-wall__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-message-wall__text {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .wi-message-wall__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,158 @@
+---
+---
+<section
+  class="wi-section wi-timeline"
+  th:if="${theme.config?.home?.home_timeline_enabled == true}"
+>
+  <div class="wi-container">
+    <div class="wi-section__header">
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_timeline_title ?: '时间线'}">时间线</h2>
+      <span class="wi-section__accent"></span>
+    </div>
+
+    <div class="wi-timeline__body">
+      <th:block th:with="postsResult = ${postFinder.list({page: 1, size: 50})}">
+        <th:block th:each="post : ${postsResult.items}">
+          <div class="wi-timeline__year" th:text="${#dates.format(post.spec.publishTime, 'yyyy')}"></div>
+          <div class="wi-timeline__entries">
+            <a
+              th:href="@{${post.status.permalink}}"
+              class="wi-timeline__entry"
+            >
+              <span class="wi-timeline__dot"></span>
+              <span class="wi-timeline__line"></span>
+              <time
+                class="wi-timeline__date"
+                th:text="${#dates.format(post.spec.publishTime, 'MM-dd')}"
+              ></time>
+              <div class="wi-timeline__content">
+                <span class="wi-timeline__title" th:text="${post.spec.title}"></span>
+                <span
+                  class="wi-timeline__excerpt"
+                  th:if="${post.status.excerpt}"
+                  th:text="${post.status.excerpt}"
+                ></span>
+              </div>
+            </a>
+          </div>
+        </th:block>
+      </th:block>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wi-timeline__body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+  }
+
+  .wi-timeline__year {
+    font-family: var(--font-sans);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--ink-2);
+    letter-spacing: var(--tracking-tight);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-timeline__entries {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .wi-timeline__entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px 56px minmax(0, 1fr);
+    gap: var(--space-sm);
+    align-items: baseline;
+    padding: var(--space-sm) 0;
+    text-decoration: none;
+    color: inherit;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-timeline__entry:hover {
+    color: var(--accent);
+  }
+
+  .wi-timeline__dot {
+    position: absolute;
+    left: 19px;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--accent);
+    z-index: 2;
+  }
+
+  .wi-timeline__line {
+    position: absolute;
+    left: 22px;
+    top: 18px;
+    bottom: calc(-1 * var(--space-sm));
+    width: 1px;
+    background: var(--rule);
+    z-index: 1;
+  }
+
+  .wi-timeline__entry:last-child .wi-timeline__line {
+    display: none;
+  }
+
+  .wi-timeline__date {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    padding-top: 1px;
+  }
+
+  .wi-timeline__content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .wi-timeline__title {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: var(--leading-snug);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-timeline__entry:hover .wi-timeline__title {
+    color: var(--accent);
+  }
+
+  .wi-timeline__excerpt {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    line-height: var(--leading-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .wi-timeline__entry {
+      grid-template-columns: 36px 48px minmax(0, 1fr);
+    }
+
+    .wi-timeline__dot {
+      left: 13px;
+      width: 6px;
+      height: 6px;
+    }
+
+    .wi-timeline__line {
+      left: 15px;
+    }
+  }
+</style>

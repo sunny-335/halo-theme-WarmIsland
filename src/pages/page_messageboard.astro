@@ -1,0 +1,140 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title
+      th:text="|${theme.config?.messageboard?.messageboard_title ?: '留言板'} - ${site.title}|"
+    ></title>
+  </Fragment>
+
+  <div class="wi-messageboard">
+    <header class="wi-messageboard__header">
+      <span class="wi-messageboard__deco">"</span>
+      <h1
+        class="wi-messageboard__title"
+        th:text="${theme.config?.messageboard?.messageboard_title ?: '留言板'}"
+      ></h1>
+      <span class="wi-page-accent"></span>
+      <p
+        class="wi-messageboard__subtitle"
+        th:text="${theme.config?.messageboard?.messageboard_subtitle}"
+      ></p>
+    </header>
+
+    <div class="wi-messageboard__content">
+      <div
+        class="wi-messageboard__body"
+        th:utext="${singlePage.content.content}"
+      ></div>
+    </div>
+
+    <div class="wi-messageboard__comment">
+      <halo:comment
+        th:if="${haloCommentEnabled}"
+        group="content.halo.run"
+        kind="SinglePage"
+        th:attr="name=${singlePage.metadata.name}"
+      ></halo:comment>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .wi-messageboard {
+    display: grid;
+    gap: var(--space-lg);
+    margin-top: calc(-1 * 100px - var(--space-lg));
+    padding-top: 100px;
+    padding-block-end: 1rem;
+  }
+
+  .wi-messageboard__header {
+    display: grid;
+    gap: var(--space-md);
+    padding: var(--space-3xl) var(--space-xl);
+    text-align: center;
+    background: var(--bg-raised);
+    border-radius: 16px;
+    border: 1px solid var(--rule);
+    position: relative;
+    overflow: hidden;
+    margin-top: 0;
+  }
+
+  .wi-messageboard__deco {
+    font-family: var(--font-sans);
+    font-size: clamp(4rem, 10vw, 7rem);
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.18;
+    position: absolute;
+    top: -0.15em;
+    left: 0.15em;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .wi-messageboard__title {
+    font-family: var(--font-sans);
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+    position: relative;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-messageboard__subtitle {
+    font-size: var(--text-md);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    margin: 0;
+    position: relative;
+  }
+
+  .wi-messageboard__content {
+    max-width: var(--content-max);
+    margin-inline: auto;
+    width: 100%;
+  }
+
+  .wi-messageboard__body {
+    font-size: var(--text-md);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+  }
+
+  .wi-messageboard__body p {
+    margin-block-end: 1.2em;
+  }
+
+  .wi-messageboard__comment {
+    width: 100%;
+    max-width: 600px;
+    margin-inline: auto;
+  }
+
+  halo\:comment {
+    display: block;
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .wi-messageboard__header {
+      padding: var(--space-2xl) var(--space-lg);
+      border-radius: 12px;
+    }
+  }
+</style>

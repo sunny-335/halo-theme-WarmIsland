@@ -7,34 +7,124 @@ import Layout from "../layouts/Layout.astro";
     <title th:text="|${category.spec.displayName} - ${site.title}|"></title>
   </Fragment>
 
-  <div class="page-heading">
-    <h1 th:text="${category.spec.displayName}"></h1>
-    <p class="page-meta">
-      <span th:text="|${posts.total} 篇文章|"></span>
-    </p>
+  <div class="wi-category">
+    <header class="wi-category__header">
+      <h1
+        class="wi-category__title"
+        th:text="${category.spec.displayName}"
+      ></h1>
+      <span class="wi-page-accent"></span>
+      <p class="wi-category__subtitle" th:text="${theme.config?.home?.home_label_post_count ?: '共 {total} 篇文章}'.replace('{total}', posts.total)}"></p>
+      <p
+        th:if="${not #strings.isEmpty(category.spec.description)}"
+        class="wi-category__description"
+        th:text="${category.spec.description}"
+      ></p>
+    </header>
+
+    <th:block th:replace="~{fragments/post-list}"></th:block>
+
+    <div
+      th:if="${posts.total == 0}"
+      class="wi-category__empty"
+        th:text="${theme.config?.home?.home_label_no_posts ?: '暂无文章。'}"
+      >暂无文章。</div>
+
+    <nav
+      th:if="${posts.totalPages gt 1}"
+      class="wi-category__pagination"
+      aria-label="Pagination"
+    >
+      <a
+        th:if="${posts.hasPrevious()}"
+        th:href="@{${posts.prevUrl}}"
+        class="wi-category__page-link wi-category__page-link--prev"
+        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
+      >&larr; 较新</a>
+      <span
+        class="wi-category__page-info"
+        th:text="|${posts.page} / ${posts.totalPages}|"
+      ></span>
+      <a
+        th:if="${posts.hasNext()}"
+        th:href="@{${posts.nextUrl}}"
+        class="wi-category__page-link wi-category__page-link--next"
+        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
+      >较旧 &rarr;</a>
+    </nav>
   </div>
-
-  <th:block th:replace="~{fragments/post-list}"></th:block>
-
-  <div th:if="${posts.total == 0}" class="feed-empty">暂无文章。</div>
-
-  <nav
-    th:if="${posts.totalPages gt 1}"
-    class="pagination"
-    aria-label="Pagination"
-  >
-    <a
-      th:if="${posts.hasPrevious()}"
-      th:href="@{${posts.prevUrl}}"
-      class="pagination__prev">&larr; 较新</a
-    >
-    <span
-      class="pagination__info"
-      th:text="|${posts.page} / ${posts.totalPages}|"></span>
-    <a
-      th:if="${posts.hasNext()}"
-      th:href="@{${posts.nextUrl}}"
-      class="pagination__next">较旧 &rarr;</a
-    >
-  </nav>
 </Layout>
+
+<style>
+  .wi-category {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: 1rem;
+  }
+
+  .wi-category__header {
+    text-align: center;
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-category__title {
+    font-size: var(--text-4xl);
+    margin-bottom: 0;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-category__subtitle {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    margin: 0;
+  }
+
+  .wi-category__description {
+    margin: var(--space-md) auto 0;
+    max-width: var(--content-max);
+    font-size: var(--text-md);
+    color: var(--ink-2);
+    line-height: var(--leading-normal);
+  }
+
+  .wi-category__empty {
+    color: var(--ink-3);
+    font-size: var(--text-md);
+    padding: var(--space-2xl) 0;
+    text-align: center;
+  }
+
+  .wi-category__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--rule);
+    font-size: var(--text-sm);
+  }
+
+  .wi-category__page-link {
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-category__page-link:hover {
+    color: var(--accent);
+  }
+
+  .wi-category__page-info {
+    color: var(--ink-3);
+  }
+</style>

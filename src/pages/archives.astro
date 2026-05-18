@@ -2,64 +2,261 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout pageTitle="归档">
+<Layout>
   <Fragment slot="head">
     <title th:text="|归档 - ${site.title}|"></title>
   </Fragment>
 
-  <section class="archive-list" aria-label="Archive list">
-    <th:block th:each="archive : ${archives.items}">
-      <th:block th:each="month : ${archive.months}">
-        <div class="archive-group">
-          <h2
-            class="archive-group__year"
-            th:text="|${archive.year} · ${month.month}|"
-          >
-          </h2>
-          <ul class="archive-group__items">
-            <li th:each="post : ${month.posts}" class="archive-entry">
+  <div class="wi-archives">
+    <header class="wi-archives__header">
+      <h1 class="wi-archives__title">归档</h1>
+      <span class="wi-page-accent"></span>
+      <p class="wi-archives__subtitle" th:text="${theme.config?.home?.home_label_post_count ?: '共 {total} 篇文章}'.replace('{total}', archives.total)}"></p>
+    </header>
+
+    <section class="wi-archives__timeline" aria-label="Archive timeline">
+      <th:block th:each="archive : ${archives.items}">
+        <th:block th:each="month : ${archive.months}">
+          <div class="wi-archives__group">
+            <div class="wi-archives__group-label">
               <span
-                class="archive-entry__date"
-                th:text="${#dates.format(post.spec.publishTime, 'MM/dd')}"
+                class="wi-archives__dot"
+                aria-hidden="true"
               ></span>
-              <div>
-                <h3 class="archive-entry__title">
+              <h2
+                class="wi-archives__year-month"
+                th:text="|${archive.year} · ${month.month}|"
+              ></h2>
+            </div>
+            <ul class="wi-archives__items">
+              <li
+                th:each="post : ${month.posts}"
+                class="wi-archives__entry"
+              >
+                <span
+                  class="wi-archives__entry-date"
+                  th:text="${#dates.format(post.spec.publishTime, 'MM/dd')}"
+                ></span>
+                <div class="wi-archives__entry-body">
                   <a
+                    class="wi-archives__entry-title"
                     th:href="@{${post.status.permalink}}"
-                    th:text="${post.spec.title}"></a>
-                </h3>
-                <p
-                  class="archive-entry__summary"
-                  th:text="${post.status.excerpt}"
-                >
-                </p>
-              </div>
-            </li>
-          </ul>
-        </div>
+                    th:text="${post.spec.title}"
+                  ></a>
+                  <p
+                    class="wi-archives__entry-excerpt"
+                    th:text="${post.status.excerpt}"
+                  ></p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </th:block>
       </th:block>
-    </th:block>
 
-    <div th:if="${archives.total == 0}" class="archive-empty">暂无文章。</div>
-  </section>
+      <div
+        th:if="${archives.total == 0}"
+        class="wi-archives__empty"
+        th:text="${theme.config?.home?.home_label_no_posts ?: '暂无文章。'}"
+      >暂无文章。</div>
+    </section>
 
-  <nav
-    th:if="${archives.totalPages gt 1}"
-    class="pagination"
-    aria-label="Pagination"
-  >
-    <a
-      th:if="${archives.hasPrevious()}"
-      th:href="@{${archives.prevUrl}}"
-      class="pagination__prev">&larr; 较新</a
+    <nav
+      th:if="${archives.totalPages gt 1}"
+      class="wi-archives__pagination"
+      aria-label="Pagination"
     >
-    <span
-      class="pagination__info"
-      th:text="|${archives.page} / ${archives.totalPages}|"></span>
-    <a
-      th:if="${archives.hasNext()}"
-      th:href="@{${archives.nextUrl}}"
-      class="pagination__next">较旧 &rarr;</a
-    >
-  </nav>
+      <a
+        th:if="${archives.hasPrevious()}"
+        th:href="@{${archives.prevUrl}}"
+        class="wi-archives__page-link wi-archives__page-link--prev"
+        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
+      >&larr; 较新</a>
+      <span
+        class="wi-archives__page-info"
+        th:text="|${archives.page} / ${archives.totalPages}|"
+      ></span>
+      <a
+        th:if="${archives.hasNext()}"
+        th:href="@{${archives.nextUrl}}"
+        class="wi-archives__page-link wi-archives__page-link--next"
+        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
+      >较旧 &rarr;</a>
+    </nav>
+  </div>
 </Layout>
+
+<style>
+  .wi-archives {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: 1rem;
+  }
+
+  .wi-archives__header {
+    text-align: center;
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-archives__title {
+    font-size: var(--text-4xl);
+    margin-bottom: 0;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-archives__subtitle {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    margin: 0;
+  }
+
+  .wi-archives__timeline {
+    display: grid;
+    gap: var(--space-3xl);
+  }
+
+  .wi-archives__group {
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .wi-archives__group-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .wi-archives__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .wi-archives__year-month {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--ink-2);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .wi-archives__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    padding-left: var(--space-lg);
+    border-left: 2px solid var(--rule);
+    margin-left: 3px;
+    display: grid;
+    gap: 0;
+  }
+
+  .wi-archives__entry {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    border-bottom: 1px dashed var(--rule);
+    transition: background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-archives__entry:hover {
+    background: var(--bg-raised);
+    margin: 0 calc(-1 * var(--space-md));
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+    border-radius: $border-radius-sm;
+  }
+
+  .wi-archives__entry:last-child {
+    border-bottom: none;
+  }
+
+  .wi-archives__entry-date {
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+    padding-top: 0.15rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wi-archives__entry-body {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .wi-archives__entry-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    line-height: var(--leading-snug);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-archives__entry-title:hover {
+    color: var(--accent);
+  }
+
+  .wi-archives__entry-excerpt {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-normal);
+  }
+
+  .wi-archives__empty {
+    color: var(--ink-3);
+    font-size: var(--text-md);
+    padding: var(--space-2xl) 0;
+    text-align: center;
+  }
+
+  .wi-archives__pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--rule);
+    font-size: var(--text-sm);
+  }
+
+  .wi-archives__page-link {
+    color: var(--ink-2);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-archives__page-link:hover {
+    color: var(--accent);
+  }
+
+  .wi-archives__page-info {
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 768px) {
+    .wi-archives__entry {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+
+    .wi-archives__items {
+      padding-left: var(--space-md);
+    }
+  }
+</style>

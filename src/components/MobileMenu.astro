@@ -1,0 +1,274 @@
+---
+---
+<div class="wi-mobile-menu" id="wi-mobile-menu" aria-hidden="true">
+  <div class="wi-mobile-menu__backdrop"></div>
+  <div class="wi-mobile-menu__panel">
+    <div class="wi-mobile-menu__header">
+      <button class="wi-mobile-menu__close" type="button" aria-label="Close menu">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <nav class="wi-mobile-menu__nav" aria-label="Mobile navigation">
+      <th:block th:if="${menuFinder != null}">
+        <th:block th:with="menu = ${menuFinder.getPrimary()}">
+          <th:block th:if="${menu != null and menu.menuItems != null and not #lists.isEmpty(menu.menuItems)}">
+            <a
+              th:each="menuItem : ${menu.menuItems}"
+              th:href="@{${menuItem.status.href}}"
+              th:target="${menuItem.spec.target}"
+              th:text="${menuItem.status.displayName}"
+              class="wi-mobile-menu__link"
+              th:data-href="${menuItem.status.href}"
+            ></a>
+          </th:block>
+        </th:block>
+      </th:block>
+    </nav>
+
+    <div class="wi-mobile-menu__footer">
+      <button
+        th:if="${pluginFinder.available('PluginSearchWidget')}"
+        class="wi-mobile-menu__action-btn"
+        type="button"
+        aria-label="Search"
+        onclick="SearchWidget.open()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span th:text="${theme.config?.basic?.label_search ?: '搜索'}">搜索</span>
+      </button>
+
+      <button class="wi-mobile-menu__action-btn wi-mobile-menu__theme-btn" type="button" aria-label="Toggle theme">
+        <svg class="wi-mobile-menu__icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg class="wi-mobile-menu__icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <span class="wi-mobile-menu__theme-label" th:text="${theme.config?.basic?.label_theme_switch ?: '切换主题'}">切换主题</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  const menu = document.getElementById("wi-mobile-menu");
+  const backdrop = menu?.querySelector(".wi-mobile-menu__backdrop");
+  const closeBtn = menu?.querySelector(".wi-mobile-menu__close");
+  const themeBtn = menu?.querySelector(".wi-mobile-menu__theme-btn");
+  let isOpen = false;
+
+  function openMenu() {
+    isOpen = true;
+    menu?.classList.add("wi-mobile-menu--open");
+    menu?.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMenu() {
+    isOpen = false;
+    menu?.classList.remove("wi-mobile-menu--open");
+    menu?.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  window.addEventListener("wi:toggle-mobile-menu", () => {
+    if (isOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
+  });
+
+  closeBtn?.addEventListener("click", closeMenu);
+  backdrop?.addEventListener("click", closeMenu);
+
+  themeBtn?.addEventListener("click", () => {
+    document.documentElement.classList.add("wi-theme-transition");
+    const isDark = document.documentElement.classList.toggle("dark");
+    localStorage.setItem("wi-theme", isDark ? "dark" : "light");
+    document.documentElement.setAttribute("data-color-scheme", isDark ? "dark" : "light");
+    setTimeout(() => {
+      document.documentElement.classList.remove("wi-theme-transition");
+    }, 300);
+  });
+
+  menu?.querySelectorAll(".wi-mobile-menu__link").forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+
+  menu?.querySelectorAll('.wi-mobile-menu__link[data-href]').forEach(function(link) {
+    try {
+      if (new URL(link.href).pathname === window.location.pathname) {
+        link.classList.add('wi-mobile-menu__link--active');
+      }
+    } catch(e) {}
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isOpen) {
+      closeMenu();
+    }
+  });
+</script>
+
+<style>
+  .wi-mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .wi-mobile-menu--open {
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .wi-mobile-menu__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-mobile-menu--open .wi-mobile-menu__backdrop {
+    opacity: 1;
+  }
+
+  .wi-mobile-menu__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(85vw, 360px);
+    display: flex;
+    flex-direction: column;
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-left: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-mobile-menu--open .wi-mobile-menu__panel {
+    transform: translateX(0);
+  }
+
+  .wi-mobile-menu__header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .wi-mobile-menu__close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      background var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-mobile-menu__close:hover {
+    background: var(--bg-raised);
+    color: var(--ink);
+  }
+
+  .wi-mobile-menu__close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .wi-mobile-menu__nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .wi-mobile-menu__link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: var(--text-lg);
+    font-weight: 500;
+    color: var(--ink-2);
+    text-decoration: none;
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-mobile-menu__link:hover {
+    color: var(--accent);
+    background: var(--bg-raised);
+  }
+
+  .wi-mobile-menu__link--active {
+    color: var(--accent);
+    background: var(--bg-raised);
+    font-weight: 600;
+  }
+
+  .wi-mobile-menu__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .wi-mobile-menu__action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--ink-2);
+    font-size: var(--text-md);
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-mobile-menu__action-btn:hover {
+    color: var(--ink);
+    background: var(--bg-raised);
+  }
+
+  .wi-mobile-menu__action-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .wi-mobile-menu__icon-sun {
+    display: none;
+  }
+
+  :global(.dark) .wi-mobile-menu__icon-moon {
+    display: none;
+  }
+
+  :global(.dark) .wi-mobile-menu__icon-sun {
+    display: block;
+  }
+</style>

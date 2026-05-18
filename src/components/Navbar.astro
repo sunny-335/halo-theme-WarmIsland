@@ -1,0 +1,324 @@
+---
+import ThemeSwitcher from "./ThemeSwitcher.vue";
+---
+
+<header class="wi-navbar-wrapper" id="wi-navbar" th:classappend="${theme.config?.navbar?.navbar_style == 'minimal'} ? 'wi-navbar--minimal' : (${theme.config?.navbar?.navbar_style == 'float'} ? 'wi-navbar--float' : 'wi-navbar--glass')">
+  <div class="wi-navbar__capsule">
+    <a class="wi-navbar__brand" th:href="@{/}">
+      <img
+        th:if="${theme.config?.basic?.logo}"
+        th:src="${theme.config?.basic?.logo}"
+        alt=""
+        class="wi-navbar__logo"
+      />
+      <span
+        th:if="${#strings.isEmpty(theme.config?.basic?.logo)}"
+        class="wi-navbar__title"
+        th:text="${site.title}"
+      ></span>
+    </a>
+
+    <nav
+      class="wi-navbar__nav"
+      aria-label="Main navigation"
+    >
+      <th:block th:if="${menuFinder != null}">
+        <th:block th:with="menu = ${menuFinder.getPrimary()}">
+          <th:block th:if="${menu != null and menu.menuItems != null and not #lists.isEmpty(menu.menuItems)}">
+            <a
+              th:each="menuItem : ${menu.menuItems}"
+              th:href="@{${menuItem.status.href}}"
+              th:target="${menuItem.spec.target}"
+              th:text="${menuItem.status.displayName}"
+              class="wi-navbar__link"
+              th:data-href="${menuItem.status.href}"
+            >
+            </a>
+          </th:block>
+        </th:block>
+      </th:block>
+    </nav>
+
+    <div class="wi-navbar__actions">
+      <button
+        th:if="${pluginFinder.available('PluginSearchWidget') and theme.config?.navbar?.navbar_show_search != false}"
+        class="wi-navbar__action-btn"
+        type="button"
+        aria-label="Search"
+        onclick="SearchWidget.open()"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+
+      <th:block th:if="${theme.config?.navbar?.navbar_show_theme_switch != false}">
+        <ThemeSwitcher client:load />
+      </th:block>
+
+      <button
+        class="wi-navbar__action-btn wi-navbar__menu-btn"
+        type="button"
+        aria-label="Toggle menu"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script is:inline>
+  const navbar = document.getElementById("wi-navbar");
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+
+  function onScroll() {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        if (currentScrollY > 20) {
+          navbar?.classList.add("wi-navbar--scrolled");
+        } else {
+          navbar?.classList.remove("wi-navbar--scrolled");
+        }
+
+        if (currentScrollY > lastScrollY && currentScrollY > 80) {
+          navbar?.classList.add("wi-navbar--hidden");
+        } else if (currentScrollY < lastScrollY) {
+          navbar?.classList.remove("wi-navbar--hidden");
+        }
+
+        lastScrollY = currentScrollY;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  document.querySelectorAll('.wi-navbar__link[data-href]').forEach(function(link) {
+    try {
+      if (new URL(link.href).pathname === window.location.pathname) {
+        link.classList.add('wi-navbar__link--active');
+      }
+    } catch(e) {}
+  });
+
+  document.querySelector(".wi-navbar__menu-btn")?.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("wi:toggle-mobile-menu"));
+  });
+</script>
+
+<style>
+  .wi-navbar-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    pointer-events: none;
+    transition:
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      padding var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-navbar--hidden {
+    transform: translateY(-100%);
+  }
+
+  .wi-navbar__capsule {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    height: 56px;
+    padding: 0 1.5rem;
+    margin: 0 auto;
+    pointer-events: auto;
+    transition:
+      background var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-navbar--glass .wi-navbar__capsule {
+    border-radius: 9999px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+    max-width: 900px;
+  }
+
+  .wi-navbar--glass.wi-navbar--scrolled .wi-navbar__capsule {
+    background: var(--bg-overlay);
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.98);
+  }
+
+  .wi-navbar--minimal {
+    padding: 0;
+  }
+
+  .wi-navbar--minimal .wi-navbar__capsule {
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+    max-width: 100%;
+    padding: 0 2rem;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .wi-navbar--minimal.wi-navbar--scrolled .wi-navbar__capsule {
+    background: var(--bg);
+    border-bottom-color: var(--rule);
+  }
+
+  .wi-navbar--float .wi-navbar__capsule {
+    border-radius: 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    max-width: 800px;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .wi-navbar--float.wi-navbar--scrolled .wi-navbar__capsule {
+    transform: scale(0.96);
+    box-shadow: var(--shadow-md);
+  }
+
+  .wi-navbar__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .wi-navbar__logo {
+    height: 32px;
+    width: auto;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .wi-navbar__title {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: var(--text-md);
+    color: var(--ink);
+    letter-spacing: var(--tracking-tight);
+    white-space: nowrap;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-navbar__brand:hover .wi-navbar__title {
+    color: var(--accent);
+  }
+
+  .wi-navbar__nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .wi-navbar__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.7rem;
+    border-radius: 9999px;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-navbar__link:hover {
+    color: var(--accent);
+    background: var(--bg-raised);
+  }
+
+  .wi-navbar__link--active {
+    color: var(--ink);
+    background: var(--bg-raised);
+    font-weight: 600;
+  }
+
+  .wi-navbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .wi-navbar__action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      background var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-navbar__action-btn:hover {
+    background: var(--bg-raised);
+    color: var(--ink);
+  }
+
+  .wi-navbar__action-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .wi-navbar__menu-btn {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .wi-navbar-wrapper {
+      padding: 0.5rem 0.75rem;
+    }
+
+    .wi-navbar__capsule {
+      padding: 0 1rem;
+    }
+
+    .wi-navbar__nav {
+      display: none;
+    }
+
+    .wi-navbar__action-btn[aria-label="Search"] {
+      display: none;
+    }
+
+    .wi-navbar__menu-btn {
+      display: inline-flex;
+    }
+  }
+</style>

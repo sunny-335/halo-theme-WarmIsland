@@ -1,0 +1,170 @@
+---
+import { findPageBySlug } from "../lib/pages";
+
+const pageConfig = findPageBySlug("photos");
+
+---
+
+<Fragment>
+  <th:block th:if="${pluginFinder.available('PluginPhotos')}">
+    <section class="wi-photos-section">
+      <div class="wi-container">
+        <h2 class="wi-photos-section__title" th:text="${pageConfig?.title ?: theme.config?.photos?.photos_title ?: '图库'}">图库</h2>
+        <div
+          class="wi-photos-section__grid"
+          th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
+        >
+          <th:block th:with="limit = ${theme.config?.photos?.photos_count ?: 6}">
+            <th:block th:each="group : ${photoFinder.groupBy()}">
+              <div
+                class="wi-photos-section__item"
+                th:each="photo, stat : ${group.photos}"
+                th:if="${stat.index < limit}"
+              >
+                <a th:href="@{'/photos'}" class="wi-photos-section__link">
+                  <div class="wi-photos-section__wrap">
+                    <img
+                      th:src="${photo.spec.url}"
+                      th:alt="${photo.spec.displayName ?: ''}"
+                      class="wi-photos-section__image"
+                      loading="lazy"
+                    />
+                  </div>
+                </a>
+              </div>
+            </th:block>
+          </th:block>
+        </div>
+        <a th:href="@{'/photos'}" class="wi-photos-section__more">
+          <span th:text="${theme.config?.home?.home_label_view_all ?: '查看全部'}">查看全部</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+  </th:block>
+</Fragment>
+
+<style>
+  .wi-photos-section {
+    padding-block: var(--section-spacing);
+  }
+
+  .wi-photos-section__title {
+    font-size: var(--text-2xl);
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    position: relative;
+  }
+
+  .wi-photos-section__title::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-inline: auto;
+    border-radius: 9999px;
+    background: var(--accent);
+    margin-top: var(--space-sm);
+  }
+
+  .wi-photos-section__grid[data-style="masonry"] {
+    columns: 3;
+    column-gap: var(--space-lg);
+  }
+
+  .wi-photos-section__grid[data-style="masonry"][data-columns="2"] {
+    columns: 2;
+  }
+
+  .wi-photos-section__grid[data-style="grid"] {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .wi-photos-section__grid[data-style="grid"][data-columns="2"] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-photos-section__grid[data-style="masonry"] .wi-photos-section__item {
+    break-inside: avoid;
+    margin-bottom: var(--space-lg);
+  }
+
+  .wi-photos-section__wrap {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition:
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-photos-section__wrap:hover {
+    box-shadow: var(--shadow-lg);
+    transform: scale(1.02);
+  }
+
+  .wi-photos-section__link {
+    display: block;
+  }
+
+  .wi-photos-section__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    transition: transform var(--duration-slow) var(--ease-out-expo);
+  }
+
+  .wi-photos-section__grid[data-style="grid"] .wi-photos-section__image {
+    aspect-ratio: 1;
+    object-fit: cover;
+  }
+
+  .wi-photos-section__wrap:hover .wi-photos-section__image {
+    transform: scale(1.06);
+  }
+
+  .wi-photos-section__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-xl);
+    margin-inline: auto;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    transition: color var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-photos-section__more:hover {
+    color: var(--accent);
+  }
+
+  .wi-photos-section__more svg {
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-photos-section__more:hover svg {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .wi-photos-section__grid[data-style="masonry"] {
+      columns: 2;
+      column-gap: var(--space-md);
+    }
+
+    .wi-photos-section__grid[data-style="masonry"] .wi-photos-section__item {
+      margin-bottom: var(--space-md);
+    }
+
+    .wi-photos-section__grid[data-style="grid"] {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+    }
+  }
+</style>

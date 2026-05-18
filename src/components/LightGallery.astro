@@ -1,0 +1,255 @@
+---
+---
+
+<script>
+  import 'lightgallery/css/lightgallery-bundle.css';
+  import lightGallery from 'lightgallery';
+  import lgZoom from 'lightgallery/plugins/zoom';
+  import lgThumbnail from 'lightgallery/plugins/thumbnail';
+  import lgFullscreen from 'lightgallery/plugins/fullscreen';
+  import lgRotate from 'lightgallery/plugins/rotate';
+  import lgAutoplay from 'lightgallery/plugins/autoplay';
+
+  var _initialized = new WeakSet();
+
+  function isInitialized(el) {
+    if (_initialized.has(el)) return true;
+    return false;
+  }
+
+  function markInitialized(el) {
+    _initialized.add(el);
+  }
+
+  function buildExifHtml(exifStr, caption) {
+    if (!exifStr) return caption || '';
+    var parts = exifStr.split('|');
+    if (parts.length < 8) return caption || '';
+    var make = parts[0], model = parts[1], lensModel = parts[2];
+    var fNumber = parts[3], exposureTime = parts[4], iso = parts[5];
+    var focalLength = parts[6], focalLengthIn35mm = parts[7];
+    var hasAnyExif = make || model || lensModel || fNumber || exposureTime || iso || focalLength;
+    if (!hasAnyExif) return caption || '';
+    var html = '<div class="wi-lg-caption">' + (caption || '') + '</div>';
+    html += '<div class="wi-lg-exif">';
+    if (make || model) {
+      html += '<span class="wi-lg-exif__item wi-lg-exif__camera">' + (make ? make + ' ' : '') + model + '</span>';
+    }
+    if (lensModel) {
+      html += '<span class="wi-lg-exif__item wi-lg-exif__lens">' + lensModel + '</span>';
+    }
+    html += '<div class="wi-lg-exif__params">';
+    if (fNumber) html += '<span class="wi-lg-exif__item wi-lg-exif__aperture">f/' + fNumber + '</span>';
+    if (exposureTime) html += '<span class="wi-lg-exif__item wi-lg-exif__shutter">' + exposureTime + 's</span>';
+    if (iso) html += '<span class="wi-lg-exif__item wi-lg-exif__iso">ISO ' + iso + '</span>';
+    if (focalLength) {
+      var focalText = focalLength + 'mm';
+      if (focalLengthIn35mm && focalLengthIn35mm !== focalLength) {
+        focalText += ' (eq. ' + focalLengthIn35mm + 'mm)';
+      }
+      html += '<span class="wi-lg-exif__item wi-lg-exif__focal">' + focalText + '</span>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function preprocessExif(el) {
+    var items = el.querySelectorAll('.wi-lightgallery-item[data-exif]');
+    items.forEach(function(item) {
+      var exifStr = item.getAttribute('data-exif');
+      if (!exifStr) return;
+      var caption = item.getAttribute('data-sub-html') || '';
+      var html = buildExifHtml(exifStr, caption);
+      if (html && html !== caption) {
+        item.setAttribute('data-sub-html', html);
+      }
+    });
+  }
+
+  function createLgConfig() {
+    return {
+      selector: '.wi-lightgallery-item',
+      plugins: [lgZoom, lgThumbnail, lgFullscreen, lgRotate, lgAutoplay],
+      speed: 280,
+      mode: 'lg-fade',
+      licenseKey: '0000-0000-0000-0000',
+      download: false,
+      counter: true,
+      preload: 2,
+      thumbWidth: 80,
+      thumbHeight: '60px',
+      thumbMargin: 4,
+      zoomFromOrigin: true,
+      actualSize: false,
+      showZoomInOutIcons: true,
+      toggleThumb: true,
+      allowMediaOverlap: true,
+      autoplay: false,
+      slideDelay: 5000,
+      progressBar: true,
+      rotate: true,
+      flipHorizontal: false,
+      flipVertical: false,
+      mobileSettings: {
+        controls: true,
+        showCloseIcon: true,
+        download: false,
+      },
+    };
+  }
+
+  function initLg(el) {
+    if (isInitialized(el)) return;
+    var items = el.querySelectorAll('.wi-lightgallery-item');
+    if (items.length === 0) return;
+    preprocessExif(el);
+    lightGallery(el, createLgConfig());
+    markInitialized(el);
+  }
+
+  function initLightGallery() {
+    initContentPages();
+    initPhotosPage();
+    initMomentsPage();
+
+    document.addEventListener('click', function(e) {
+      var toggleBtn = e.target.closest('.lg-toggle-thumb');
+      if (toggleBtn) {
+        e.stopPropagation();
+        var lgOuter = toggleBtn.closest('.lg-outer');
+        if (lgOuter) {
+          lgOuter.classList.toggle('wi-thumb-shown');
+        }
+      }
+    }, true);
+  }
+
+  function initContentPages() {
+    var selectors = ['.wi-post__body', '.wi-page__body'];
+    selectors.forEach(function(sel) {
+      var els = document.querySelectorAll(sel);
+      els.forEach(function(el) {
+        processContentImages(el);
+        initLg(el);
+      });
+    });
+  }
+
+  function initPhotosPage() {
+    var allGroups = document.querySelector('.wi-photos-page__all-groups');
+    if (allGroups) {
+      var links = allGroups.querySelectorAll('.wi-photos-page__link');
+      links.forEach(function(link) {
+        link.classList.add('wi-lightgallery-item');
+      });
+      initLg(allGroups);
+      return;
+    }
+
+    var singleGrid = document.querySelector('.wi-photos-page__grid:not(.wi-photos-page__all-groups .wi-photos-page__grid)');
+    if (singleGrid) {
+      var links2 = singleGrid.querySelectorAll('.wi-photos-page__link');
+      links2.forEach(function(link) {
+        link.classList.add('wi-lightgallery-item');
+      });
+      initLg(singleGrid);
+      return;
+    }
+
+    var grids = document.querySelectorAll('.wi-photos-page__grid');
+    grids.forEach(function(el) {
+      processPhotosGrid(el);
+      initLg(el);
+    });
+  }
+
+  function initMomentsPage() {
+    var selectors = ['.wi-moments-page__media', '.wi-moments-page__card-media', '.wi-moments-page__masonry-media'];
+    selectors.forEach(function(sel) {
+      var els = document.querySelectorAll(sel);
+      els.forEach(function(el) {
+        processMomentsMedia(el);
+        initLg(el);
+      });
+    });
+  }
+
+  function processContentImages(container) {
+    var images = container.querySelectorAll('img');
+    images.forEach(function(img) {
+      var src = img.getAttribute('src');
+      if (!src) return;
+
+      var w = img.getAttribute('width');
+      var h = img.getAttribute('height');
+      if ((w && parseInt(w) < 50) || (h && parseInt(h) < 50)) return;
+
+      var className = (img.getAttribute('class') || '').toLowerCase();
+      if (/emoji|icon|avatar|logo|badge|smiley/.test(className)) return;
+
+      if (img.getAttribute('role') === 'presentation') return;
+      if (img.getAttribute('aria-hidden') === 'true') return;
+
+      var parentA = img.closest('a');
+      if (parentA) {
+        if (parentA.getAttribute('target') === '_blank') return;
+        parentA.classList.add('wi-lightgallery-item');
+        if (!parentA.getAttribute('data-src')) {
+          var href = parentA.getAttribute('href') || src;
+          parentA.setAttribute('data-src', href);
+        }
+        var alt = img.getAttribute('alt') || '';
+        if (alt && !parentA.getAttribute('data-sub-html')) {
+          parentA.setAttribute('data-sub-html', alt);
+        }
+      } else {
+        var a = document.createElement('a');
+        a.setAttribute('href', src);
+        a.setAttribute('data-src', src);
+        a.classList.add('wi-lightgallery-item');
+        var alt2 = img.getAttribute('alt') || '';
+        if (alt2) {
+          a.setAttribute('data-sub-html', alt2);
+        }
+        img.parentNode.insertBefore(a, img);
+        a.appendChild(img);
+      }
+    });
+  }
+
+  function processPhotosGrid(container) {
+    var links = container.querySelectorAll('.wi-photos-page__link');
+    links.forEach(function(link) {
+      link.classList.add('wi-lightgallery-item');
+    });
+  }
+
+  function processMomentsMedia(container) {
+    var images = container.querySelectorAll('img');
+    images.forEach(function(img) {
+      var src = img.getAttribute('src');
+      if (!src) return;
+
+      var parentA = img.closest('a');
+      if (parentA) {
+        parentA.classList.add('wi-lightgallery-item');
+        if (!parentA.getAttribute('data-src')) {
+          parentA.setAttribute('data-src', src);
+        }
+      } else {
+        var a = document.createElement('a');
+        a.setAttribute('href', src);
+        a.setAttribute('data-src', src);
+        a.classList.add('wi-lightgallery-item');
+        img.parentNode.insertBefore(a, img);
+        a.appendChild(img);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLightGallery);
+  } else {
+    initLightGallery();
+  }
+</script>

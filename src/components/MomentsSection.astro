@@ -1,0 +1,156 @@
+---
+import { findPageBySlug } from "../lib/pages";
+
+const pageConfig = findPageBySlug("moments");
+
+---
+
+<Fragment>
+  <th:block th:if="${pluginFinder.available('PluginMoments')}">
+    <section class="wi-moments-section">
+      <div class="wi-container">
+        <h2 class="wi-moments-section__title" th:text="${pageConfig?.title ?: theme.config?.moments?.moments_title ?: '瞬间'}">瞬间</h2>
+        <div
+          class="wi-moments-section__list"
+          th:attr="data-style=${theme.config?.moments?.moments_style ?: 'timeline'}"
+        >
+          <th:block th:with="limit = ${theme.config?.moments?.moments_count ?: 5}, momentsResult = ${momentFinder.list(1, limit)}">
+            <div
+              class="wi-moments-section__item"
+              th:each="moment : ${momentsResult.items}"
+            >
+              <div class="wi-moments-section__dot" th:if="${theme.config?.moments?.moments_style != 'cards'}"></div>
+              <div class="wi-moments-section__content" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
+              <time
+                class="wi-moments-section__date"
+                th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
+              ></time>
+            </div>
+          </th:block>
+        </div>
+        <a th:href="@{'/moments'}" class="wi-moments-section__more">
+          <span th:text="${theme.config?.home?.home_label_view_all ?: '查看全部'}">查看全部</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+  </th:block>
+</Fragment>
+
+<style>
+  .wi-moments-section {
+    padding-block: var(--section-spacing);
+  }
+
+  .wi-moments-section__title {
+    font-size: var(--text-2xl);
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    position: relative;
+  }
+
+  .wi-moments-section__title::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin-inline: auto;
+    border-radius: 9999px;
+    background: var(--accent);
+    margin-top: var(--space-sm);
+  }
+
+  .wi-moments-section__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+  }
+
+  .wi-moments-section__list[data-style="timeline"] {
+    padding-left: var(--space-2xl);
+  }
+
+  .wi-moments-section__item {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: var(--space-xl);
+    transition:
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-moments-section__item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  .wi-moments-section__list[data-style="timeline"] .wi-moments-section__item {
+    margin-left: var(--space-lg);
+  }
+
+  .wi-moments-section__list[data-style="timeline"] .wi-moments-section__dot {
+    position: absolute;
+    left: calc(-1 * var(--space-2xl) - 5px);
+    top: 28px;
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--accent);
+  }
+
+  .wi-moments-section__content {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-moments-section__date {
+    display: block;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-moments-section__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-top: var(--space-xl);
+    margin-inline: auto;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    transition: color var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-moments-section__more:hover {
+    color: var(--accent);
+  }
+
+  .wi-moments-section__more svg {
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-moments-section__more:hover svg {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .wi-moments-section__list[data-style="timeline"] {
+      padding-left: var(--space-xl);
+    }
+
+    .wi-moments-section__list[data-style="timeline"] .wi-moments-section__item {
+      margin-left: var(--space-md);
+    }
+
+    .wi-moments-section__list[data-style="timeline"] .wi-moments-section__dot {
+      left: calc(-1 * var(--space-xl) - 5px);
+    }
+  }
+</style>

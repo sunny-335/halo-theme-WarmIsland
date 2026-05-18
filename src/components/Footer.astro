@@ -1,33 +1,165 @@
 ---
-// TODO: Only execute when compiling Astro templates, so it will not be dynamically updated
+const THEME_VERSION = "1.0.0";
 const today = new Date();
 ---
 
-<footer>
+<footer th:with="showPowered=${theme.config?.footer?.footer_show_powered != false}, showTheme=${theme.config?.footer?.footer_show_theme != false}, hideRight=${showPowered == false and showTheme == false}">
   <div class="footer-inner">
-    <span>
-      &copy; {today.getFullYear()}
-      <th:block th:text="${site.title}"></th:block>.
-    </span>
+    <div class="footer-bottom" th:classappend="${hideRight} ? 'footer-bottom--center' : ''">
+      <div class="footer-bottom__left">
+        <span class="footer-copyright" th:if="${theme.config?.footer?.footer_copyright}" th:text="${theme.config?.footer?.footer_copyright}"></span>
+        <span class="footer-copyright" th:unless="${theme.config?.footer?.footer_copyright}">
+          © {today.getFullYear()}
+          <th:block th:text="${site.title}"></th:block>
+        </span>
+        <span class="footer-icp" th:if="${theme.config?.footer?.footer_icp}">
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" th:text="${theme.config?.footer?.footer_icp}"></a>
+        </span>
+      </div>
+      <div class="footer-socials" th:if="${theme.config?.footer?.footer_socials}">
+        <a
+          th:each="social : ${theme.config?.footer?.footer_socials}"
+          th:href="${social.url}"
+          th:title="${social.platform}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i th:if="${social.icon}" th:class="${social.icon}"></i>
+          <span th:if="${#strings.isEmpty(social.icon)}" th:text="${social.platform}"></span>
+        </a>
+      </div>
+      <div class="footer-bottom__right" th:if="${showPowered or showTheme}">
+        <a th:if="${showPowered}" href="https://halo.run" target="_blank" rel="noopener noreferrer">Powered by Halo</a>
+        <span class="footer-separator" th:if="${showPowered and showTheme}">·</span>
+        <span th:if="${showTheme}">WarmIsland v{THEME_VERSION}</span>
+      </div>
+    </div>
+    <div th:if="${theme.config?.footer?.footer_custom_html}" th:utext="${theme.config?.footer?.footer_custom_html}" class="footer-custom"></div>
+    <halo:footer />
   </div>
 </footer>
 
 <style>
   footer {
     border-top: 1px solid var(--rule);
-    background: var(--bg);
+    background: linear-gradient(
+      to bottom,
+      var(--bg),
+      color-mix(in srgb, var(--bg) 97%, var(--accent) 3%)
+    );
   }
 
   .footer-inner {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .footer-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 1rem;
-    width: 820px;
-    max-width: calc(100% - 2.5rem);
-    margin: 0 auto;
-    padding: 1.5rem 0 2.5rem;
+    font-size: 0.85rem;
     color: var(--ink-3);
-    font-size: 0.88rem;
+    width: 100%;
+  }
+
+  .footer-bottom--center {
+    justify-content: center;
+  }
+
+  .footer-bottom--center .footer-bottom__left {
+    flex: none;
+  }
+
+  .footer-bottom__left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-copyright {
+    color: var(--ink-3);
+  }
+
+  .footer-icp a {
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-icp a:hover {
+    color: var(--ink-2);
+  }
+
+  .footer-socials {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .footer-socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+    text-decoration: none;
+    font-size: 1.05rem;
+    transition: color 0.15s ease;
+  }
+
+  .footer-socials a:hover {
+    color: var(--ink-2);
+  }
+
+  .footer-bottom__right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .footer-bottom__right a {
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-bottom__right a:hover {
+    color: var(--ink-2);
+  }
+
+  .footer-separator {
+    color: var(--ink-3);
+    opacity: 0.5;
+  }
+
+  .footer-custom {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 768px) {
+    .footer-bottom {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .footer-bottom__left {
+      justify-content: center;
+    }
+
+    .footer-bottom__right {
+      justify-content: center;
+    }
   }
 </style>

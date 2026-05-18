@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>
+    (function () {
+      var stored = localStorage.getItem("wi-theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var isDark = stored === "dark" || (!stored && prefersDark);
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      }
+    })();
+  </script>
+  <title>服务器开小差了 - 暖屿</title>
+  <style>
+    :root {
+      --bg: #faf7f2;
+      --ink: #2c2420;
+      --ink-2: #7a6e64;
+      --accent: #d4764e;
+      --accent-hover: #c4613a;
+    }
+
+    html.dark {
+      --bg: #1a1614;
+      --ink: #ede6de;
+      --ink-2: #9a8e84;
+      --accent: #e8955f;
+      --accent-hover: #f0a872;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wi-error {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .wi-error__code {
+      font-size: 8rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--accent);
+      opacity: 0.3;
+      letter-spacing: -0.04em;
+    }
+
+    .wi-error__title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-top: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .wi-error__desc {
+      color: var(--ink-2);
+      margin-top: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .wi-error__actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 2rem;
+    }
+
+    .wi-error__home {
+      display: inline-block;
+      padding: 0.625rem 1.5rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: background 0.15s ease;
+    }
+
+    .wi-error__home:hover {
+      background: var(--accent-hover);
+    }
+
+    .wi-error__back {
+      display: inline-block;
+      padding: 0.625rem 1.5rem;
+      background: transparent;
+      color: var(--ink-2);
+      border: 1px solid var(--ink-2);
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .wi-error__back:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="wi-error">
+    <p class="wi-error__code">500</p>
+    <h1 class="wi-error__title">服务器开小差了</h1>
+    <p class="wi-error__desc">小岛遇到了一些问题，稍后再来看看吧</p>
+    <div class="wi-error__actions">
+      <a class="wi-error__home" href="/">回到首页</a>
+      <a class="wi-error__back" href="javascript:history.back()">返回上页</a>
+    </div>
+  </div>
+</body>
+</html>

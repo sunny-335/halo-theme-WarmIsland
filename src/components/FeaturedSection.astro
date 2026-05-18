@@ -1,0 +1,178 @@
+---
+---
+
+<section
+  class="wi-section"
+  th:if="${theme.config?.home?.home_featured_enabled != false}"
+  th:with="featuredPosts = ${postFinder.list({page: 1, size: theme.config?.home?.home_featured_count ?: 3})}"
+>
+  <div class="wi-container">
+    <div class="wi-section__header">
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_featured_title ?: '精选'}">精选</h2>
+    </div>
+    <div class="wi-featured">
+      <a
+        th:each="post,iterStat : ${featuredPosts.items}"
+        th:href="@{${post.status.permalink}}"
+        class="wi-featured__card"
+        th:classappend="${iterStat.index == 0} ? 'wi-featured__card--hero' : ''"
+      >
+        <div
+          class="wi-featured__cover"
+          th:if="${!#strings.isEmpty(post.spec.cover)}"
+        >
+          <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-featured__image" />
+        </div>
+        <div class="wi-featured__body">
+          <time
+            class="wi-featured__date"
+            th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+          ></time>
+          <h3
+            class="wi-featured__title"
+            th:text="${post.spec.title}"
+          ></h3>
+          <p
+            class="wi-featured__excerpt"
+            th:if="${post.status.excerpt}"
+            th:text="${post.status.excerpt}"
+          ></p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .wi-section__header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .wi-section__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: var(--tracking-tight);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .wi-section__title::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .wi-featured {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+  }
+
+  .wi-featured__card {
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-featured__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .wi-featured__card--hero {
+    grid-column: 1 / -1;
+  }
+
+  .wi-featured__card--hero .wi-featured__cover {
+    aspect-ratio: 21 / 9;
+  }
+
+  .wi-featured__card--hero .wi-featured__title {
+    font-size: var(--text-2xl);
+  }
+
+  .wi-featured__cover {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+  }
+
+  .wi-featured__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+    border-radius: 0;
+  }
+
+  .wi-featured__card:hover .wi-featured__image {
+    transform: scale(1.03);
+  }
+
+  .wi-featured__body {
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    flex: 1;
+  }
+
+  .wi-featured__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .wi-featured__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-featured__card:hover .wi-featured__title {
+    color: var(--accent);
+  }
+
+  .wi-featured__excerpt {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    .wi-featured {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-featured__card--hero .wi-featured__cover {
+      aspect-ratio: 16 / 9;
+    }
+
+    .wi-featured__card--hero .wi-featured__title {
+      font-size: var(--text-xl);
+    }
+  }
+</style>

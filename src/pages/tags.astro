@@ -2,20 +2,118 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout pageTitle="标签">
+<Layout>
   <Fragment slot="head">
     <title th:text="|标签 - ${site.title}|"></title>
   </Fragment>
 
-  <div class="tag-cloud" role="list" aria-label="Tag list">
-    <a
-      th:each="tag : ${tags}"
-      class="tag-pill"
-      role="listitem"
-      th:href="@{${tag.status.permalink}}"
-    >
-      <span th:text="${tag.spec.displayName}"></span>
-      <span class="tag-pill__count" th:text="${tag.postCount}"></span>
-    </a>
+  <div class="wi-tags">
+    <header class="wi-tags__header">
+      <h1 class="wi-tags__title">标签</h1>
+      <span class="wi-page-accent"></span>
+      <p class="wi-tags__subtitle" th:text="|共 ${tags.size} 个标签|"></p>
+    </header>
+
+    <div class="wi-tags__cloud" role="list" aria-label="Tag list">
+      <a
+        th:each="tag : ${tags}"
+        class="wi-tags__pill"
+        role="listitem"
+        th:href="@{${tag.status.permalink}}"
+      >
+        <span class="wi-tags__pill-name" th:text="${tag.spec.displayName}"></span>
+        <span class="wi-tags__pill-count" th:text="${tag.postCount}"></span>
+      </a>
+    </div>
   </div>
 </Layout>
+
+<style>
+  .wi-tags {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: 1rem;
+  }
+
+  .wi-tags__header {
+    text-align: center;
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .wi-tags__title {
+    font-size: var(--text-4xl);
+    margin-bottom: 0;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-tags__subtitle {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    margin: 0;
+  }
+
+  .wi-tags__cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .wi-tags__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition:
+      background var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart),
+      transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-tags__pill:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .wi-tags__pill-name {
+    font-weight: 500;
+  }
+
+  .wi-tags__pill-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 0.35rem;
+    border-radius: 999px;
+    font-size: 0.8em;
+    background: var(--bg);
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+
+  .wi-tags__pill:hover .wi-tags__pill-count {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--bg);
+  }
+</style>
