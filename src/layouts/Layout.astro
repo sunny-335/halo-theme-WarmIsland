@@ -72,8 +72,8 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     </main>
     <Footer />
     <MobileMenu />
-    <ScrollReveal client:load />
-    <CursorGlow th:if="${theme.config?.animation?.animation_cursor_glow}" client:load />
+    <ScrollReveal client:visible />
+    <CursorGlow th:if="${theme.config?.animation?.animation_cursor_glow}" client:idle />
   </body>
 </html>
 

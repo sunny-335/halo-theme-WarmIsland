@@ -210,12 +210,19 @@ import LightGallery from "../components/LightGallery.astro";
       if (progressBar) {
         var article = document.querySelector(".wi-post");
         if (article) {
+          var progressTicking = false;
           window.addEventListener("scroll", function () {
-            var rect = article.getBoundingClientRect();
-            var articleHeight = article.offsetHeight;
-            var scrolled = -rect.top;
-            var progress = Math.min(Math.max(scrolled / (articleHeight - window.innerHeight), 0), 1);
-            progressBar.style.width = (progress * 100) + "%";
+            if (!progressTicking) {
+              requestAnimationFrame(function () {
+                var rect = article.getBoundingClientRect();
+                var articleHeight = article.offsetHeight;
+                var scrolled = -rect.top;
+                var progress = Math.min(Math.max(scrolled / (articleHeight - window.innerHeight), 0), 1);
+                progressBar.style.width = (progress * 100) + "%";
+                progressTicking = false;
+              });
+              progressTicking = true;
+            }
           }, { passive: true });
         }
       }
@@ -242,25 +249,35 @@ import LightGallery from "../components/LightGallery.astro";
       function buildTocHtml(headings) {
         var groups = [];
         var currentGroup = null;
+        var baseLevel = 6;
+
+        headings.forEach(function (h) {
+          var level = parseInt(h.tagName.charAt(1), 10);
+          if (level < baseLevel) baseLevel = level;
+        });
 
         headings.forEach(function (h, i) {
           var id = "wi-heading-" + i;
           h.id = id;
           var level = parseInt(h.tagName.charAt(1), 10);
 
-          if (level === 2 || !currentGroup) {
-            currentGroup = { h2: { id: id, text: h.textContent.trim() }, children: [] };
+          if (level === baseLevel || !currentGroup) {
+            currentGroup = { h2: { id: id, text: h.textContent.trim(), level: level }, children: [] };
             groups.push(currentGroup);
-          } else {
+          } else if (level > baseLevel) {
             currentGroup.children.push({ id: id, text: h.textContent.trim(), level: level });
           }
         });
 
         var html = "";
-        groups.forEach(function (group) {
-          html += '<div class="wi-toc__group" data-h2="' + group.h2.id + '">';
-          html += '<a class="wi-toc__link wi-toc__link--h2" href="#' + group.h2.id + '">' + group.h2.text + '</a>';
-          if (group.children.length > 0) {
+          groups.forEach(function (group) {
+            var linkClasses = "wi-toc__link";
+            if (group.children.length > 0) {
+              linkClasses += " wi-toc__link--group";
+            }
+            html += '<div class="wi-toc__group" data-h2="' + group.h2.id + '">';
+            html += '<a class="' + linkClasses + ' wi-toc__link--h' + group.h2.level + '" href="#' + group.h2.id + '">' + group.h2.text + '</a>';
+            if (group.children.length > 0) {
             html += '<div class="wi-toc__sub">';
             group.children.forEach(function (child) {
               html += '<a class="wi-toc__link wi-toc__link--h' + child.level + '" href="#' + child.id + '">' + child.text + '</a>';
@@ -286,16 +303,12 @@ import LightGallery from "../components/LightGallery.astro";
           var tocLinks = tocNav.querySelectorAll(".wi-toc__link");
 
           tocGroups.forEach(function (group) {
-            var h2Link = group.querySelector(".wi-toc__link--h2");
-            if (h2Link) {
-              h2Link.addEventListener("click", function (e) {
+            var groupLink = group.querySelector(".wi-toc__link--group");
+            if (groupLink) {
+              groupLink.addEventListener("click", function (e) {
                 e.preventDefault();
-                var isExpanded = group.classList.contains("wi-toc__group--expanded");
-                tocGroups.forEach(function (g) { g.classList.remove("wi-toc__group--expanded"); });
-                if (!isExpanded) {
-                  group.classList.add("wi-toc__group--expanded");
-                }
-                var targetId = h2Link.getAttribute("href").substring(1);
+                group.classList.toggle("wi-toc__group--expanded");
+                var targetId = groupLink.getAttribute("href").substring(1);
                 var target = document.getElementById(targetId);
                 if (target) {
                   target.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -394,16 +407,12 @@ import LightGallery from "../components/LightGallery.astro";
         var drawerGroups = tocDrawerNav.querySelectorAll(".wi-toc__group");
         tocDrawerNav.querySelectorAll(".wi-toc__link").forEach(function (link) {
           link.addEventListener("click", function (e) {
-            var h2Link = link.classList.contains("wi-toc__link--h2");
-            if (h2Link) {
+            var isGroupLink = link.classList.contains("wi-toc__link--group");
+            if (isGroupLink) {
               e.preventDefault();
               var group = link.closest(".wi-toc__group");
               if (group) {
-                var isExpanded = group.classList.contains("wi-toc__group--expanded");
-                drawerGroups.forEach(function (g) { g.classList.remove("wi-toc__group--expanded"); });
-                if (!isExpanded) {
-                  group.classList.add("wi-toc__group--expanded");
-                }
+                group.classList.toggle("wi-toc__group--expanded");
               }
               var targetId = link.getAttribute("href").substring(1);
               var target = document.getElementById(targetId);
@@ -967,9 +976,13 @@ import LightGallery from "../components/LightGallery.astro";
     transition: max-height 0.3s ease, opacity 0.25s ease;
   }
 
-  .wi-toc__group--active .wi-toc__sub,
+  .wi-toc__group--active .wi-toc__sub {
+    max-height: 600px;
+    opacity: 1;
+  }
+
   .wi-toc__group--expanded .wi-toc__sub {
-    max-height: 500px;
+    max-height: 600px;
     opacity: 1;
   }
 
@@ -998,14 +1011,14 @@ import LightGallery from "../components/LightGallery.astro";
     background: color-mix(in srgb, var(--accent) 8%, transparent);
   }
 
-  .wi-toc__link--h2 {
+  .wi-toc__link--group {
     padding-left: 0;
     padding-right: 4px;
     font-weight: 500;
     cursor: pointer;
   }
 
-  .wi-toc__link--h2::before {
+  .wi-toc__link--group::before {
     content: "";
     display: inline-block;
     width: 4px;
@@ -1017,7 +1030,25 @@ import LightGallery from "../components/LightGallery.astro";
     transition: background 0.15s ease;
   }
 
-  .wi-toc__link--active.wi-toc__link--h2::before {
+  .wi-toc__link--group::after {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-right: 1.5px solid var(--ink-3);
+    border-bottom: 1.5px solid var(--ink-3);
+    transform: rotate(-45deg);
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: transform 0.2s ease, border-color 0.15s ease;
+  }
+
+  .wi-toc__group--expanded > .wi-toc__link--group::after,
+  .wi-toc__group--active > .wi-toc__link--group::after {
+    transform: rotate(45deg);
+  }
+
+  .wi-toc__link--active.wi-toc__link--group::before {
     background: var(--accent);
   }
 

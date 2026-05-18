@@ -5,9 +5,11 @@ import Icons from "unplugin-icons/vite";
 
 export default defineConfig({
   base: "/themes/warm-island",
+  compressHTML: true,
   build: {
     assets: "assets",
     format: "file",
+    cssMinify: true,
   },
   outDir: "./templates",
   integrations: [vue()],

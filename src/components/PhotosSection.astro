@@ -28,6 +28,7 @@ const pageConfig = findPageBySlug("photos");
                       th:alt="${photo.spec.displayName ?: ''}"
                       class="wi-photos-section__image"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 </a>

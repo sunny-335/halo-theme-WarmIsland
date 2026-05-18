@@ -2,7 +2,12 @@
 ---
 
 <script>
-  import 'lightgallery/css/lightgallery-bundle.css';
+  import 'lightgallery/css/lightgallery.css';
+  import 'lightgallery/css/lg-zoom.css';
+  import 'lightgallery/css/lg-thumbnail.css';
+  import 'lightgallery/css/lg-fullscreen.css';
+  import 'lightgallery/css/lg-rotate.css';
+  import 'lightgallery/css/lg-autoplay.css';
   import lightGallery from 'lightgallery';
   import lgZoom from 'lightgallery/plugins/zoom';
   import lgThumbnail from 'lightgallery/plugins/thumbnail';
@@ -84,9 +89,12 @@
       showZoomInOutIcons: true,
       toggleThumb: true,
       allowMediaOverlap: true,
-      autoplay: false,
-      slideDelay: 5000,
+      autoplay: true,
+      slideShowAutoplay: false,
+      slideShowInterval: 5000,
       progressBar: true,
+      autoplayControls: true,
+      forceSlideShowAutoplay: false,
       rotate: true,
       flipHorizontal: false,
       flipVertical: false,
@@ -107,6 +115,10 @@
     markInitialized(el);
   }
 
+  function isMobile() {
+    return window.innerWidth < 768;
+  }
+
   function initLightGallery() {
     initContentPages();
     initPhotosPage();
@@ -122,6 +134,18 @@
         }
       }
     }, true);
+
+    document.addEventListener('click', function(e) {
+      var link = e.target.closest('.wi-lightgallery-item');
+      if (link) {
+        setTimeout(function() {
+          var lgOuter = document.querySelector('.lg-outer');
+          if (lgOuter && !lgOuter.classList.contains('wi-thumb-shown') && !isMobile()) {
+            lgOuter.classList.add('wi-thumb-shown');
+          }
+        }, 350);
+      }
+    });
   }
 
   function initContentPages() {

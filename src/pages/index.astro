@@ -60,36 +60,74 @@ import HeroSection from "../components/HeroSection.astro";
 
   <section class="wi-home-posts" id="wi-home-posts">
     <div class="wi-container">
+      <div class="wi-section__header">
+        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_posts_title ?: '文章'}">文章</h2>
+      </div>
       <div class="wi-flow" id="wi-post-grid">
-        <a
+        <article
           th:each="post : ${posts.items}"
           th:if="${!post.spec.pinned}"
-          th:href="@{${post.status.permalink}}"
           class="wi-flow__card"
           th:classappend="${!#strings.isEmpty(post.spec.cover)} ? 'wi-flow__card--with-cover' : ''"
         >
+          <a
+            class="wi-flow__stretched-link"
+            th:href="@{${post.status.permalink}}"
+            tabindex="-1"
+            aria-hidden="true"
+          ></a>
           <div class="wi-flow__body">
             <div class="wi-flow__meta">
-              <span
-                class="wi-flow__category"
-                th:if="${!#lists.isEmpty(post.categories)}"
-                th:text="${post.categories[0].spec.displayName}"
-              ></span>
+              <th:block th:if="${(theme.config?.home?.home_card_show_category ?: true) and !#lists.isEmpty(post.categories)}">
+                <span class="wi-flow__categories">
+                  <a
+                    th:each="cat : ${post.categories}"
+                    th:href="@{${cat.status.permalink}}"
+                    th:text="${cat.spec.displayName}"
+                    class="wi-flow__category-link"
+                  ></a>
+                </span>
+              </th:block>
               <time
                 class="wi-flow__date"
                 th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
               ></time>
             </div>
-            <h3
-              class="wi-flow__title"
-              th:text="${post.spec.title}"
-            ></h3>
+            <a
+              th:href="@{${post.status.permalink}}"
+              class="wi-flow__title-link"
+            >
+              <h3
+                class="wi-flow__title"
+                th:text="${post.spec.title}"
+              ></h3>
+            </a>
             <p
               class="wi-flow__excerpt"
               th:if="${post.status.excerpt}"
               th:text="${post.status.excerpt}"
               th:style="'-webkit-line-clamp:' + (${theme.config?.home?.home_excerpt_lines ?: 3})"
             ></p>
+            <div class="wi-flow__footer">
+              <th:block th:if="${(theme.config?.home?.home_card_show_tags ?: true) and post.tags != null and !#lists.isEmpty(post.tags)}">
+                <div class="wi-flow__tags">
+                  <a
+                    th:each="tag : ${post.tags}"
+                    th:href="@{${tag.status.permalink}}"
+                    th:text="${tag.spec.displayName}"
+                    class="wi-flow__tag-link"
+                  ></a>
+                </div>
+              </th:block>
+              <div class="wi-flow__stats">
+                <span
+                  class="wi-flow__stat"
+                  th:if="${theme.config?.home?.home_card_show_visit ?: true}"
+                >
+                  <th:block th:text="${post.stats?.visit ?: 0}"></th:block> 阅读
+                </span>
+              </div>
+            </div>
           </div>
           <div
             class="wi-flow__cover"
@@ -97,7 +135,7 @@ import HeroSection from "../components/HeroSection.astro";
           >
             <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-flow__image" />
           </div>
-        </a>
+        </article>
       </div>
 
       <nav
@@ -396,11 +434,17 @@ import HeroSection from "../components/HeroSection.astro";
     overflow: hidden;
     background: var(--bg-raised);
     box-shadow: var(--shadow-sm);
-    text-decoration: none;
     color: inherit;
+    position: relative;
     transition:
       transform var(--duration-normal) var(--ease-out-expo),
       box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-flow__stretched-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
   }
 
   .wi-flow__card:hover {
@@ -448,18 +492,35 @@ import HeroSection from "../components/HeroSection.astro";
     flex-wrap: wrap;
   }
 
-  .wi-flow__category {
+  .wi-flow__categories {
     font-size: var(--text-xs);
-    color: var(--accent);
     letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
     font-weight: 600;
   }
 
-  .wi-flow__category::after {
+  .wi-flow__categories::after {
     content: '·';
     margin-left: var(--space-sm);
+    margin-right: var(--space-sm);
     color: var(--ink-3);
+  }
+
+  .wi-flow__category-link {
+    color: var(--accent);
+    text-decoration: none;
+    position: relative;
+    z-index: 2;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-flow__category-link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+  }
+
+  .wi-flow__category-link + .wi-flow__category-link::before {
+    content: '、';
+    color: var(--accent);
   }
 
   .wi-flow__date {
@@ -467,6 +528,12 @@ import HeroSection from "../components/HeroSection.astro";
     color: var(--ink-3);
     letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
+  }
+
+  .wi-flow__title-link {
+    text-decoration: none;
+    position: relative;
+    z-index: 2;
   }
 
   .wi-flow__title {
@@ -491,6 +558,57 @@ import HeroSection from "../components/HeroSection.astro";
     -webkit-box-orient: vertical;
     overflow: hidden;
     margin-block-end: 0;
+  }
+
+  .wi-flow__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: auto;
+    padding-top: var(--space-xs);
+  }
+
+  .wi-flow__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .wi-flow__tag-link {
+    font-size: 11px;
+    color: var(--ink-3);
+    text-decoration: none;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    position: relative;
+    z-index: 2;
+    transition: color var(--duration-fast) var(--ease-out-quart), border-color var(--duration-fast) var(--ease-out-quart), background var(--duration-fast) var(--ease-out-quart);
+    white-space: nowrap;
+  }
+
+  .wi-flow__tag-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, var(--bg));
+  }
+
+  .wi-flow__stats {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+
+  .wi-flow__stat + .wi-flow__stat::before {
+    content: '·';
+    margin-right: 0.5rem;
+    color: var(--ink-3);
   }
 
   .wi-pagination {
@@ -560,6 +678,12 @@ import HeroSection from "../components/HeroSection.astro";
     .wi-flow__cover {
       width: 100%;
       aspect-ratio: 16 / 9;
+    }
+
+    .wi-flow__footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
     }
   }
 </style>

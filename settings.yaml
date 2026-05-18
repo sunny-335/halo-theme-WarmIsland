@@ -189,6 +189,26 @@ spec:
           name: home_pinned_title
           label: 置顶模块标题
           value: 置顶
+        - $formkit: text
+          name: home_posts_title
+          label: 文章模块标题
+          value: 文章
+        - $formkit: switch
+          name: home_card_show_visit
+          label: 文章卡片显示阅读量
+          value: true
+        - $formkit: switch
+          name: home_card_show_wordcount
+          label: 文章卡片显示字数
+          value: true
+        - $formkit: switch
+          name: home_card_show_category
+          label: 文章卡片显示分类
+          value: true
+        - $formkit: switch
+          name: home_card_show_tags
+          label: 文章卡片显示标签
+          value: true
         - $formkit: number
           name: home_excerpt_lines
           label: 文章简介显示行数

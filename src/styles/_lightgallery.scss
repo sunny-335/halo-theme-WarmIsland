@@ -81,6 +81,7 @@ $lg-thumb-height: 100px;
   font-size: 13px;
   letter-spacing: 0.02em;
   padding: 48px 16px 12px;
+  transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .wi-lg-caption {
@@ -165,6 +166,7 @@ $lg-thumb-height: 100px;
 
 .lg-progress-bar {
   height: 2px;
+  top: 0;
 }
 
 .lg-progress-bar .lg-progress {
@@ -173,16 +175,35 @@ $lg-thumb-height: 100px;
   border-radius: 1px;
 }
 
+.lg-autoplay-button {
+  &.lg-icon::after {
+    content: '';
+    display: none;
+  }
+}
+
+.lg-outer.lg-show-autoplay .lg-autoplay-button {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .lg-outer .lg-thumb-outer {
-  display: none !important;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .lg-outer.wi-thumb-shown .lg-thumb-outer {
-  display: block !important;
+  transform: translateY(0);
 }
 
 .lg-outer.wi-thumb-shown .lg-inner {
   bottom: $lg-thumb-height !important;
+  transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lg-outer.wi-thumb-shown .lg-sub-html {
+  bottom: $lg-thumb-height;
+  transition: bottom 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lg-outer .lg-item {
@@ -336,6 +357,10 @@ html.dark {
 
   .lg-outer.wi-thumb-shown .lg-inner {
     bottom: 80px !important;
+  }
+
+  .lg-outer.wi-thumb-shown .lg-sub-html {
+    bottom: 80px;
   }
 }
 

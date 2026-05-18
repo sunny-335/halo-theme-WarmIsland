@@ -68,6 +68,7 @@ import LightGallery from "../components/LightGallery.astro";
                             th:alt="${photo.spec.displayName ?: ''}"
                             class="wi-photos-page__image"
                             loading="lazy"
+                            decoding="async"
                           />
                           <div class="wi-photos-page__overlay">
                             <span
@@ -111,6 +112,7 @@ import LightGallery from "../components/LightGallery.astro";
                           th:alt="${photo.spec.displayName ?: ''}"
                           class="wi-photos-page__image"
                           loading="lazy"
+                          decoding="async"
                         />
                         <div class="wi-photos-page__overlay">
                           <span
@@ -148,6 +150,7 @@ import LightGallery from "../components/LightGallery.astro";
                           th:alt="${photo.spec.displayName ?: ''}"
                           class="wi-photos-page__image"
                           loading="lazy"
+                          decoding="async"
                         />
                         <div class="wi-photos-page__overlay">
                           <span
@@ -176,6 +179,7 @@ import LightGallery from "../components/LightGallery.astro";
                         th:alt="${photo.spec.displayName ?: ''}"
                         class="wi-photos-page__image"
                         loading="lazy"
+                        decoding="async"
                       />
                       <div class="wi-photos-page__overlay">
                         <span
@@ -186,6 +190,7 @@ import LightGallery from "../components/LightGallery.astro";
                       </div>
                     </a>
                   </div>
+                </th:block>
                 </th:block>
               </div>
             </th:block>
@@ -221,6 +226,7 @@ import LightGallery from "../components/LightGallery.astro";
                           th:alt="${photo.spec.displayName ?: ''}"
                           class="wi-photos-page__image"
                           loading="lazy"
+                          decoding="async"
                         />
                         <div class="wi-photos-page__overlay">
                           <span

@@ -11,7 +11,7 @@ import Layout from "../layouts/Layout.astro";
     <header class="wi-tag__header">
       <h1 class="wi-tag__title" th:text="${tag.spec.displayName}"></h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-tag__subtitle" th:text="${theme.config?.home?.home_label_post_count ?: '共 {total} 篇文章}'.replace('{total}', posts.total)}"></p>
+      <p class="wi-tag__subtitle" th:text="|共 ${posts.total} 篇文章|"></p>
       <p
         th:if="${not #strings.isEmpty(tag.spec.description)}"
         class="wi-tag__description"
@@ -46,6 +46,7 @@ import Layout from "../layouts/Layout.astro";
             th:src="${post.spec.cover}"
             alt=""
             loading="lazy"
+            decoding="async"
           />
         </a>
       </li>

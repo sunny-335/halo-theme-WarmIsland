@@ -1,13 +1,18 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted } from "vue";
 
-const x = ref(0);
-const y = ref(0);
+const glowEl = ref<HTMLElement | null>(null);
 const visible = ref(false);
+var rafId = 0;
 
 function handleMouseMove(e: MouseEvent) {
-  x.value = e.clientX;
-  y.value = e.clientY;
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    if (glowEl.value) {
+      glowEl.value.style.transform = `translate(calc(${e.clientX}px - 50%), calc(${e.clientY}px - 50%))`;
+    }
+    rafId = 0;
+  });
   visible.value = true;
 }
 
@@ -16,21 +21,22 @@ function handleMouseLeave() {
 }
 
 onMounted(() => {
-  document.addEventListener("mousemove", handleMouseMove);
+  document.addEventListener("mousemove", handleMouseMove, { passive: true });
   document.addEventListener("mouseleave", handleMouseLeave);
 });
 
 onUnmounted(() => {
   document.removeEventListener("mousemove", handleMouseMove);
   document.removeEventListener("mouseleave", handleMouseLeave);
+  if (rafId) cancelAnimationFrame(rafId);
 });
 </script>
 
 <template>
   <div
+    ref="glowEl"
     class="wi-cursor-glow"
     :class="{ 'wi-cursor-glow--visible': visible }"
-    :style="{ transform: `translate(calc(${x}px - 50%), calc(${y}px - 50%))` }"
   />
 </template>
 

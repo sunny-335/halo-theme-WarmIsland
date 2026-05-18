@@ -51,7 +51,7 @@ import ThemeSwitcher from "./ThemeSwitcher.vue";
       </button>
 
       <th:block th:if="${theme.config?.navbar?.navbar_show_theme_switch != false}">
-        <ThemeSwitcher client:load />
+        <ThemeSwitcher client:idle />
       </th:block>
 
       <button
