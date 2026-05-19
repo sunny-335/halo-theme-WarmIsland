@@ -79,6 +79,7 @@ spec:
           name: layout_sidebar
           label: 启用侧边栏
           value: false
+          help: 侧边栏功能开发中，暂不可用
         - $formkit: switch
           name: animation_enabled
           label: 启用动效
@@ -132,6 +133,7 @@ spec:
           label: 副标题（留空则使用站点副标题）
         - $formkit: select
           name: hero_description_mode
+          id: hero_description_mode
           label: 描述文案来源
           options:
             - label: 无
@@ -178,6 +180,7 @@ spec:
         - $formkit: textarea
           name: hero_custom_description
           label: 自定义描述文案
+          key: hero_custom_description
           if: "$get(hero_description_mode).value === 'custom'"
         - $formkit: attachment
           name: hero_background_image
@@ -238,14 +241,6 @@ spec:
           name: home_label_all_loaded
           label: 无限滚动-全部加载文案
           value: 已加载全部文章
-        - $formkit: text
-          name: home_latest_title
-          label: 最新文章模块标题
-          value: 最新文章
-        - $formkit: text
-          name: home_label_view_all
-          label: 查看全部标签
-          value: 查看全部
         - $formkit: text
           name: home_label_no_posts
           label: 暂无文章文案
@@ -329,6 +324,19 @@ spec:
             - label: Masonry
               value: masonry
           value: timeline
+        - $formkit: select
+          name: moments_loading_mode
+          label: 加载方式
+          options:
+            - label: 下滑加载
+              value: infinite_scroll
+            - label: 分页
+              value: pagination
+          value: infinite_scroll
+        - $formkit: number
+          name: moments_page_size
+          label: 每页显示数量
+          value: 10
     - group: photos
       label: 图库
       formSchema:

@@ -10,6 +10,7 @@ import Layout from "../layouts/Layout.astro";
   <section
     class="wi-links"
     th:if="${pluginFinder.available('PluginLinks')}"
+    th:attr="data-style=${theme.config?.links?.links_style ?: 'cards'}"
   >
     <div class="wi-container">
       <div class="wi-links__header">
@@ -119,6 +120,32 @@ import Layout from "../layouts/Layout.astro";
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--space-md);
     margin-bottom: var(--space-2xl);
+  }
+
+  .wi-links[data-style="list"] .wi-links__grid {
+    grid-template-columns: 1fr;
+    max-width: 720px;
+  }
+
+  .wi-links[data-style="list"] .wi-links__card-inner {
+    border-radius: 12px;
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  .wi-links[data-style="grid"] .wi-links__grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-sm);
+  }
+
+  .wi-links[data-style="grid"] .wi-links__card-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .wi-links[data-style="grid"] .wi-links__arrow {
+    display: none;
   }
 
   .wi-links__card {

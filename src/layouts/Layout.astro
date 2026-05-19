@@ -21,6 +21,7 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta th:if="${theme.config?.basic?.site_description}" name="description" th:content="${theme.config?.basic?.site_description}" />
     <script is:inline th:attr="data-scheme=${theme.config?.style?.color_scheme}">
       (function () {
         var stored = localStorage.getItem("wi-theme");
@@ -56,6 +57,12 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     />
     <link rel="alternate" type="application/rss+xml" th:title="${site.title}" th:href="@{/feed.xml}" />
     <style th:if="${theme.config?.style?.accent_color}" th:utext="${':root { --accent: ' + theme.config?.style?.accent_color + '; --accent-hover: ' + theme.config?.style?.accent_color + '; }'}"></style>
+    <style th:if="${theme.config?.style?.border_radius == 'small'}" th:utext="${':root { --radius-sm: 4px; --radius-md: 8px; --radius-lg: 16px; }'}"></style>
+    <style th:if="${theme.config?.style?.border_radius == 'medium' or theme.config?.style?.border_radius == null}" th:utext="${':root { --radius-sm: 8px; --radius-md: 12px; --radius-lg: 24px; }'}"></style>
+    <style th:if="${theme.config?.style?.border_radius == 'large'}" th:utext="${':root { --radius-sm: 12px; --radius-md: 20px; --radius-lg: 36px; }'}"></style>
+    <style th:if="${theme.config?.style?.layout_container_width == 'narrow'}" th:utext="${'.wi-content-wrap { max-width: 680px; } .wi-content-wrap--wide { max-width: 1000px; } .wi-main--wide { max-width: 1200px; }'}"></style>
+    <style th:if="${theme.config?.style?.layout_container_width == 'medium' or theme.config?.style?.layout_container_width == null}" th:utext="${'.wi-content-wrap { max-width: 800px; } .wi-content-wrap--wide { max-width: 1200px; } .wi-main--wide { max-width: 1400px; }'}"></style>
+    <style th:if="${theme.config?.style?.layout_container_width == 'wide'}" th:utext="${'.wi-content-wrap { max-width: 900px; } .wi-content-wrap--wide { max-width: 1400px; } .wi-main--wide { max-width: 1600px; }'}"></style>
     <style th:if="${theme.config?.style?.custom_css}" th:utext="${theme.config?.style?.custom_css}"></style>
     <slot name="head" />
   </head>
@@ -72,8 +79,8 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     </main>
     <Footer />
     <MobileMenu />
-    <ScrollReveal client:visible />
-    <CursorGlow th:if="${theme.config?.animation?.animation_cursor_glow}" client:idle />
+    <ScrollReveal th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_scroll_reveal != false}" client:visible />
+    <CursorGlow th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_cursor_glow == true}" client:idle />
   </body>
 </html>
 

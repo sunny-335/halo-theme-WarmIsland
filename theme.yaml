@@ -5,12 +5,13 @@ metadata:
 spec:
   displayName: WarmIsland 暖屿
   author:
-    name: WarmIsland
-    website: https://github.com/warm-island
-  description: 一座深夜里温暖、安静、治愈的小岛 — 具有独特气质的生活博客主题
+    name: 暖心向阳335
+    website: https://nxxy335.top/
+  description: 具有独特气质的生活博客主题
   logo: /themes/warm-island/assets/logo.png
-  homepage: https://github.com/warm-island/theme-warm-island
-  issues: https://github.com/warm-island/theme-warm-island/issues
+  homepage: https://nxxy335.top/
+  repo: https://github.com/nxxy335top/halo-theme-WarmIsland
+  issues: https://github.com/nxxy335top/halo-theme-WarmIsland/issues
   settingName: "warm-island-setting"
   configMapName: "warm-island-configMap"
   customTemplates:

@@ -4,9 +4,14 @@ import MingcuteMoonLine from "~icons/mingcute/moon-line";
 import MingcuteSunLine from "~icons/mingcute/sun-line";
 
 const isDark = ref(false);
+const label = ref("切换主题");
 
 onMounted(() => {
   isDark.value = document.documentElement.classList.contains("dark");
+  const parent = document.querySelector("[data-label]");
+  if (parent) {
+    label.value = parent.getAttribute("data-label") || "切换主题";
+  }
 });
 
 function toggle() {
@@ -24,10 +29,10 @@ function toggle() {
   <button
     class="theme-toggle"
     type="button"
-    :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+    :aria-label="label"
+    :title="label"
     @click="toggle"
   >
-    <!-- Moon: shown in light mode -->
     <MingcuteSunLine v-if="isDark" />
     <MingcuteMoonLine v-else />
   </button>

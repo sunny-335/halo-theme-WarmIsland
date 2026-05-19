@@ -30,7 +30,7 @@ import Layout from "../layouts/Layout.astro";
       ></div>
     </div>
 
-    <div class="wi-messageboard__comment">
+    <div class="wi-messageboard__comment" th:attr="data-comment-style=${theme.config?.comment?.comment_style ?: 'warm'},data-show-avatar=${theme.config?.comment?.comment_show_avatar != false}">
       <halo:comment
         th:if="${haloCommentEnabled}"
         group="content.halo.run"

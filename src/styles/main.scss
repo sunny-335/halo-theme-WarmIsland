@@ -78,9 +78,13 @@ a {
 img,
 video,
 svg {
-  display: block;
   max-width: 100%;
   height: auto;
+}
+
+.wi-main img,
+.wi-main video {
+  display: block;
 }
 
 img {

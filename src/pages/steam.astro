@@ -16,15 +16,23 @@ import Layout from "../layouts/Layout.astro";
 
     <th:block th:with="profile = ${steamFinder.getProfile()}, stats = ${steamFinder.getStats()}, badges = ${steamFinder.getBadges()}, recentGames = ${steamFinder.getRecentGames(recentGamesLimit)}">
 
-    <div class="wi-steam__profile" th:if="${profile != null and profile.summary != null}">
+    <div class="wi-steam__profile" th:if="${profile != null}">
       <div class="wi-steam__avatar">
         <img
+          th:if="${profile.summary != null and !#strings.isEmpty(profile.summary?.avatarFull) and !#strings.contains(profile.summary?.avatarFull, '00000000000000000')}"
           th:src="${profile.summary?.avatarFull}"
-          th:alt="${profile.summary?.personaName}"
+          th:alt="${profile.summary?.personaName ?: 'Steam'}"
           class="wi-steam__avatar-img"
-          loading="lazy"
           decoding="async"
         />
+        <span
+          class="wi-steam__avatar-placeholder"
+          th:if="${profile.summary == null or #strings.isEmpty(profile.summary?.avatarFull) or #strings.contains(profile.summary?.avatarFull, '00000000000000000')}"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
         <span
           class="wi-steam__status-dot wi-steam__status-dot--playing"
           th:if="${profile.playing}"
@@ -39,11 +47,11 @@ import Layout from "../layouts/Layout.astro";
         ></span>
       </div>
       <div class="wi-steam__info">
-        <h2 class="wi-steam__name" th:text="${profile.summary?.personaName}"></h2>
-        <span class="wi-steam__status-text" th:text="${profile.statusText}"></span>
+        <h2 class="wi-steam__name" th:if="${profile.summary != null}" th:text="${profile.summary?.personaName}"></h2>
+        <span class="wi-steam__status-text" th:if="${!#strings.isEmpty(profile.statusText)}" th:text="${profile.statusText}"></span>
         <a
           class="wi-steam__profile-link"
-          th:if="${!#strings.isEmpty(profile.summary?.profileUrl)}"
+          th:if="${profile.summary != null and !#strings.isEmpty(profile.summary?.profileUrl)}"
           th:href="${profile.summary?.profileUrl}"
           target="_blank"
           rel="noopener noreferrer"
@@ -57,19 +65,19 @@ import Layout from "../layouts/Layout.astro";
 
     <div class="wi-steam__stats" th:if="${stats != null}">
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.totalGames}"></span>
+        <span class="wi-steam__stat-value" th:text="${stats.totalGames} ?: 0">0</span>
         <span class="wi-steam__stat-label">拥有游戏</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.totalPlaytimeFormatted}"></span>
+        <span class="wi-steam__stat-value" th:text="${stats.totalPlaytimeFormatted} ?: '0 小时'">0 小时</span>
         <span class="wi-steam__stat-label">总游玩时长</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.recentPlaytimeFormatted}"></span>
+        <span class="wi-steam__stat-value" th:text="${stats.recentPlaytimeFormatted} ?: '0 小时'">0 小时</span>
         <span class="wi-steam__stat-label">近两周</span>
       </div>
-      <div class="wi-steam__stat-card" th:if="${badges != null}">
-        <span class="wi-steam__stat-value" th:text="${badges.totalBadges}"></span>
+      <div class="wi-steam__stat-card">
+        <span class="wi-steam__stat-value" th:text="${badges != null and badges.totalBadges != null ? badges.totalBadges : 0}">0</span>
         <span class="wi-steam__stat-label">徽章</span>
       </div>
     </div>
@@ -99,7 +107,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="wi-steam__recent-body">
             <h4 class="wi-steam__recent-name" th:text="${game.name}"></h4>
             <div class="wi-steam__recent-meta">
-              <span class="wi-steam__recent-time" th:text="${game.playtime2WeeksFormatted}"></span>
+              <span class="wi-steam__recent-time" th:text="${game.playtime2WeeksFormatted} ?: '0 小时'"></span>
               <span
                 class="wi-steam__recent-achievements"
                 th:if="${game.achievementProgressText != null}"
@@ -138,7 +146,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="wi-steam__game-body">
             <h4 class="wi-steam__game-name" th:text="${game.name}"></h4>
             <div class="wi-steam__game-meta">
-              <span class="wi-steam__game-time" th:text="${game.playtimeFormatted}"></span>
+              <span class="wi-steam__game-time" th:text="${game.playtimeFormatted} ?: '0 小时'"></span>
               <span
                 class="wi-steam__game-last"
                 th:if="${!#strings.isEmpty(game.lastPlayedFormatted)}"
@@ -216,6 +224,19 @@ import Layout from "../layouts/Layout.astro";
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--rule);
+    display: block;
+  }
+
+  .wi-steam__avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--accent-bg);
+    border: 3px solid var(--rule);
+    color: var(--ink-3);
   }
 
   .wi-steam__status-dot {
@@ -340,6 +361,7 @@ import Layout from "../layouts/Layout.astro";
     font-size: var(--text-xs);
     color: var(--ink-3);
     margin-top: 4px;
+    white-space: nowrap;
   }
 
   .wi-steam__section {
@@ -450,7 +472,7 @@ import Layout from "../layouts/Layout.astro";
 
   .wi-steam__games-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--space-md);
   }
 
@@ -499,6 +521,7 @@ import Layout from "../layouts/Layout.astro";
     display: flex;
     flex-direction: column;
     gap: 4px;
+    min-height: 72px;
   }
 
   .wi-steam__game-name {
@@ -513,13 +536,26 @@ import Layout from "../layouts/Layout.astro";
   .wi-steam__game-meta {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 8px;
     font-size: var(--text-xs);
     color: var(--ink-3);
+    flex-wrap: wrap;
   }
 
   .wi-steam__game-time {
     color: var(--accent);
     font-weight: 500;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .wi-steam__game-last {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
   }
 
   .wi-steam__pagination {
@@ -552,8 +588,18 @@ import Layout from "../layouts/Layout.astro";
     flex: 1;
   }
 
+  @media (max-width: 1200px) {
+    .wi-steam__games-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
   @media (max-width: 1024px) {
     .wi-steam__stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wi-steam__games-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
@@ -565,7 +611,8 @@ import Layout from "../layouts/Layout.astro";
       padding: var(--space-lg);
     }
 
-    .wi-steam__avatar-img {
+    .wi-steam__avatar-img,
+    .wi-steam__avatar-placeholder {
       width: 64px;
       height: 64px;
     }
@@ -584,7 +631,7 @@ import Layout from "../layouts/Layout.astro";
     }
 
     .wi-steam__games-grid {
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: var(--space-sm);
     }
 
@@ -598,6 +645,9 @@ import Layout from "../layouts/Layout.astro";
 
     .wi-steam__game-meta {
       font-size: 10px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
     }
 
     .wi-steam__recent-card {

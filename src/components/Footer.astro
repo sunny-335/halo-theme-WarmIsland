@@ -10,7 +10,7 @@ const today = new Date();
         <span class="footer-copyright" th:if="${theme.config?.footer?.footer_copyright}" th:text="${theme.config?.footer?.footer_copyright}"></span>
         <span class="footer-copyright" th:unless="${theme.config?.footer?.footer_copyright}">
           © {today.getFullYear()}
-          <th:block th:text="${site.title}"></th:block>
+          <th:block th:text="${theme.config?.basic?.owner_name ?: site.title}"></th:block>
         </span>
         <span class="footer-icp" th:if="${theme.config?.footer?.footer_icp}">
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" th:text="${theme.config?.footer?.footer_icp}"></a>
@@ -172,7 +172,6 @@ const today = new Date();
 
   .footer-custom :global(img) {
     display: inline-block;
-    max-height: 26px;
     vertical-align: middle;
     border-radius: 4px;
   }
@@ -208,7 +207,6 @@ const today = new Date();
 
   .footer-injected :global(img) {
     display: inline-block;
-    max-height: 26px;
     vertical-align: middle;
     border-radius: 4px;
   }
@@ -235,11 +233,6 @@ const today = new Date();
     .footer-custom,
     .footer-injected {
       font-size: 0.75rem;
-    }
-
-    .footer-custom :global(img),
-    .footer-injected :global(img) {
-      max-height: 20px;
     }
   }
 </style>

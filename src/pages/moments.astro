@@ -18,7 +18,7 @@ import LightGallery from "../components/LightGallery.astro";
       <th:block th:if="${pluginFinder.available('PluginMoments')}">
         <div class="wi-moments-page__content">
           <th:block th:if="${momentFinder != null}">
-            <th:block th:with="momentsResult = ${momentFinder.list(1, 50)}">
+            <th:block th:with="pageSize = ${theme.config?.moments?.moments_page_size ?: 10}, momentsResult = ${momentFinder.list(1, pageSize)}">
               <div
                 class="wi-moments-page__timeline"
                 th:if="${theme.config?.moments?.moments_style == 'timeline' or theme.config?.moments?.moments_style == null}"
@@ -195,6 +195,29 @@ import LightGallery from "../components/LightGallery.astro";
               </div>
             </th:block>
           </th:block>
+
+          <nav
+            class="wi-moments-page__pagination"
+            th:if="${theme.config?.moments?.moments_loading_mode == 'pagination' and momentsResult != null and momentsResult.hasPrevious()}"
+          >
+            <a
+              class="wi-moments-page__page-btn"
+              th:if="${momentsResult.hasPrevious()}"
+              th:href="${momentsResult.prevUrl}"
+            >← 较新</a>
+            <span class="wi-moments-page__page-spacer" th:if="${momentsResult.hasPrevious() and momentsResult.hasNext()}"></span>
+            <a
+              class="wi-moments-page__page-btn"
+              th:if="${momentsResult.hasNext()}"
+              th:href="${momentsResult.nextUrl}"
+            >较旧 →</a>
+          </nav>
+
+          <div
+            class="wi-moments-page__infinite-sentinel"
+            th:if="${theme.config?.moments?.moments_loading_mode != 'pagination' and momentsResult != null and momentsResult.hasNext()}"
+            th:attr="data-next-url=${momentsResult.nextUrl}"
+          ></div>
           <th:block th:if="${momentFinder == null}">
             <div class="wi-moments-page__empty">
               <p>瞬间插件加载异常，请检查插件状态</p>
@@ -315,6 +338,98 @@ import LightGallery from "../components/LightGallery.astro";
     }
 
     loadMomentStats();
+
+    var sentinel = document.querySelector(".wi-moments-page__infinite-sentinel");
+    if (sentinel) {
+      var momentsContent = document.querySelector(".wi-moments-page__content");
+      var infiniteLoading = false;
+      var infiniteNextUrl = sentinel.getAttribute("data-next-url");
+
+      var infiniteObserver = new IntersectionObserver(
+        function (entries) {
+          if (entries[0].isIntersecting && !infiniteLoading && infiniteNextUrl) {
+            infiniteLoading = true;
+            fetch(infiniteNextUrl)
+              .then(function (res) {
+                if (!res.ok) throw new Error("Fetch failed");
+                return res.text();
+              })
+              .then(function (html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, "text/html");
+
+                var style = sentinel.closest(".wi-moments-page__content")
+                  ? sentinel.closest(".wi-moments-page__content").querySelector(
+                      sentinel.previousElementSibling
+                        ? sentinel.previousElementSibling.className.split(" ")[0]
+                        : ".wi-moments-page__timeline"
+                    )
+                  : null;
+
+                var container = null;
+                var selectors = [
+                  ".wi-moments-page__timeline",
+                  ".wi-moments-page__cards",
+                  ".wi-moments-page__masonry"
+                ];
+                for (var s = 0; s < selectors.length; s++) {
+                  container = doc.querySelector(selectors[s]);
+                  if (container) break;
+                }
+                if (!container) {
+                  infiniteLoading = false;
+                  return;
+                }
+
+                var currentContainer = document.querySelector(selectors[0]) ||
+                  document.querySelector(selectors[1]) ||
+                  document.querySelector(selectors[2]);
+                if (!currentContainer) {
+                  infiniteLoading = false;
+                  return;
+                }
+
+                var newItems = container.children;
+                for (var i = 0; i < newItems.length; i++) {
+                  var item = newItems[i].cloneNode(true);
+                  item.style.opacity = "0";
+                  item.style.transform = "translateY(20px)";
+                  currentContainer.appendChild(item);
+                  (function (el) {
+                    requestAnimationFrame(function () {
+                      el.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+                      el.style.opacity = "1";
+                      el.style.transform = "translateY(0)";
+                    });
+                  })(item);
+                }
+
+                var newSentinel = doc.querySelector(".wi-moments-page__infinite-sentinel");
+                if (newSentinel && newSentinel.getAttribute("data-next-url")) {
+                  infiniteNextUrl = newSentinel.getAttribute("data-next-url");
+                  sentinel.setAttribute("data-next-url", infiniteNextUrl);
+                } else {
+                  infiniteNextUrl = null;
+                  infiniteObserver.disconnect();
+                  sentinel.style.display = "none";
+                  var endMsg = document.createElement("div");
+                  endMsg.className = "wi-moments-page__empty";
+                  endMsg.innerHTML = "<p>已加载全部瞬间</p>";
+                  sentinel.parentNode.appendChild(endMsg);
+                }
+
+                infiniteLoading = false;
+              })
+              .catch(function () {
+                infiniteLoading = false;
+              });
+          }
+        },
+        { rootMargin: "300px" }
+      );
+
+      infiniteObserver.observe(sentinel);
+    }
   })();
 </script>
 
@@ -691,6 +806,41 @@ import LightGallery from "../components/LightGallery.astro";
     font-size: var(--text-xs);
     color: var(--ink-3);
     letter-spacing: var(--tracking-wide);
+  }
+
+  .wi-moments-page__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-3xl);
+  }
+
+  .wi-moments-page__page-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-moments-page__page-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .wi-moments-page__page-spacer {
+    flex: 1;
+  }
+
+  .wi-moments-page__infinite-sentinel {
+    height: 1px;
+    width: 100%;
   }
 
   @media (max-width: 768px) {

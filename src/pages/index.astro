@@ -33,7 +33,7 @@ import HeroSection from "../components/HeroSection.astro";
             class="wi-pinned__cover"
             th:if="${!#strings.isEmpty(post.spec.cover)}"
           >
-            <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-pinned__image" />
+            <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-pinned__image" loading="lazy" decoding="async" />
           </div>
           <div class="wi-pinned__body">
             <div class="wi-pinned__meta">
@@ -137,7 +137,7 @@ import HeroSection from "../components/HeroSection.astro";
             class="wi-flow__cover"
             th:if="${!#strings.isEmpty(post.spec.cover)}"
           >
-            <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-flow__image" />
+            <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-flow__image" loading="lazy" decoding="async" />
           </div>
         </article>
       </div>
@@ -196,6 +196,7 @@ import HeroSection from "../components/HeroSection.astro";
     var grid = document.getElementById("wi-post-grid");
     var loading = false;
     var nextUrl = sentinel.getAttribute("data-next-url");
+    var allLoadedText = sentinel.getAttribute("data-all-loaded-text") || "已加载全部文章";
 
     var observer = new IntersectionObserver(
       function (entries) {

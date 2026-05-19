@@ -15,62 +15,96 @@ import Layout from "../layouts/Layout.astro";
       </div>
 
       <div class="wi-douban__filters">
-        <th:block th:with="urlType = ${param.type}, isDefaultType = ${urlType == null or #strings.isEmpty(urlType.toString())}, currentType = ${isDefaultType ? 'movie' : urlType.toString()}">
+        <th:block th:with="urlType = ${param.type}, isDefaultType = ${urlType == null or #strings.isEmpty(urlType.toString())}, currentType = ${isDefaultType ? 'music' : urlType.toString()}, urlStatus = ${param.status}, hasStatus = ${urlStatus != null and !#strings.isEmpty(urlStatus.toString())}, currentStatus = ${hasStatus ? urlStatus.toString() : (isDefaultType ? 'done' : null)}">
         <div class="wi-douban__filter-group" th:if="${types != null and !#lists.isEmpty(types)}">
           <a
             th:each="t : ${types}"
             class="wi-douban__filter-tag"
             th:href="@{/douban(type=${t.key})}"
             th:text="${t.name}"
-            th:classappend="${(isDefaultType and t.key == 'movie') or (!isDefaultType and urlType.toString() == t.key) ? 'wi-douban__filter-tag--active' : ''}"
+            th:classappend="${(isDefaultType and t.key == 'music') or (!isDefaultType and urlType.toString() == t.key) ? 'wi-douban__filter-tag--active' : ''}"
           ></a>
         </div>
 
         <div class="wi-douban__filter-group wi-douban__status-filters">
-          <th:block th:if="${currentType == 'movie'}">
+          <th:block th:if="${currentType == 'movie' or currentType == 'drama'}">
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
-              th:href="@{/douban(type='movie',status='wish')}"
-              th:classappend="${param.status != null and param.status.toString() == 'wish' ? 'wi-douban__filter-tag--active' : ''}"
+              th:href="@{/douban(type=${currentType},status='wish')}"
+              th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
             >想看</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
-              th:href="@{/douban(type='movie',status='done')}"
-              th:classappend="${param.status != null and param.status.toString() == 'done' ? 'wi-douban__filter-tag--active' : ''}"
+              th:href="@{/douban(type=${currentType},status='done')}"
+              th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
             >看过</a>
           </th:block>
           <th:block th:if="${currentType == 'book'}">
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='book',status='wish')}"
-              th:classappend="${param.status != null and param.status.toString() == 'wish' ? 'wi-douban__filter-tag--active' : ''}"
-            >想看</a>
+              th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
+            >想读</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='book',status='doing')}"
-              th:classappend="${param.status != null and param.status.toString() == 'doing' ? 'wi-douban__filter-tag--active' : ''}"
-            >在看</a>
+              th:classappend="${hasStatus and currentStatus == 'doing'} ? 'wi-douban__filter-tag--active' : ''"
+            >在读</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='book',status='done')}"
-              th:classappend="${param.status != null and param.status.toString() == 'done' ? 'wi-douban__filter-tag--active' : ''}"
-            >看过</a>
+              th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
+            >读过</a>
+          </th:block>
+          <th:block th:if="${currentType == 'music'}">
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='music',status='wish')}"
+              th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
+            >想听</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='music',status='doing')}"
+              th:classappend="${hasStatus and currentStatus == 'doing'} ? 'wi-douban__filter-tag--active' : ''"
+            >在听</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='music',status='done')}"
+              th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
+            >听过</a>
+          </th:block>
+          <th:block th:if="${currentType == 'game'}">
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='game',status='wish')}"
+              th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
+            >想玩</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='game',status='doing')}"
+              th:classappend="${hasStatus and currentStatus == 'doing'} ? 'wi-douban__filter-tag--active' : ''"
+            >在玩</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='game',status='done')}"
+              th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
+            >玩过</a>
           </th:block>
         </div>
 
         <div class="wi-douban__filter-group" th:if="${genres != null and !#lists.isEmpty(genres)}">
-          <th:block th:each="g : ${genres}" th:with="urlStatus = ${param.status}, hasStatus = ${urlStatus != null and !#strings.isEmpty(urlStatus.toString())}">
+          <th:block th:each="g : ${genres}">
             <a
               th:if="${hasStatus}"
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
-              th:href="@{/douban(type=${currentType}, status=${urlStatus.toString()}, genre=${g.name})}"
+              th:href="@{/douban(type=${currentType}, status=${currentStatus}, genre=${g.name})}"
               th:text="|${g.name}(${g.doubanCount})|"
               th:classappend="${param.genre != null and param.genre.toString() == g.name ? 'wi-douban__filter-tag--active' : ''}"
             ></a>
             <a
               th:unless="${hasStatus}"
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
-              th:href="@{/douban(type=${currentType}, genre=${g.name})}"
+              th:href="@{/douban(type=${currentType}, status='done', genre=${g.name})}"
               th:text="|${g.name}(${g.doubanCount})|"
               th:classappend="${param.genre != null and param.genre.toString() == g.name ? 'wi-douban__filter-tag--active' : ''}"
             ></a>
@@ -79,7 +113,7 @@ import Layout from "../layouts/Layout.astro";
         </th:block>
       </div>
 
-      <th:block th:with="urlType = ${param.type}, isDefaultType = ${urlType == null or #strings.isEmpty(urlType.toString())}, currentType = ${isDefaultType ? 'movie' : urlType.toString()}, urlStatus = ${param.status}, hasStatus = ${urlStatus != null and !#strings.isEmpty(urlStatus.toString())}, currentStatus = ${hasStatus ? urlStatus.toString() : null}, urlGenre = ${param.genre}, hasGenre = ${urlGenre != null and !#strings.isEmpty(urlGenre.toString())}, currentGenre = ${hasGenre ? urlGenre.toString() : null}, doubans = ${hasStatus ? doubanFinder.list(1, 100, currentType, currentStatus) : doubanFinder.listByType(1, 100, currentType)}">
+      <th:block th:with="urlType = ${param.type}, isDefaultType = ${urlType == null or #strings.isEmpty(urlType.toString())}, currentType = ${isDefaultType ? 'music' : urlType.toString()}, urlStatus = ${param.status}, hasStatus = ${urlStatus != null and !#strings.isEmpty(urlStatus.toString())}, currentStatus = ${hasStatus ? urlStatus.toString() : 'done'}, urlGenre = ${param.genre}, hasGenre = ${urlGenre != null and !#strings.isEmpty(urlGenre.toString())}, currentGenre = ${hasGenre ? urlGenre.toString() : null}, doubans = ${doubanFinder.list(1, 100, currentType, currentStatus)}">
 
       <div class="wi-douban__grid">
         <article
@@ -134,11 +168,6 @@ import Layout from "../layouts/Layout.astro";
                 th:if="${!#strings.isEmpty(item.spec?.year)}"
                 th:text="${item.spec?.year}"
               ></span>
-              <span
-                class="wi-douban__type-badge"
-                th:if="${!#strings.isEmpty(item.spec?.type)}"
-                th:text="${item.spec?.type}"
-              ></span>
             </div>
             <div class="wi-douban__tags" th:if="${item.spec?.genres != null and !#sets.isEmpty(item.spec?.genres)}">
               <span
@@ -152,11 +181,6 @@ import Layout from "../layouts/Layout.astro";
               th:if="${!#strings.isEmpty(item.faves?.remark)}"
               th:text="${item.faves?.remark}"
             ></p>
-            <span
-              class="wi-douban__status"
-              th:if="${!#strings.isEmpty(item.faves?.status)}"
-              th:text="${item.faves?.status == 'done' ? '看过' : (item.faves?.status == 'doing' ? '在看' : '想看')}"
-            ></span>
           </div>
         </article>
       </div>
@@ -343,14 +367,6 @@ import Layout from "../layouts/Layout.astro";
     font-weight: 500;
   }
 
-  .wi-douban__type-badge {
-    padding: 1px 6px;
-    border-radius: 4px;
-    background: var(--accent-bg);
-    color: var(--accent);
-    font-weight: 500;
-  }
-
   .wi-douban__tags {
     display: flex;
     flex-wrap: wrap;
@@ -377,17 +393,6 @@ import Layout from "../layouts/Layout.astro";
     margin-top: 4px;
     position: relative;
     z-index: 2;
-  }
-
-  .wi-douban__status {
-    display: inline-block;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    background: color-mix(in srgb, var(--accent) 10%, transparent);
-    color: var(--accent);
-    font-weight: 500;
-    width: fit-content;
   }
 
   @media (max-width: 640px) {

@@ -4,14 +4,14 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|归档 - ${site.title}|"></title>
+    <title th:text="|${theme.config?.basic?.label_archives_title ?: '归档'} - ${site.title}|"></title>
   </Fragment>
 
   <div class="wi-archives">
     <header class="wi-archives__header">
-      <h1 class="wi-archives__title">归档</h1>
+      <h1 class="wi-archives__title" th:text="${theme.config?.basic?.label_archives_title ?: '归档'}">归档</h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-archives__subtitle" th:text="|共 ${archives.total} 篇文章|"></p>
+      <p class="wi-archives__subtitle" th:text="${#strings.replace(theme.config?.home?.home_label_post_count ?: '共 {total} 篇文章', '{total}', #strings.toString(archives.total))}"></p>
     </header>
 
     <section class="wi-archives__timeline" aria-label="Archive timeline">
