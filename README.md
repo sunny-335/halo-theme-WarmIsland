@@ -1,6 +1,6 @@
 # WarmIsland 暖屿
 
-一座深夜里温暖、安静、治愈的小岛 — 具有独特气质的生活博客主题，适用于 [Halo CMS](https://github.com/halo-dev/halo)。
+具有独特气质的生活博客主题，适用于 [Halo CMS](https://github.com/halo-dev/halo)。
 
 > 本项目由 AI 开发完成，人工仅进行部分功能测试及问题找寻
 
