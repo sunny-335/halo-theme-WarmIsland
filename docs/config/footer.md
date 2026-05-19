@@ -102,7 +102,7 @@ footer_socials:
 
 ### 显示主题版本（footer_show_theme）
 
-开启后，页脚会显示当前 WarmIsland 主题的名称和版本号，如「Theme WarmIsland v1.0.0」。
+开启后，页脚会显示当前 WarmIsland 主题的名称和版本号，如「Theme WarmIsland v0.1.0」。
 
 ::: tip
 保持开启主题版本显示有助于访客了解你使用的主题，也可能帮助你在遇到问题时快速确认当前版本号。

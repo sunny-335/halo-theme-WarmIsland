@@ -14,7 +14,7 @@
 
 ## 预览
 
-![WarmIsland Preview](./public/WarmIsland%20Preview.png)
+![WarmIsland Preview](./public/WarmIsland%20Preview.webp)
 
 ## 已适配插件
 
@@ -27,7 +27,6 @@
 | [装备管理](https://github.com/chengzhongxue/plugin-equipment) | `equipment` | `/equipments` | 装备展示页面，按分组展示，支持封面图 |
 | [豆瓣](https://github.com/chengzhongxue/plugin-douban) | `plugin-douban` | `/douban` | 豆瓣记录页面，支持类型/状态/标签筛选，默认电影 |
 | [Steam 信息展示](https://github.com/Tim0x0/halo-plugin-steam) | `PluginSteam` | `/steam` | Steam 游戏库页面，含用户资料、统计数据、最近游玩、游戏库分页 |
-| [足迹](https://github.com/acanyo/halo-plugin-footprint) | `footprint` | `/footprints` | 足迹地图页面，保留插件原有样式 + 主题导航栏 |
 
 > **注意**：插件需要单独安装，安装后主题会自动适配对应页面。若未安装某插件，对应页面不会出现。
 

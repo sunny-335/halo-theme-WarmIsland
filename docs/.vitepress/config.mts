@@ -1,12 +1,13 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
+  base: '/WarmIsland/',
   title: "WarmIsland 暖屿",
   description: "具有独特气质的生活博客主题",
   lang: 'zh-CN',
-  head: [['link', { rel: 'icon', href: '/favicon.ico' }]],
+  head: [['link', { rel: 'icon', href: '/WarmIsland/favicon.ico' }]],
   themeConfig: {
-    logo: '/favicon.ico',
+    logo: '/WarmIsland/favicon.ico',
 
     nav: [
       { text: '示例站点', link: 'https://nxxy335.top/' }
@@ -100,7 +101,7 @@ export default defineConfig({
 
     footer: {
       message: '基于 GPL-3.0 许可发布',
-      copyright: '© 2024-present 暖心向阳335'
+      copyright: '© 2026 暖心向阳335'
     },
 
     docFooter: {

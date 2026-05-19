@@ -9,9 +9,9 @@ spec:
     website: https://nxxy335.top/
   description: 具有独特气质的生活博客主题
   logo: /themes/warm-island/assets/logo.png
-  homepage: https://nxxy335.top/
-  repo: https://github.com/nxxy335top/halo-theme-WarmIsland
-  issues: https://github.com/nxxy335top/halo-theme-WarmIsland/issues
+  homepage: https://nxxy335.top/WarmIsland/
+  repo: https://github.com/sunny-335/halo-theme-WarmIsland
+  issues: https://github.com/sunny-335/halo-theme-WarmIsland/issues
   settingName: "warm-island-setting"
   configMapName: "warm-island-configMap"
   customTemplates:
@@ -20,7 +20,7 @@ spec:
         description: 留言板
         screenshot:
         file: page_messageboard.html
-  version: "1.0.0"
+  version: "0.1.0"
   requires: ">=2.24.0"
   license:
     - name: "GPL-3.0"
