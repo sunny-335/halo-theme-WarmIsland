@@ -755,8 +755,8 @@ import LightGallery from "../components/LightGallery.astro";
   .wi-toc-fab {
     display: none;
     position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
+    bottom: 32px;
+    right: 24px;
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -779,6 +779,16 @@ import LightGallery from "../components/LightGallery.astro";
   @media (max-width: 1279px) {
     .wi-toc-fab {
       display: inline-flex;
+      bottom: 152px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .wi-toc-fab {
+      right: 16px;
+      bottom: 152px;
+      width: 40px;
+      height: 40px;
     }
   }
 

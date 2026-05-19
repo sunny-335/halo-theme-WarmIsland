@@ -14,7 +14,7 @@
 
 ## 预览
 
-![WarmIsland Preview](https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=A%20warm%20and%20cozy%20blog%20theme%20preview%2C%20soft%20colors%2C%20clean%20layout%2C%20minimalist%20design%2C%20dark%20mode%20support&image_size=landscape_16_9)
+![WarmIsland Preview](./public/WarmIsland%20Preview.png)
 
 ## 已适配插件
 

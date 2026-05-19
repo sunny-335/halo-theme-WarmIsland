@@ -4,7 +4,7 @@
 <section
   class="wi-section"
   th:if="${theme.config?.home?.home_featured_enabled != false}"
-  th:with="featuredPosts = ${postFinder.list({page: 1, size: theme.config?.home?.home_featured_count ?: 3})}"
+  th:with="featuredPosts = ${postFinder.list({page: 1, size: theme.config?.home?.home_featured_count ?: 3, sort: {'spec.pinned,desc', 'spec.publishTime,desc'}})}"
 >
   <div class="wi-container">
     <div class="wi-section__header">
@@ -24,10 +24,16 @@
           <img th:src="${post.spec.cover}" th:alt="${post.spec.title}" class="wi-featured__image" />
         </div>
         <div class="wi-featured__body">
-          <time
-            class="wi-featured__date"
-            th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
-          ></time>
+          <div class="wi-featured__top-row">
+            <time
+              class="wi-featured__date"
+              th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+            ></time>
+            <span
+              class="wi-featured__pinned"
+              th:if="${post.spec.pinned}"
+            >置顶</span>
+          </div>
           <h3
             class="wi-featured__title"
             th:text="${post.spec.title}"
@@ -129,6 +135,22 @@
     flex-direction: column;
     gap: var(--space-sm);
     flex: 1;
+  }
+
+  .wi-featured__top-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  .wi-featured__pinned {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 2px 8px;
+    border-radius: 9999px;
+    letter-spacing: var(--tracking-wide);
   }
 
   .wi-featured__date {
