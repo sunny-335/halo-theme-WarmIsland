@@ -188,6 +188,7 @@ table {
   position: relative;
   z-index: 1;
   background-color: var(--bg);
+  width: 100%;
 }
 
 .wi-main--wide.wi-main--home {
@@ -212,5 +213,6 @@ table {
 
 .wi-main--wide {
   max-width: 1400px;
+  width: 100%;
   margin: 0 auto;
 }

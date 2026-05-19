@@ -35,12 +35,16 @@ const today = new Date();
       </div>
     </div>
     <div th:if="${theme.config?.footer?.footer_custom_html}" th:utext="${theme.config?.footer?.footer_custom_html}" class="footer-custom"></div>
-    <halo:footer />
+    <div class="footer-injected">
+      <halo:footer />
+    </div>
   </div>
 </footer>
 
 <style>
   footer {
+    position: relative;
+    z-index: 1;
     border-top: 1px solid var(--rule);
     background: linear-gradient(
       to bottom,
@@ -53,11 +57,11 @@ const today = new Date();
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
-    padding: 0 1.25rem;
-    min-height: 50px;
+    padding: 1.25rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    flex-wrap: wrap;
+    gap: 0.75rem;
   }
 
   .footer-bottom {
@@ -142,9 +146,75 @@ const today = new Date();
   }
 
   .footer-custom {
-    margin-left: auto;
+    width: 100%;
+    text-align: center;
     font-size: 0.85rem;
     color: var(--ink-3);
+    line-height: 1.8;
+  }
+
+  .footer-custom :global(a),
+  .footer-custom :global(p),
+  .footer-custom :global(span) {
+    display: inline;
+    margin-inline: 0.25em;
+  }
+
+  .footer-custom :global(a) {
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-custom :global(a):hover {
+    color: var(--ink-2);
+  }
+
+  .footer-custom :global(img) {
+    display: inline-block;
+    max-height: 26px;
+    vertical-align: middle;
+    border-radius: 4px;
+  }
+
+  .footer-custom :global(div) {
+    text-align: center;
+  }
+
+  .footer-injected {
+    width: 100%;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--ink-3);
+    line-height: 1.8;
+  }
+
+  .footer-injected :global(a),
+  .footer-injected :global(p),
+  .footer-injected :global(span) {
+    display: inline;
+    margin-inline: 0.25em;
+  }
+
+  .footer-injected :global(a) {
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-injected :global(a):hover {
+    color: var(--ink-2);
+  }
+
+  .footer-injected :global(img) {
+    display: inline-block;
+    max-height: 26px;
+    vertical-align: middle;
+    border-radius: 4px;
+  }
+
+  .footer-injected :global(div) {
+    text-align: center;
   }
 
   @media (max-width: 768px) {
@@ -160,6 +230,16 @@ const today = new Date();
 
     .footer-bottom__right {
       justify-content: center;
+    }
+
+    .footer-custom,
+    .footer-injected {
+      font-size: 0.75rem;
+    }
+
+    .footer-custom :global(img),
+    .footer-injected :global(img) {
+      max-height: 20px;
     }
   }
 </style>

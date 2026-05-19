@@ -19,10 +19,6 @@ spec:
         description: 留言板
         screenshot:
         file: page_messageboard.html
-      - name: Equipment
-        description: 装备
-        screenshot:
-        file: equipment.html
   version: "1.0.0"
   requires: ">=2.24.0"
   license:

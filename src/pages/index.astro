@@ -10,6 +10,10 @@ import HeroSection from "../components/HeroSection.astro";
 
   <HeroSection />
 
+  <div
+    class="wi-home-content"
+    th:classappend="${theme.config?.hero?.hero_enabled != false} ? 'wi-home-content--with-hero'"
+  >
   <section
     class="wi-home-pinned"
     th:if="${posts != null and !#lists.isEmpty(posts.items)}"
@@ -181,6 +185,7 @@ import HeroSection from "../components/HeroSection.astro";
       </div>
     </div>
   </section>
+  </div>
 </Layout>
 
 <script is:inline>
@@ -252,7 +257,64 @@ import HeroSection from "../components/HeroSection.astro";
   })();
 </script>
 
+<script is:inline>
+  (function () {
+    var hero = document.getElementById("wi-hero");
+    var blurOverlay = document.getElementById("wi-hero-blur-overlay");
+    var heroContent = document.getElementById("wi-hero-content");
+    var scrollIndicator = document.getElementById("wi-hero-scroll-indicator");
+
+    if (!hero || !blurOverlay) return;
+
+    var maxBlur = 20;
+    var triggerDistance = 300;
+    var fadeStart = 200;
+    var fadeEnd = 500;
+    var ticking = false;
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        ticking = false;
+        var scrollY = window.scrollY || window.pageYOffset;
+
+        var currentBlur = Math.min(scrollY / triggerDistance * maxBlur, maxBlur);
+        blurOverlay.style.backdropFilter = "blur(" + currentBlur + "px)";
+        blurOverlay.style.webkitBackdropFilter = "blur(" + currentBlur + "px)";
+
+        if (heroContent) {
+          var progress = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
+          heroContent.style.opacity = String(1 - progress);
+          heroContent.style.transform = "translateY(" + (-20 * progress) + "px)";
+        }
+
+        if (scrollIndicator) {
+          var indicatorProgress = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
+          scrollIndicator.style.opacity = String(1 - indicatorProgress);
+        }
+      });
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  })();
+</script>
+
 <style>
+  .wi-home-content {
+    position: relative;
+    z-index: 1;
+    background: var(--bg);
+    min-height: 100vh;
+    padding-bottom: 2rem;
+  }
+
+  .wi-home-content--with-hero {
+    margin-top: 100vh;
+    margin-top: 100dvh;
+  }
+
   .wi-home-pinned {
     padding-block: 2rem;
     background: var(--bg);

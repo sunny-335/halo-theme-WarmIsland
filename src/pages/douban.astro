@@ -1,0 +1,407 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${title} - ${site.title}|"></title>
+  </Fragment>
+
+  <section class="wi-douban">
+    <div class="wi-container">
+      <div class="wi-douban__header">
+        <h1 class="wi-douban__title" th:text="${title}">豆瓣</h1>
+        <span class="wi-page-accent"></span>
+      </div>
+
+      <div class="wi-douban__filters">
+        <th:block th:with="urlType = ${param.type}, isDefaultType = ${urlType == null or #strings.isEmpty(urlType.toString())}, currentType = ${isDefaultType ? 'movie' : urlType.toString()}">
+        <div class="wi-douban__filter-group" th:if="${types != null and !#lists.isEmpty(types)}">
+          <a
+            th:each="t : ${types}"
+            class="wi-douban__filter-tag"
+            th:href="@{/douban(type=${t.key})}"
+            th:text="${t.name}"
+            th:classappend="${(isDefaultType and t.key == 'movie') or (!isDefaultType and urlType.toString() == t.key) ? 'wi-douban__filter-tag--active' : ''}"
+          ></a>
+        </div>
+
+        <div class="wi-douban__filter-group wi-douban__status-filters">
+          <th:block th:if="${currentType == 'movie'}">
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='movie',status='wish')}"
+              th:classappend="${param.status != null and param.status.toString() == 'wish' ? 'wi-douban__filter-tag--active' : ''}"
+            >想看</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='movie',status='done')}"
+              th:classappend="${param.status != null and param.status.toString() == 'done' ? 'wi-douban__filter-tag--active' : ''}"
+            >看过</a>
+          </th:block>
+          <th:block th:if="${currentType == 'book'}">
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='book',status='wish')}"
+              th:classappend="${param.status != null and param.status.toString() == 'wish' ? 'wi-douban__filter-tag--active' : ''}"
+            >想看</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='book',status='doing')}"
+              th:classappend="${param.status != null and param.status.toString() == 'doing' ? 'wi-douban__filter-tag--active' : ''}"
+            >在看</a>
+            <a
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type='book',status='done')}"
+              th:classappend="${param.status != null and param.status.toString() == 'done' ? 'wi-douban__filter-tag--active' : ''}"
+            >看过</a>
+          </th:block>
+        </div>
+
+        <div class="wi-douban__filter-group" th:if="${genres != null and !#lists.isEmpty(genres)}">
+          <th:block th:each="g : ${genres}" th:with="urlStatus = ${param.status}, hasStatus = ${urlStatus != null and !#strings.isEmpty(urlStatus.toString())}">
+            <a
+              th:if="${hasStatus}"
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type=${currentType}, status=${urlStatus.toString()}, genre=${g.name})}"
+              th:text="|${g.name}(${g.doubanCount})|"
+              th:classappend="${param.genre != null and param.genre.toString() == g.name ? 'wi-douban__filter-tag--active' : ''}"
+            ></a>
+            <a
+              th:unless="${hasStatus}"
+              class="wi-douban__filter-tag wi-douban__filter-tag--sm"
+              th:href="@{/douban(type=${currentType}, genre=${g.name})}"
+              th:text="|${g.name}(${g.doubanCount})|"
+              th:classappend="${param.genre != null and param.genre.toString() == g.name ? 'wi-douban__filter-tag--active' : ''}"
+            ></a>
+          </th:block>
+        </div>
+        </th:block>
+      </div>
+
+      <th:block th:with="urlType = ${param.type}, isDefaultType = ${urlType == null or #strings.isEmpty(urlType.toString())}, currentType = ${isDefaultType ? 'movie' : urlType.toString()}, urlStatus = ${param.status}, hasStatus = ${urlStatus != null and !#strings.isEmpty(urlStatus.toString())}, currentStatus = ${hasStatus ? urlStatus.toString() : null}, urlGenre = ${param.genre}, hasGenre = ${urlGenre != null and !#strings.isEmpty(urlGenre.toString())}, currentGenre = ${hasGenre ? urlGenre.toString() : null}, doubans = ${hasStatus ? doubanFinder.list(1, 100, currentType, currentStatus) : doubanFinder.listByType(1, 100, currentType)}">
+
+      <div class="wi-douban__grid">
+        <article
+          class="wi-douban__card"
+          th:each="item : ${doubans.items}"
+          th:if="${!hasGenre or #sets.contains(item.spec?.genres, currentGenre)}"
+        >
+          <a
+            class="wi-douban__card-link"
+            th:if="${!#strings.isEmpty(item.spec?.link)}"
+            th:href="${item.spec?.link}"
+            target="_blank"
+            rel="noopener noreferrer"
+            tabindex="-1"
+            aria-hidden="true"
+          ></a>
+          <div class="wi-douban__poster" th:if="${!#strings.isEmpty(item.spec?.poster)}">
+            <img
+              th:src="${item.spec?.poster}"
+              th:alt="${item.spec?.name}"
+              class="wi-douban__poster-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="wi-douban__poster wi-douban__poster--placeholder" th:if="${#strings.isEmpty(item.spec?.poster)}">
+            <span th:text="${#strings.substring(item.spec?.name ?: '', 0, 1)}"></span>
+          </div>
+          <div class="wi-douban__body">
+            <h3 class="wi-douban__name" th:text="${item.spec?.name}"></h3>
+            <p
+              class="wi-douban__subtitle"
+              th:if="${!#strings.isEmpty(item.spec?.cardSubtitle)}"
+              th:text="${item.spec?.cardSubtitle}"
+            ></p>
+            <div class="wi-douban__meta">
+              <span
+                class="wi-douban__score"
+                th:if="${!#strings.isEmpty(item.spec?.score) and item.spec?.score != '0'}"
+              >
+                <svg class="wi-douban__star" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <th:block th:text="${item.spec?.score}"></th:block>
+              </span>
+              <span
+                class="wi-douban__my-score"
+                th:if="${!#strings.isEmpty(item.faves?.score)}"
+              >
+                我的：<th:block th:text="${item.faves?.score}"></th:block>
+              </span>
+              <span
+                class="wi-douban__year"
+                th:if="${!#strings.isEmpty(item.spec?.year)}"
+                th:text="${item.spec?.year}"
+              ></span>
+              <span
+                class="wi-douban__type-badge"
+                th:if="${!#strings.isEmpty(item.spec?.type)}"
+                th:text="${item.spec?.type}"
+              ></span>
+            </div>
+            <div class="wi-douban__tags" th:if="${item.spec?.genres != null and !#sets.isEmpty(item.spec?.genres)}">
+              <span
+                class="wi-douban__tag"
+                th:each="genre : ${item.spec?.genres}"
+                th:text="${genre}"
+              ></span>
+            </div>
+            <p
+              class="wi-douban__remark"
+              th:if="${!#strings.isEmpty(item.faves?.remark)}"
+              th:text="${item.faves?.remark}"
+            ></p>
+            <span
+              class="wi-douban__status"
+              th:if="${!#strings.isEmpty(item.faves?.status)}"
+              th:text="${item.faves?.status == 'done' ? '看过' : (item.faves?.status == 'doing' ? '在看' : '想看')}"
+            ></span>
+          </div>
+        </article>
+      </div>
+
+      </th:block>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .wi-douban {
+    padding-block: 1rem;
+  }
+
+  .wi-douban__header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .wi-douban__title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-douban__filters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-douban__filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .wi-douban__filter-tag {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--ease-out-quart),
+      background var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-douban__filter-tag--sm {
+    padding: 4px 12px;
+    font-size: var(--text-xs);
+  }
+
+  .wi-douban__filter-tag:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .wi-douban__filter-tag--active {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .wi-douban__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .wi-douban__card {
+    position: relative;
+    display: flex;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-douban__card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+
+  .wi-douban__card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .wi-douban__poster {
+    flex-shrink: 0;
+    width: 80px;
+    height: 112px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .wi-douban__poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .wi-douban__poster--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+  }
+
+  .wi-douban__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .wi-douban__name {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: var(--leading-tight);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-douban__subtitle {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-douban__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+  }
+
+  .wi-douban__score {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: #f59e0b;
+    font-weight: 600;
+  }
+
+  .wi-douban__star {
+    color: #f59e0b;
+  }
+
+  .wi-douban__my-score {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .wi-douban__type-badge {
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .wi-douban__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .wi-douban__tag {
+    font-size: 11px;
+    color: var(--ink-3);
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+  }
+
+  .wi-douban__remark {
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 4px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .wi-douban__status {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    color: var(--accent);
+    font-weight: 500;
+    width: fit-content;
+  }
+
+  @media (max-width: 640px) {
+    .wi-douban__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-douban__card {
+      padding: var(--space-md);
+    }
+
+    .wi-douban__poster {
+      width: 64px;
+      height: 90px;
+    }
+  }
+</style>

@@ -1,0 +1,626 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${title} - ${site.title}|"></title>
+  </Fragment>
+
+  <section class="wi-steam">
+    <div class="wi-container">
+    <div class="wi-steam__header">
+      <h1 class="wi-steam__title" th:text="${title}">Steam</h1>
+      <span class="wi-page-accent"></span>
+    </div>
+
+    <th:block th:with="profile = ${steamFinder.getProfile()}, stats = ${steamFinder.getStats()}, badges = ${steamFinder.getBadges()}, recentGames = ${steamFinder.getRecentGames(recentGamesLimit)}">
+
+    <div class="wi-steam__profile" th:if="${profile != null and profile.summary != null}">
+      <div class="wi-steam__avatar">
+        <img
+          th:src="${profile.summary?.avatarFull}"
+          th:alt="${profile.summary?.personaName}"
+          class="wi-steam__avatar-img"
+          loading="lazy"
+          decoding="async"
+        />
+        <span
+          class="wi-steam__status-dot wi-steam__status-dot--playing"
+          th:if="${profile.playing}"
+        ></span>
+        <span
+          class="wi-steam__status-dot wi-steam__status-dot--online"
+          th:if="${!profile.playing and profile.summary?.personaState != null and profile.summary?.personaState > 0}"
+        ></span>
+        <span
+          class="wi-steam__status-dot wi-steam__status-dot--offline"
+          th:if="${!profile.playing and (profile.summary?.personaState == null or profile.summary?.personaState == 0)}"
+        ></span>
+      </div>
+      <div class="wi-steam__info">
+        <h2 class="wi-steam__name" th:text="${profile.summary?.personaName}"></h2>
+        <span class="wi-steam__status-text" th:text="${profile.statusText}"></span>
+        <a
+          class="wi-steam__profile-link"
+          th:if="${!#strings.isEmpty(profile.summary?.profileUrl)}"
+          th:href="${profile.summary?.profileUrl}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Steam 主页 →</a>
+      </div>
+      <div class="wi-steam__level" th:if="${profile.steamLevel != null}">
+        <span class="wi-steam__level-num" th:text="${profile.steamLevel}"></span>
+        <span class="wi-steam__level-label">等级</span>
+      </div>
+    </div>
+
+    <div class="wi-steam__stats" th:if="${stats != null}">
+      <div class="wi-steam__stat-card">
+        <span class="wi-steam__stat-value" th:text="${stats.totalGames}"></span>
+        <span class="wi-steam__stat-label">拥有游戏</span>
+      </div>
+      <div class="wi-steam__stat-card">
+        <span class="wi-steam__stat-value" th:text="${stats.totalPlaytimeFormatted}"></span>
+        <span class="wi-steam__stat-label">总游玩时长</span>
+      </div>
+      <div class="wi-steam__stat-card">
+        <span class="wi-steam__stat-value" th:text="${stats.recentPlaytimeFormatted}"></span>
+        <span class="wi-steam__stat-label">近两周</span>
+      </div>
+      <div class="wi-steam__stat-card" th:if="${badges != null}">
+        <span class="wi-steam__stat-value" th:text="${badges.totalBadges}"></span>
+        <span class="wi-steam__stat-label">徽章</span>
+      </div>
+    </div>
+
+    <div class="wi-steam__section" th:if="${recentGames != null and !recentGames.isEmpty()}">
+      <h3 class="wi-steam__section-title">最近游玩</h3>
+      <div class="wi-steam__recent-scroll">
+        <article class="wi-steam__recent-card" th:each="game : ${recentGames}">
+          <a
+            class="wi-steam__card-link"
+            th:if="${enableGameLink}"
+            th:href="@{'https://store.steampowered.com/app/' + ${game.appId}}"
+            target="_blank"
+            rel="noopener noreferrer"
+            tabindex="-1"
+            aria-hidden="true"
+          ></a>
+          <div class="wi-steam__recent-cover">
+            <img
+              th:src="${game.headerImageUrl}"
+              th:alt="${game.name}"
+              class="wi-steam__recent-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="wi-steam__recent-body">
+            <h4 class="wi-steam__recent-name" th:text="${game.name}"></h4>
+            <div class="wi-steam__recent-meta">
+              <span class="wi-steam__recent-time" th:text="${game.playtime2WeeksFormatted}"></span>
+              <span
+                class="wi-steam__recent-achievements"
+                th:if="${game.achievementProgressText != null}"
+                th:text="${game.achievementProgressText}"
+              ></span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    </th:block>
+
+    <div class="wi-steam__section">
+      <h3 class="wi-steam__section-title">游戏库</h3>
+      <div class="wi-steam__games-grid">
+        <article class="wi-steam__game-card" th:each="game : ${games.items}">
+          <a
+            class="wi-steam__card-link"
+            th:if="${enableGameLink}"
+            th:href="@{'https://store.steampowered.com/app/' + ${game.appId}}"
+            target="_blank"
+            rel="noopener noreferrer"
+            tabindex="-1"
+            aria-hidden="true"
+          ></a>
+          <div class="wi-steam__game-cover">
+            <img
+              th:src="${game.headerImageUrl}"
+              th:alt="${game.name}"
+              class="wi-steam__game-img"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <div class="wi-steam__game-body">
+            <h4 class="wi-steam__game-name" th:text="${game.name}"></h4>
+            <div class="wi-steam__game-meta">
+              <span class="wi-steam__game-time" th:text="${game.playtimeFormatted}"></span>
+              <span
+                class="wi-steam__game-last"
+                th:if="${!#strings.isEmpty(game.lastPlayedFormatted)}"
+                th:text="|最后游玩 ${game.lastPlayedFormatted}|"
+              ></span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <nav
+      class="wi-steam__pagination"
+      th:if="${games.hasPrevious() or games.hasNext()}"
+    >
+      <a
+        class="wi-steam__page-btn"
+        th:if="${games.hasPrevious()}"
+        th:href="${games.prevUrl}"
+      >上一页</a>
+      <span class="wi-steam__page-spacer" th:if="${games.hasPrevious() and games.hasNext()}"></span>
+      <a
+        class="wi-steam__page-btn"
+        th:if="${games.hasNext()}"
+        th:href="${games.nextUrl}"
+      >下一页</a>
+    </nav>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .wi-steam {
+    padding-block: 1rem;
+  }
+
+  .wi-steam__header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+  }
+
+  .wi-steam__title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  .wi-steam__profile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-xl);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-steam__avatar {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .wi-steam__avatar-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--rule);
+  }
+
+  .wi-steam__status-dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-raised);
+  }
+
+  .wi-steam__status-dot--online {
+    background: #22c55e;
+  }
+
+  .wi-steam__status-dot--playing {
+    background: #3b82f6;
+  }
+
+  .wi-steam__status-dot--offline {
+    background: #6b7280;
+  }
+
+  .wi-steam__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wi-steam__name {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .wi-steam__status-text {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .wi-steam__profile-link {
+    font-size: var(--text-xs);
+    color: var(--accent);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .wi-steam__profile-link:hover {
+    text-decoration: underline;
+  }
+
+  .wi-steam__level {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--accent-bg);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .wi-steam__level-num {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .wi-steam__level-label {
+    font-size: 11px;
+    color: var(--ink-3);
+    margin-top: 2px;
+  }
+
+  .wi-steam__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-steam__stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    min-height: 80px;
+  }
+
+  .wi-steam__stat-value {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    container-type: inline-size;
+  }
+
+  @container (max-width: 120px) {
+    .wi-steam__stat-value {
+      font-size: var(--text-lg);
+    }
+  }
+
+  @container (max-width: 80px) {
+    .wi-steam__stat-value {
+      font-size: var(--text-md);
+    }
+  }
+
+  .wi-steam__stat-label {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    margin-top: 4px;
+  }
+
+  .wi-steam__section {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-steam__section-title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 2px solid var(--accent);
+    display: inline-block;
+  }
+
+  .wi-steam__recent-scroll {
+    display: flex;
+    gap: var(--space-md);
+    overflow-x: auto;
+    padding-bottom: var(--space-sm);
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .wi-steam__recent-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .wi-steam__recent-scroll::-webkit-scrollbar-track {
+    background: var(--bg);
+    border-radius: 3px;
+  }
+
+  .wi-steam__recent-scroll::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: 3px;
+  }
+
+  .wi-steam__recent-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    max-width: 260px;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-steam__recent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent);
+  }
+
+  .wi-steam__recent-cover {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .wi-steam__recent-img {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+    object-fit: cover;
+  }
+
+  .wi-steam__recent-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    min-width: 0;
+  }
+
+  .wi-steam__recent-name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-steam__recent-meta {
+    display: flex;
+    gap: 8px;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+  }
+
+  .wi-steam__recent-time {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .wi-steam__recent-achievements {
+    color: #f59e0b;
+  }
+
+  .wi-steam__games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .wi-steam__game-card {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    transition:
+      transform var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-steam__game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
+  }
+
+  .wi-steam__card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .wi-steam__game-cover {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .wi-steam__game-img {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+    object-fit: cover;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-steam__game-card:hover .wi-steam__game-img {
+    transform: scale(1.05);
+  }
+
+  .wi-steam__game-body {
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .wi-steam__game-name {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-steam__game-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+  }
+
+  .wi-steam__game-time {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .wi-steam__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-lg);
+    margin-top: var(--space-3xl);
+  }
+
+  .wi-steam__page-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    text-decoration: none;
+    transition: border-color var(--duration-fast) var(--ease-out-quart),
+      color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-steam__page-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .wi-steam__page-spacer {
+    flex: 1;
+  }
+
+  @media (max-width: 1024px) {
+    .wi-steam__stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .wi-steam__profile {
+      flex-direction: column;
+      text-align: center;
+      padding: var(--space-lg);
+    }
+
+    .wi-steam__avatar-img {
+      width: 64px;
+      height: 64px;
+    }
+
+    .wi-steam__stats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .wi-steam__stat-card {
+      padding: var(--space-md);
+    }
+
+    .wi-steam__stat-value {
+      font-size: var(--text-xl);
+    }
+
+    .wi-steam__games-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: var(--space-sm);
+    }
+
+    .wi-steam__game-body {
+      padding: var(--space-xs) var(--space-sm) var(--space-sm);
+    }
+
+    .wi-steam__game-name {
+      font-size: var(--text-xs);
+    }
+
+    .wi-steam__game-meta {
+      font-size: 10px;
+    }
+
+    .wi-steam__recent-card {
+      min-width: 180px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wi-steam__games-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-xs);
+    }
+
+    .wi-steam__stat-card {
+      padding: var(--space-sm);
+    }
+
+    .wi-steam__stat-value {
+      font-size: var(--text-lg);
+    }
+
+    .wi-steam__stat-label {
+      font-size: 10px;
+    }
+  }
+</style>

@@ -386,13 +386,6 @@ spec:
           name: friends_page_title
           label: 页面标题
           value: 朋友圈
-    - group: equipment
-      label: 我的装备
-      formSchema:
-        - $formkit: text
-          name: equipment_page_title
-          label: 页面标题
-          value: 装备
     - group: messageboard
       label: 留言板
       formSchema:

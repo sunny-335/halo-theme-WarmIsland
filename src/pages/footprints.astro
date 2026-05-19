@@ -1,0 +1,161 @@
+---
+import Navbar from "../components/Navbar.astro";
+import MobileMenu from "../components/MobileMenu.astro";
+import "../styles/main.scss";
+---
+
+<!doctype html>
+<html lang="zh" th:lang="${theme.config?.basic?.language ?: #locale.language}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline th:attr="data-scheme=${theme.config?.style?.color_scheme}">
+      (function () {
+        var stored = localStorage.getItem("wi-theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var scheme = null;
+        if (document.currentScript && document.currentScript.getAttribute("data-scheme")) {
+          scheme = document.currentScript.getAttribute("data-scheme");
+        }
+        var isDark = false;
+        if (stored === "dark") { isDark = true; }
+        else if (stored === "light") { isDark = false; }
+        else if (scheme === "dark") { isDark = true; }
+        else if (scheme === "light") { isDark = false; }
+        else if (!stored && prefersDark) { isDark = true; }
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+          document.documentElement.setAttribute("data-color-scheme", "dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.setAttribute("data-color-scheme", "light");
+        }
+      })();
+    </script>
+    <title th:text="|${settings.title} - ${site.title}|"></title>
+    <link rel="stylesheet" type="text/css" th:href="@{/plugins/footprint/assets/static/css/footprint.css(version=${version})}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/plugins/footprint/assets/static/font/result.css(version=${version})}" />
+    <script type="text/javascript" th:src="@{/plugins/footprint/assets/static/js/jquery-3.6.0.min.js}"></script>
+    <script type="text/javascript">
+      window._AMapSecurityConfig = {
+        securityJsCode: /*[[${settings.gaoDeKey}]]*/''
+      }
+    </script>
+    <script type="text/javascript" th:src="|https://webapi.amap.com/maps?v=2.0&key=${settings.gaoDeKey}|"></script>
+    <script type="text/javascript" th:src="@{/plugins/footprint/assets/static/js/footprint.js(version=${version})}"></script>
+    <script th:inline="javascript">
+      window.FOOTPRINT_CONFIG = {
+        amapKey: /*[[${settings.gaoDeKey}]]*/'',
+        footprints: [],
+        title: /*[[${settings.title}]]*/ '足迹',
+        logoName: /*[[${settings.logoName}]]*/ '足迹',
+        describe: /*[[${settings.describe}]]*/ '描述',
+        hsla: /*[[${settings.hsla}]]*/ '200, 100%, 50%',
+        mapStyle: /*[[${settings.mapStyle}]]*/ 'amap://styles/normal'
+      };
+    </script>
+  </head>
+  <body id="footprint-page">
+    <Navbar />
+    <MobileMenu />
+
+    <div class="footprint-container">
+      <div id="footprint-map"></div>
+
+      <div class="logo-container">
+        <h1 class="footprint-logo" th:text="${settings.logoName}">足迹<span class="logo-version">2024</span></h1>
+        <p class="footprint-slogan" th:text="${settings.describe}">每一处足迹都充满了故事，那是对人生的思考和无限的风光。</p>
+      </div>
+
+      <div class="map-controls">
+        <div class="likcc-layer-selector">
+          <button class="likcc-layer-btn active" data-type="normal">
+            <svg class="likcc-layer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <path d="M9 9h6v6H9z"></path>
+            </svg>
+            <span>标准图</span>
+          </button>
+          <button class="likcc-layer-btn" data-type="satellite">
+            <svg class="likcc-layer-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span>卫星图</span>
+          </button>
+        </div>
+
+        <div class="likcc-feature-toggles">
+          <label class="likcc-toggle-item">
+            <input type="checkbox" data-type="road">
+            <div class="likcc-toggle-switch">
+              <div class="likcc-toggle-slider"></div>
+            </div>
+            <div class="likcc-toggle-content">
+              <svg class="likcc-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7v10a4 4 0 004 4h10a4 4 0 004-4V7a4 4 0 00-4-4H7a4 4 0 00-4 4z"></path>
+                <path d="M9 12h6"></path>
+              </svg>
+              <span class="likcc-toggle-label">路网</span>
+            </div>
+          </label>
+
+          <label class="likcc-toggle-item">
+            <input type="checkbox" data-type="traffic">
+            <div class="likcc-toggle-switch">
+              <div class="likcc-toggle-slider"></div>
+            </div>
+            <div class="likcc-toggle-content">
+              <svg class="likcc-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+              </svg>
+              <span class="likcc-toggle-label">路况</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="likcc-zoom-controls">
+          <button class="likcc-zoom-btn" id="zoom-out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.35-4.35"></path>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+          <button class="likcc-zoom-btn" id="zoom-in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.35-4.35"></path>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="likcc-scale-display">
+          <div class="likcc-scale-bar"></div>
+          <span class="likcc-scale-text" id="scale-text">1000 公里</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  #footprint-page {
+    margin: 0;
+    padding: 0;
+  }
+
+  #footprint-page .footprint-container {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 72px);
+    margin-top: 72px;
+  }
+
+  #footprint-page #footprint-map {
+    width: 100%;
+    height: 100%;
+  }
+</style>

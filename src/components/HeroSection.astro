@@ -3,6 +3,7 @@
 
 <section
   class="hero"
+  id="wi-hero"
   th:if="${theme.config?.hero?.hero_enabled != false}"
   th:classappend="${theme.config?.animation?.animation_breath == false} ? 'hero--no-breath'"
 >
@@ -17,7 +18,9 @@
     ></div>
   </div>
 
-  <div class="hero__content">
+  <div class="hero__blur-overlay" id="wi-hero-blur-overlay"></div>
+
+  <div class="hero__content" id="wi-hero-content">
     <h1
       class="hero__title"
       th:text="${theme.config?.hero?.hero_title != null and !#strings.isEmpty(theme.config?.hero?.hero_title) ? theme.config?.hero?.hero_title : site.title}"
@@ -43,7 +46,7 @@
     ></p>
   </div>
 
-  <div class="hero__scroll-indicator" aria-hidden="true">
+  <div class="hero__scroll-indicator" id="wi-hero-scroll-indicator" aria-hidden="true">
     <svg
       width="24"
       height="24"
@@ -105,9 +108,9 @@
 
 <style>
   .hero {
-    position: relative;
-    height: calc(100vh + 80px);
-    height: calc(100dvh + 80px);
+    position: fixed;
+    inset: 0;
+    z-index: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -119,14 +122,22 @@
       color-mix(in srgb, var(--bg) 90%, var(--mist-pink) 10%) 70%,
       var(--bg) 100%
     );
-    margin-top: -80px;
-    padding-top: 80px;
     width: 100%;
   }
 
   .hero__bg {
     position: absolute;
     inset: 0;
+    pointer-events: none;
+  }
+
+  .hero__blur-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    will-change: backdrop-filter;
     pointer-events: none;
   }
 
@@ -190,13 +201,14 @@
 
   .hero__content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     padding: var(--space-xl);
     gap: var(--space-lg);
+    transition: opacity 0.4s ease, transform 0.4s ease;
   }
 
   .hero__title {
@@ -230,8 +242,10 @@
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 2;
     color: var(--ink-3);
     animation: scrollHint 2s ease-in-out infinite;
+    transition: opacity 0.4s ease;
   }
 
   .hero--no-breath .hero__orb {
