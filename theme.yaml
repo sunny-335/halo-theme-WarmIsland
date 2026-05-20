@@ -20,7 +20,7 @@ spec:
         description: 留言板
         screenshot:
         file: page_messageboard.html
-  version: "0.1.0"
+  version: "1.0.0"
   requires: ">=2.24.0"
   license:
     - name: "GPL-3.0"
