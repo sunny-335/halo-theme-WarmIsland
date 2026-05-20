@@ -14,7 +14,7 @@
 
 ## 预览
 
-![WarmIsland Preview](./public/WarmIsland%20Preview.webp)
+![WarmIsland Preview](./WarmIsland%20Preview.webp)
 
 ## 已适配插件
 
