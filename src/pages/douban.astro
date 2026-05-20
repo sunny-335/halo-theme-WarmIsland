@@ -10,7 +10,7 @@ import Layout from "../layouts/Layout.astro";
   <section class="wi-douban">
     <div class="wi-container">
       <div class="wi-douban__header">
-        <h1 class="wi-douban__title" th:text="${title}">豆瓣</h1>
+        <h1 class="wi-douban__title" th:text="${title ?: #messages.msg('douban.title')}">Douban</h1>
         <span class="wi-page-accent"></span>
       </div>
 
@@ -32,63 +32,63 @@ import Layout from "../layouts/Layout.astro";
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type=${currentType},status='wish')}"
               th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
-            >想看</a>
+            th:text="#{douban.wish}">Wish</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type=${currentType},status='done')}"
               th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
-            >看过</a>
+            th:text="#{douban.done}">Done</a>
           </th:block>
           <th:block th:if="${currentType == 'book'}">
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='book',status='wish')}"
               th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
-            >想读</a>
+            th:text="#{douban.wishRead}">Wish</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='book',status='doing')}"
               th:classappend="${hasStatus and currentStatus == 'doing'} ? 'wi-douban__filter-tag--active' : ''"
-            >在读</a>
+            th:text="#{douban.reading}">Reading</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='book',status='done')}"
               th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
-            >读过</a>
+            th:text="#{douban.done}">Done</a>
           </th:block>
           <th:block th:if="${currentType == 'music'}">
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='music',status='wish')}"
               th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
-            >想听</a>
+            th:text="#{douban.wishListen}">Wish</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='music',status='doing')}"
               th:classappend="${hasStatus and currentStatus == 'doing'} ? 'wi-douban__filter-tag--active' : ''"
-            >在听</a>
+            th:text="#{douban.listening}">Listening</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='music',status='done')}"
               th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
-            >听过</a>
+            th:text="#{douban.listened}">Listened</a>
           </th:block>
           <th:block th:if="${currentType == 'game'}">
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='game',status='wish')}"
               th:classappend="${hasStatus and currentStatus == 'wish'} ? 'wi-douban__filter-tag--active' : ''"
-            >想玩</a>
+            th:text="#{douban.wishPlay}">Wish</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='game',status='doing')}"
               th:classappend="${hasStatus and currentStatus == 'doing'} ? 'wi-douban__filter-tag--active' : ''"
-            >在玩</a>
+            th:text="#{douban.playing}">Playing</a>
             <a
               class="wi-douban__filter-tag wi-douban__filter-tag--sm"
               th:href="@{/douban(type='game',status='done')}"
               th:classappend="${(!hasStatus and isDefaultType) or (hasStatus and currentStatus == 'done')} ? 'wi-douban__filter-tag--active' : ''"
-            >玩过</a>
+            th:text="#{douban.played}">Played</a>
           </th:block>
         </div>
 
@@ -120,6 +120,7 @@ import Layout from "../layouts/Layout.astro";
           class="wi-douban__card"
           th:each="item : ${doubans.items}"
           th:if="${!hasGenre or #sets.contains(item.spec?.genres, currentGenre)}"
+          th:attr="data-type=${currentType}"
         >
           <a
             class="wi-douban__card-link"
@@ -161,7 +162,7 @@ import Layout from "../layouts/Layout.astro";
                 class="wi-douban__my-score"
                 th:if="${!#strings.isEmpty(item.faves?.score)}"
               >
-                我的：<th:block th:text="${item.faves?.score}"></th:block>
+                <span th:text="#{douban.myRating}">My:</span><th:block th:text="${item.faves?.score}"></th:block>
               </span>
               <span
                 class="wi-douban__year"
@@ -299,6 +300,12 @@ import Layout from "../layouts/Layout.astro";
     background: var(--bg);
   }
 
+  .wi-douban__card[data-type="music"] .wi-douban__poster {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+  }
+
   .wi-douban__poster-img {
     width: 100%;
     height: 100%;
@@ -407,6 +414,11 @@ import Layout from "../layouts/Layout.astro";
     .wi-douban__poster {
       width: 64px;
       height: 90px;
+    }
+
+    .wi-douban__card[data-type="music"] .wi-douban__poster {
+      width: 64px;
+      height: 64px;
     }
   }
 </style>

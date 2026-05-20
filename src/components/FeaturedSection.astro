@@ -8,7 +8,7 @@
 >
   <div class="wi-container">
     <div class="wi-section__header">
-      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_featured_title ?: '精选'}">精选</h2>
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_featured_title ?: #messages.msg('common.featured')}">精选</h2>
     </div>
     <div class="wi-featured">
       <a
@@ -32,7 +32,7 @@
             <span
               class="wi-featured__pinned"
               th:if="${post.spec.pinned}"
-            >置顶</span>
+              th:text="#{hero.pinned}">Pinned</span>
           </div>
           <h3
             class="wi-featured__title"

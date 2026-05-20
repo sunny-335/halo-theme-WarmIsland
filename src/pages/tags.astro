@@ -4,14 +4,14 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|标签 - ${site.title}|"></title>
+    <title th:text="|#{tags.title} - ${site.title}|"></title>
   </Fragment>
 
   <div class="wi-tags">
     <header class="wi-tags__header">
-      <h1 class="wi-tags__title">标签</h1>
+      <h1 class="wi-tags__title" th:text="#{tags.title}">标签</h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-tags__subtitle" th:text="|共 ${tags.size} 个标签|"></p>
+      <p class="wi-tags__subtitle" th:text="${#messages.msg('common.tagCount', ${tags.size})}"></p>
     </header>
 
     <div class="wi-tags__cloud" role="list" aria-label="Tag list">

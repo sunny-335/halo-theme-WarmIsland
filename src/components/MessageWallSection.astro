@@ -6,7 +6,7 @@
 >
   <div class="wi-container">
     <div class="wi-section__header">
-      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_message_wall_title ?: '留言墙'}">留言墙</h2>
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_message_wall_title ?: #messages.msg('messageboard.title')}">留言墙</h2>
       <span class="wi-section__accent"></span>
     </div>
 

@@ -22,15 +22,26 @@ spec:
         - $formkit: text
           name: label_search
           label: 搜索按钮标签
-          value: 搜索
         - $formkit: text
           name: label_theme_switch
           label: 主题切换标签
-          value: 切换主题
         - $formkit: text
           name: label_archives_title
           label: 归档页标题
-          value: 归档
+        - $formkit: select
+          name: language
+          label: 语言
+          options:
+            - label: 跟随浏览器
+              value: auto
+            - label: 简体中文
+              value: zh_CN
+            - label: 繁體中文
+              value: zh_TW
+            - label: English
+              value: en
+          value: auto
+          help: 设置主题界面语言，选择"跟随浏览器"将根据浏览器语言自动匹配
     - group: style
       label: 总体样式
       formSchema:
@@ -75,11 +86,6 @@ spec:
             - label: Wide
               value: wide
           value: medium
-        - $formkit: switch
-          name: layout_sidebar
-          label: 启用侧边栏
-          value: false
-          help: 侧边栏功能开发中，暂不可用
         - $formkit: switch
           name: animation_enabled
           label: 启用动效
@@ -191,11 +197,9 @@ spec:
         - $formkit: text
           name: home_pinned_title
           label: 置顶模块标题
-          value: 置顶
         - $formkit: text
           name: home_posts_title
           label: 文章模块标题
-          value: 文章
         - $formkit: switch
           name: home_card_show_visit
           label: 文章卡片显示阅读量
@@ -228,27 +232,21 @@ spec:
         - $formkit: text
           name: home_label_newer
           label: 分页-较新标签
-          value: 较新
         - $formkit: text
           name: home_label_older
           label: 分页-较旧标签
-          value: 较旧
         - $formkit: text
           name: home_label_loading
           label: 无限滚动-加载中文案
-          value: 加载中...
         - $formkit: text
           name: home_label_all_loaded
           label: 无限滚动-全部加载文案
-          value: 已加载全部文章
         - $formkit: text
           name: home_label_no_posts
           label: 暂无文章文案
-          value: 暂无文章。
         - $formkit: text
           name: home_label_post_count
           label: 文章数量文案（{total}为占位符）
-          value: 共 {total} 篇文章
     - group: article
       label: 文章
       formSchema:
@@ -306,13 +304,42 @@ spec:
             - label: Cold
               value: cold
           value: warm
+        - $formkit: select
+          name: article_toc_expand
+          label: 目录展开模式
+          options:
+            - label: 仅展开当前分组
+              value: active
+            - label: 全部展开
+              value: all
+          value: active
+          help: 控制文章目录的展开方式
+        - $formkit: switch
+          name: article_show_related
+          id: article_show_related
+          label: 显示相关文章推荐
+          value: false
+        - $formkit: text
+          name: article_related_title
+          key: article_related_title
+          label: 相关文章标题
+          if: "$get(article_show_related).value === true"
+        - $formkit: switch
+          name: article_show_share
+          id: article_show_share
+          label: 显示分享按钮
+          value: true
+        - $formkit: text
+          name: article_share_title
+          key: article_share_title
+          label: 分享区域标题
+          if: "$get(article_show_share).value !== false"
     - group: moments
       label: 瞬间
       formSchema:
         - $formkit: text
           name: moments_page_title
           label: 页面标题
-          value: 瞬间
         - $formkit: select
           name: moments_style
           label: 展示样式
@@ -343,7 +370,6 @@ spec:
         - $formkit: text
           name: photos_page_title
           label: 页面标题
-          value: 图库
         - $formkit: select
           name: photos_style
           label: 展示样式
@@ -375,7 +401,6 @@ spec:
         - $formkit: text
           name: links_page_title
           label: 页面标题
-          value: 友情链接
         - $formkit: select
           name: links_style
           label: 展示样式
@@ -393,18 +418,15 @@ spec:
         - $formkit: text
           name: friends_page_title
           label: 页面标题
-          value: 朋友圈
     - group: messageboard
       label: 留言板
       formSchema:
         - $formkit: text
           name: messageboard_title
           label: 留言板标题
-          value: 留言板
         - $formkit: textarea
           name: messageboard_subtitle
           label: 留言板副标题
-          value: 在这里留下你的足迹吧 🌙
     - group: comment
       label: 评论
       formSchema:

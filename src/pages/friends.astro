@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout wide>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.friends?.friends_page_title ?: '朋友圈'} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.friends?.friends_page_title ?: #messages.msg('friends.title')} - ${site.title}|"></title>
   </Fragment>
 
   <section
@@ -15,9 +15,9 @@ import Layout from "../layouts/Layout.astro";
       <div class="wi-friends-page__header">
         <h1
           class="wi-friends-page__title"
-          th:text="${theme.config?.friends?.friends_page_title ?: '朋友圈'}"
+          th:text="${theme.config?.friends?.friends_page_title ?: #messages.msg('friends.title')}"
         >
-          朋友圈
+          Friends Circle
         </h1>
         <span class="wi-page-accent"></span>
       </div>
@@ -87,8 +87,9 @@ import Layout from "../layouts/Layout.astro";
           th:if="${friends.hasPrevious()}"
           th:href="@{${friends.prevUrl}}"
           class="wi-friends-page__page-link"
+          th:text="#{common.newer}"
         >
-          ← 上一页
+          &larr; Newer
         </a>
         <span
           class="wi-friends-page__page-info"
@@ -98,8 +99,9 @@ import Layout from "../layouts/Layout.astro";
           th:if="${friends.hasNext()}"
           th:href="@{${friends.nextUrl}}"
           class="wi-friends-page__page-link"
+          th:text="#{common.older}"
         >
-          下一页 →
+          Older &rarr;
         </a>
       </div>
     </div>
@@ -111,11 +113,11 @@ import Layout from "../layouts/Layout.astro";
   >
     <div class="wi-container">
       <div class="wi-friends-page__header">
-        <h1 class="wi-friends-page__title">朋友圈</h1>
+        <h1 class="wi-friends-page__title" th:text="#{friends.title}">Friends Circle</h1>
         <span class="wi-page-accent"></span>
       </div>
       <div class="wi-friends-page__empty">
-        <p>朋友圈功能需要安装「朋友圈」插件，<a href="https://www.halo.run/store/apps/app-friends">前往应用市场安装</a></p>
+        <p th:utext="#{common.installPlugin('Friends Circle', 'https://www.halo.run/store/apps/app-friends')}">This feature requires the Friends Circle plugin</p>
       </div>
     </div>
   </section>

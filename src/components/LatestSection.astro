@@ -7,7 +7,7 @@
 >
   <div class="wi-container">
     <div class="wi-section__header">
-      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_latest_title ?: '最新文章'}">最新文章</h2>
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_latest_title ?: #messages.msg('common.latestPosts')}">Latest Posts</h2>
     </div>
     <div
       class="wi-latest"
@@ -58,8 +58,8 @@
         th:if="${posts.hasPrevious()}"
         th:href="@{${posts.prevUrl}}"
         class="wi-pagination__prev"
-        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
-      >&larr; 较新</a>
+        th:text="${theme.config?.home?.home_label_newer ?: #messages.msg('common.newer')}"
+      >&larr; Newer</a>
       <span
         class="wi-pagination__info"
         th:text="|${posts.page} / ${posts.totalPages}|"
@@ -68,8 +68,8 @@
         th:if="${posts.hasNext()}"
         th:href="@{${posts.nextUrl}}"
         class="wi-pagination__next"
-        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
-      >较旧 &rarr;</a>
+        th:text="${theme.config?.home?.home_label_older ?: #messages.msg('common.older')}"
+      >Older &rarr;</a>
     </nav>
   </div>
 </section>

@@ -5,7 +5,7 @@ import LightGallery from "../components/LightGallery.astro";
 
 <Layout wide>
   <Fragment slot="head">
-    <title th:text="|${title ?: (theme.config?.photos?.photos_page_title ?: '图库')} - ${site.title}|"></title>
+    <title th:text="|${title ?: (theme.config?.photos?.photos_page_title ?: #messages.msg('photos.title'))} - ${site.title}|"></title>
   </Fragment>
 
   <section class="wi-photos-page">
@@ -13,9 +13,9 @@ import LightGallery from "../components/LightGallery.astro";
       <div class="wi-photos-page__header">
         <h1
           class="wi-photos-page__title"
-          th:text="${theme.config?.photos?.photos_page_title ?: '图库'}"
+          th:text="${theme.config?.photos?.photos_page_title ?: #messages.msg('photos.title')}"
         >
-          图库
+          Gallery
         </h1>
         <span class="wi-page-accent"></span>
       </div>
@@ -30,8 +30,9 @@ import LightGallery from "../components/LightGallery.astro";
               th:href="@{${photoUrl.list()}}"
               class="wi-photos-page__group-link"
               th:classappend="${#strings.isEmpty(currentGroup)} ? 'wi-photos-page__group-link--active' : ''"
+              th:text="#{common.all}"
             >
-              全部
+              All
             </a>
             <a
               th:each="group : ${groups}"
@@ -48,7 +49,7 @@ import LightGallery from "../components/LightGallery.astro";
               <div class="wi-photos-page__all-groups">
               <th:block th:if="${showUngrouped and photos != null and !#lists.isEmpty(photos.items)}">
                 <div class="wi-photos-page__section">
-                  <h2 class="wi-photos-page__section-title">全部</h2>
+                  <h2 class="wi-photos-page__section-title" th:text="#{common.all}">All</h2>
                   <div
                     class="wi-photos-page__grid"
                     th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
@@ -240,7 +241,7 @@ import LightGallery from "../components/LightGallery.astro";
                   </div>
                 </div>
                 <div class="wi-photos-page__empty" th:if="${#lists.isEmpty(group.photos)}">
-                  <p>该分组暂无图片</p>
+                  <p th:text="#{common.noPhotosInGroup}">No photos in this group.</p>
                 </div>
               </th:block>
             </th:block>
@@ -248,25 +249,20 @@ import LightGallery from "../components/LightGallery.astro";
           </th:block>
 
           <div class="wi-photos-page__empty" th:if="${#lists.isEmpty(groups) and !(showUngrouped and photos != null and !#lists.isEmpty(photos.items))}">
-            <p>暂无图片</p>
+            <p th:text="#{common.noPhotos}">No photos yet.</p>
           </div>
         </th:block>
 
         <th:block th:if="${groups == null}">
           <div class="wi-photos-page__empty">
-            <p>图库插件加载异常，请检查插件状态</p>
+            <p th:text="#{common.pluginError}">Plugin error</p>
           </div>
         </th:block>
       </th:block>
 
       <th:block th:unless="${pluginFinder.available('PluginPhotos')}">
         <div class="wi-photos-page__empty">
-          <p>
-            图库功能需要安装「图库」插件，<a
-              href="https://www.halo.run/store/apps/app-PgHgw"
-              >前往应用市场安装</a
-            >
-          </p>
+          <p th:utext="#{common.installPlugin('Gallery', 'https://www.halo.run/store/apps/app-PgHgw')}">This feature requires the Gallery plugin</p>
         </div>
       </th:block>
     </div>

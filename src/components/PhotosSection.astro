@@ -9,7 +9,7 @@ const pageConfig = findPageBySlug("photos");
   <th:block th:if="${pluginFinder.available('PluginPhotos')}">
     <section class="wi-photos-section">
       <div class="wi-container">
-        <h2 class="wi-photos-section__title" th:text="${pageConfig?.title ?: theme.config?.photos?.photos_title ?: '图库'}">图库</h2>
+        <h2 class="wi-photos-section__title" th:text="${pageConfig?.title ?: theme.config?.photos?.photos_title ?: #messages.msg('photos.title')}">图库</h2>
         <div
           class="wi-photos-section__grid"
           th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
@@ -37,7 +37,7 @@ const pageConfig = findPageBySlug("photos");
           </th:block>
         </div>
         <a th:href="@{'/photos'}" class="wi-photos-section__more">
-          <span th:text="${theme.config?.home?.home_label_view_all ?: '查看全部'}">查看全部</span>
+          <span th:text="${theme.config?.home?.home_label_view_all ?: #messages.msg('common.viewAll')}">查看全部</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>

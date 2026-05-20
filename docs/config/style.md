@@ -10,7 +10,6 @@
 | `accent_color` | 颜色 | `#d4764e` | 全局强调色 |
 | `border_radius` | 下拉 | `medium` | 圆角风格：`small` / `medium` / `large` |
 | `layout_container_width` | 下拉 | `medium` | 容器宽度：`narrow` / `medium` / `wide` |
-| `layout_sidebar` | 开关 | `false` | 启用侧边栏（开发中） |
 | `animation_enabled` | 开关 | `true` | 全局动画总开关 |
 | `animation_breath` | 开关 | `true` | 呼吸动画效果 |
 | `animation_scroll_reveal` | 开关 | `true` | 滚动渐入动画 |
@@ -79,12 +78,6 @@ accent_color: "#8b5cf6"  # 紫罗兰
 | `medium` | 中等宽度，兼顾阅读体验与信息密度（默认） |
 | `wide` | 宽容器，适合图片较多的站点或需要更大展示空间的场景 |
 
-### 侧边栏（layout_sidebar）
-
-::: danger
-侧边栏功能目前仍在开发中，此选项暂不可用。开启后不会产生实际效果，请关注后续版本更新。
-:::
-
 ### 动画效果
 
 WarmIsland 提供了丰富的动画效果，所有动画都可以独立开关：
@@ -118,11 +111,6 @@ WarmIsland 提供了丰富的动画效果，所有动画都可以独立开关：
 在此处编写自定义 CSS 代码，会注入到全站所有页面的 `<style>` 标签中。可以用来覆盖主题默认样式或添加全新样式。
 
 ```css
-/* 示例：修改正文字体 */
-body {
-  font-family: "LXGW WenKai", sans-serif;
-}
-
 /* 示例：自定义卡片悬停效果 */
 .post-card:hover {
   transform: translateY(-4px);

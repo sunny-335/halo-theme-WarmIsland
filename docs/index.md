@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "WarmIsland"
   text: "暖屿主题文档"
-  tagline: 具有独特气质的生活博客主题，为 Halo 打造
+  tagline: 暖如灯火，静如留白。暖屿以柔和的色调和舒缓的节奏回归内容本身，为记录与阅读留出一方安静从容的角落。
   actions:
     - theme: brand
       text: 快速开始

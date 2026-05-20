@@ -17,6 +17,11 @@
 | `article_show_visit_count` | 开关 | `true` | 显示阅读量统计 |
 | `article_show_read_time` | 开关 | `false` | 显示预计阅读时间 |
 | `article_code_theme` | 下拉 | `warm` | 代码高亮主题：`warm` / `cold` |
+| `article_toc_expand` | 下拉 | `active` | 目录展开模式：`active` / `all` |
+| `article_show_related` | 开关 | `false` | 显示相关文章推荐 |
+| `article_related_title` | 文本 | `相关推荐` | 相关文章标题 |
+| `article_show_share` | 开关 | `true` | 显示分享按钮 |
+| `article_share_title` | 文本 | `分享` | 分享区域标题 |
 
 ## 详细说明
 
@@ -96,6 +101,57 @@ article_code_theme: warm
 
 ::: tip
 代码高亮支持多种编程语言，包括 JavaScript、Python、Java、Go、Rust、YAML、JSON、Bash 等。语言检测基于代码块的语言标记自动完成。
+:::
+
+### 目录展开模式（article_toc_expand）
+
+控制文章目录的展开方式：
+
+| 值 | 说明 |
+| --- | --- |
+| `active` | 仅展开当前阅读位置所在的分组，其余分组折叠（默认） |
+| `all` | 全部展开，显示所有层级的目录项 |
+
+::: tip
+对于标题层级较多的长文，推荐使用 `active` 模式，可以让读者更聚焦于当前章节。对于短文或标题层级较少的文章，`all` 模式可以一次性展示完整目录结构。
+:::
+
+### 相关文章推荐（article_show_related）
+
+开启后，文章底部会显示相关文章推荐列表，帮助读者发现更多感兴趣的内容。相关文章基于 Halo 的随机推荐算法选取。
+
+#### 相关文章标题（article_related_title）
+
+自定义相关文章推荐区域的标题文字，默认为「相关推荐」。仅在 `article_show_related` 开启时显示此配置项。
+
+```yaml
+article_show_related: true
+article_related_title: "猜你喜欢"
+```
+
+### 分享功能（article_show_share）
+
+开启后，文章底部会显示分享按钮，支持以下社交平台：
+
+| 平台 | 说明 |
+| --- | --- |
+| 微博 | 分享到新浪微博 |
+| X (Twitter) | 分享到 X |
+| Facebook | 分享到 Facebook |
+| Telegram | 分享到 Telegram |
+| 复制链接 | 复制文章链接到剪贴板 |
+
+#### 分享区域标题（article_share_title）
+
+自定义分享区域的标题文字，默认为「分享」。仅在 `article_show_share` 开启时显示此配置项。
+
+```yaml
+article_show_share: true
+article_share_title: "分享这篇文章"
+```
+
+::: tip
+分享功能会自动携带文章标题和链接，无需手动配置分享内容。移动端会优先显示适合移动端的分享方式。
 :::
 
 ## 阅读增强功能

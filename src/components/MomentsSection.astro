@@ -9,7 +9,7 @@ const pageConfig = findPageBySlug("moments");
   <th:block th:if="${pluginFinder.available('PluginMoments')}">
     <section class="wi-moments-section">
       <div class="wi-container">
-        <h2 class="wi-moments-section__title" th:text="${pageConfig?.title ?: theme.config?.moments?.moments_title ?: '瞬间'}">瞬间</h2>
+        <h2 class="wi-moments-section__title" th:text="${pageConfig?.title ?: theme.config?.moments?.moments_title ?: #messages.msg('moments.title')}">瞬间</h2>
         <div
           class="wi-moments-section__list"
           th:attr="data-style=${theme.config?.moments?.moments_style ?: 'timeline'}"
@@ -29,7 +29,7 @@ const pageConfig = findPageBySlug("moments");
           </th:block>
         </div>
         <a th:href="@{'/moments'}" class="wi-moments-section__more">
-          <span th:text="${theme.config?.home?.home_label_view_all ?: '查看全部'}">查看全部</span>
+          <span th:text="${theme.config?.home?.home_label_view_all ?: #messages.msg('common.viewAll')}">查看全部</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M5 12h14M12 5l7 7-7 7"/>
           </svg>

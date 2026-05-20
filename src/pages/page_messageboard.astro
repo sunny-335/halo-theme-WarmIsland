@@ -5,7 +5,7 @@ import Layout from "../layouts/Layout.astro";
 <Layout>
   <Fragment slot="head">
     <title
-      th:text="|${theme.config?.messageboard?.messageboard_title ?: '留言板'} - ${site.title}|"
+      th:text="|${theme.config?.messageboard?.messageboard_title ?: #messages.msg('messageboard.title')} - ${site.title}|"
     ></title>
   </Fragment>
 
@@ -14,12 +14,12 @@ import Layout from "../layouts/Layout.astro";
       <span class="wi-messageboard__deco">"</span>
       <h1
         class="wi-messageboard__title"
-        th:text="${theme.config?.messageboard?.messageboard_title ?: '留言板'}"
+        th:text="${theme.config?.messageboard?.messageboard_title ?: #messages.msg('messageboard.title')}"
       ></h1>
       <span class="wi-page-accent"></span>
       <p
         class="wi-messageboard__subtitle"
-        th:text="${theme.config?.messageboard?.messageboard_subtitle}"
+        th:text="${theme.config?.messageboard?.messageboard_subtitle ?: #messages.msg('messageboard.subtitle')}"
       ></p>
     </header>
 

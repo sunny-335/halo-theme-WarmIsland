@@ -104,18 +104,18 @@ else if (!stored && prefersDark) { isDark = true; }
 
 | 变量 | 字体栈 | 用途 |
 |------|--------|------|
-| `--font-sans` | `'Noto Serif SC', 'Source Han Serif SC', Georgia, serif` | 标题、强调文字 |
-| `--font-body` | `'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif` | 正文、UI 文字 |
-| `--font-mono` | `'JetBrains Mono', 'Fira Code', monospace` | 代码 |
+| `--font-sans` | `Georgia, 'Noto Serif SC', 'Source Han Serif SC', serif` | 标题、强调文字 |
+| `--font-body` | `-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif` | 正文、UI 文字 |
+| `--font-mono` | `'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace` | 代码 |
 
 ### 设计思路
 
-- **标题用衬线体**：Noto Serif SC 赋予标题优雅的文艺气质
-- **正文用无衬线体**：Noto Sans SC 保证长文阅读的舒适度
-- **代码用等宽体**：JetBrains Mono 专为代码设计
+- **标题用衬线体**：Georgia 赋予标题优雅的文艺气质，回退到系统中文字体
+- **正文用系统字体**：使用各平台原生系统字体栈，确保最佳阅读体验与加载性能
+- **代码用等宽体**：优先使用 JetBrains Mono，回退到系统等宽字体
 
 ::: tip
-这些字体不会自动加载，需要在 Halo 后台或 HTML 中引入对应的字体 CSS。推荐使用 Google Fonts 或国内 CDN 镜像。
+主题使用系统默认字体栈，无需额外加载字体文件，可显著提升页面加载速度。如需使用自定义字体，可通过 [自定义 CSS](/customize/custom-css) 覆盖 `--font-sans`、`--font-body` 等变量。
 :::
 
 ## 间距系统

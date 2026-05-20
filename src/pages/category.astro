@@ -14,7 +14,7 @@ import Layout from "../layouts/Layout.astro";
         th:text="${category.spec.displayName}"
       ></h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-category__subtitle" th:text="|共 ${posts.total} 篇文章|"></p>
+      <p class="wi-category__subtitle" th:text="#{common.postCount(${posts.total})}"></p>
       <p
         th:if="${not #strings.isEmpty(category.spec.description)}"
         class="wi-category__description"
@@ -22,13 +22,44 @@ import Layout from "../layouts/Layout.astro";
       ></p>
     </header>
 
-    <th:block th:replace="~{fragments/post-list}"></th:block>
+    <ul class="wi-category__list" role="list">
+      <li
+        th:each="post : ${posts.items}"
+        class="wi-category__entry"
+      >
+        <a
+          class="wi-category__entry-link"
+          th:href="@{${post.status.permalink}}"
+        >
+          <div class="wi-category__entry-body">
+            <time
+              class="wi-category__entry-date"
+              th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+              datetime="${post.spec.publishTime}"
+            ></time>
+            <h2 class="wi-category__entry-title" th:text="${post.spec.title}"></h2>
+            <p
+              class="wi-category__entry-excerpt"
+              th:text="${post.status.excerpt}"
+            ></p>
+          </div>
+          <img
+            th:unless="${#strings.isEmpty(post.spec.cover)}"
+            class="wi-category__entry-image"
+            th:src="${post.spec.cover}"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        </a>
+      </li>
+    </ul>
 
     <div
       th:if="${posts.total == 0}"
       class="wi-category__empty"
-        th:text="${theme.config?.home?.home_label_no_posts ?: '暂无文章。'}"
-      >暂无文章。</div>
+        th:text="${theme.config?.home?.home_label_no_posts ?: #messages.msg('common.noPosts')}"
+      >No posts yet.</div>
 
     <nav
       th:if="${posts.totalPages gt 1}"
@@ -39,8 +70,8 @@ import Layout from "../layouts/Layout.astro";
         th:if="${posts.hasPrevious()}"
         th:href="@{${posts.prevUrl}}"
         class="wi-category__page-link wi-category__page-link--prev"
-        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
-      >&larr; 较新</a>
+        th:text="${theme.config?.home?.home_label_newer ?: #messages.msg('common.newer')}"
+      >&larr; Newer</a>
       <span
         class="wi-category__page-info"
         th:text="|${posts.page} / ${posts.totalPages}|"
@@ -49,8 +80,8 @@ import Layout from "../layouts/Layout.astro";
         th:if="${posts.hasNext()}"
         th:href="@{${posts.nextUrl}}"
         class="wi-category__page-link wi-category__page-link--next"
-        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
-      >较旧 &rarr;</a>
+        th:text="${theme.config?.home?.home_label_older ?: #messages.msg('common.older')}"
+      >Older &rarr;</a>
     </nav>
   </div>
 </Layout>
@@ -97,6 +128,90 @@ import Layout from "../layouts/Layout.astro";
     line-height: var(--leading-normal);
   }
 
+  .wi-category__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .wi-category__entry {
+    border-bottom: 1px dashed var(--rule);
+    transition: background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-category__entry:last-child {
+    border-bottom: none;
+  }
+
+  .wi-category__entry:hover {
+    background: var(--bg-raised);
+    margin: 0 calc(-1 * var(--space-md));
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+    border-radius: var(--radius-sm);
+  }
+
+  .wi-category__entry-link {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 200px;
+    gap: var(--space-lg);
+    padding: var(--space-lg) 0;
+    text-decoration: none;
+    color: inherit;
+    align-items: start;
+  }
+
+  .wi-category__entry-body {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .wi-category__entry-date {
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wi-category__entry-title {
+    font-family: var(--font-sans);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: var(--leading-snug);
+    margin: 0.25rem 0;
+    transition: color var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-category__entry-link:hover .wi-category__entry-title {
+    color: var(--accent);
+  }
+
+  .wi-category__entry-excerpt {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    line-height: var(--leading-normal);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .wi-category__entry-image {
+    width: 200px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    align-self: center;
+    transition: transform var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-category__entry:hover .wi-category__entry-image {
+    transform: scale(1.02);
+  }
+
   .wi-category__empty {
     color: var(--ink-3);
     font-size: var(--text-md);
@@ -126,5 +241,17 @@ import Layout from "../layouts/Layout.astro";
 
   .wi-category__page-info {
     color: var(--ink-3);
+  }
+
+  @media (max-width: 768px) {
+    .wi-category__entry-link {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-category__entry-image {
+      width: 100%;
+      height: 180px;
+      order: -1;
+    }
   }
 </style>

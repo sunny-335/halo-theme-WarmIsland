@@ -4,14 +4,14 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.basic?.label_archives_title ?: '归档'} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.basic?.label_archives_title ?: #messages.msg('archives.title')} - ${site.title}|"></title>
   </Fragment>
 
   <div class="wi-archives">
     <header class="wi-archives__header">
-      <h1 class="wi-archives__title" th:text="${theme.config?.basic?.label_archives_title ?: '归档'}">归档</h1>
+      <h1 class="wi-archives__title" th:text="${theme.config?.basic?.label_archives_title ?: #messages.msg('archives.title')}">归档</h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-archives__subtitle" th:text="${#strings.replace(theme.config?.home?.home_label_post_count ?: '共 {total} 篇文章', '{total}', #strings.toString(archives.total))}"></p>
+      <p class="wi-archives__subtitle" th:text="${#strings.replace(#messages.msg('common.postCount'), '{0}', #strings.toString(archives.total))}"></p>
     </header>
 
     <section class="wi-archives__timeline" aria-label="Archive timeline">
@@ -57,8 +57,8 @@ import Layout from "../layouts/Layout.astro";
       <div
         th:if="${archives.total == 0}"
         class="wi-archives__empty"
-        th:text="${theme.config?.home?.home_label_no_posts ?: '暂无文章。'}"
-      >暂无文章。</div>
+        th:text="${theme.config?.home?.home_label_no_posts ?: #messages.msg('common.noPosts')}"
+      >No posts yet.</div>
     </section>
 
     <nav
@@ -70,8 +70,8 @@ import Layout from "../layouts/Layout.astro";
         th:if="${archives.hasPrevious()}"
         th:href="@{${archives.prevUrl}}"
         class="wi-archives__page-link wi-archives__page-link--prev"
-        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
-      >&larr; 较新</a>
+        th:text="${theme.config?.home?.home_label_newer ?: #messages.msg('common.newer')}"
+      >&larr; Newer</a>
       <span
         class="wi-archives__page-info"
         th:text="|${archives.page} / ${archives.totalPages}|"
@@ -80,8 +80,8 @@ import Layout from "../layouts/Layout.astro";
         th:if="${archives.hasNext()}"
         th:href="@{${archives.nextUrl}}"
         class="wi-archives__page-link wi-archives__page-link--next"
-        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
-      >较旧 &rarr;</a>
+        th:text="${theme.config?.home?.home_label_older ?: #messages.msg('common.older')}"
+      >Older &rarr;</a>
     </nav>
   </div>
 </Layout>

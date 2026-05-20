@@ -17,7 +17,7 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="zh" th:lang="${theme.config?.basic?.language ?: #locale.language}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'">
+<html class={home ? 'wi-home-snap' : ''} th:lang="${#locale.toLanguageTag()}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'" th:attr="data-lang=${theme.config?.basic?.language}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -56,17 +56,47 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
       th:href="${theme.config?.basic?.favicon ?: '/favicon.ico'}"
     />
     <link rel="alternate" type="application/rss+xml" th:title="${site.title}" th:href="@{/feed.xml}" />
-    <style th:if="${theme.config?.style?.accent_color}" th:utext="${':root { --accent: ' + theme.config?.style?.accent_color + '; --accent-hover: ' + theme.config?.style?.accent_color + '; }'}"></style>
-    <style th:if="${theme.config?.style?.border_radius == 'small'}" th:utext="${':root { --radius-sm: 4px; --radius-md: 8px; --radius-lg: 16px; }'}"></style>
-    <style th:if="${theme.config?.style?.border_radius == 'medium' or theme.config?.style?.border_radius == null}" th:utext="${':root { --radius-sm: 8px; --radius-md: 12px; --radius-lg: 24px; }'}"></style>
-    <style th:if="${theme.config?.style?.border_radius == 'large'}" th:utext="${':root { --radius-sm: 12px; --radius-md: 20px; --radius-lg: 36px; }'}"></style>
-    <style th:if="${theme.config?.style?.layout_container_width == 'narrow'}" th:utext="${'.wi-content-wrap { max-width: 680px; } .wi-content-wrap--wide { max-width: 1000px; } .wi-main--wide { max-width: 1200px; }'}"></style>
-    <style th:if="${theme.config?.style?.layout_container_width == 'medium' or theme.config?.style?.layout_container_width == null}" th:utext="${'.wi-content-wrap { max-width: 800px; } .wi-content-wrap--wide { max-width: 1200px; } .wi-main--wide { max-width: 1400px; }'}"></style>
-    <style th:if="${theme.config?.style?.layout_container_width == 'wide'}" th:utext="${'.wi-content-wrap { max-width: 900px; } .wi-content-wrap--wide { max-width: 1400px; } .wi-main--wide { max-width: 1600px; }'}"></style>
-    <style th:if="${theme.config?.style?.custom_css}" th:utext="${theme.config?.style?.custom_css}"></style>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <style is:inline th:if="${theme.config?.style?.accent_color}" th:utext="${':root { --accent: ' + theme.config?.style?.accent_color + '; --accent-hover: ' + theme.config?.style?.accent_color + '; }'}">/*accent*/</style>
+    <style is:inline th:if="${theme.config?.style?.border_radius == 'small'}" th:utext="${':root { --radius-sm: 4px; --radius-md: 8px; --radius-lg: 16px; }'}">/*radius*/</style>
+    <style is:inline th:if="${theme.config?.style?.border_radius == 'medium' or theme.config?.style?.border_radius == null}" th:utext="${':root { --radius-sm: 8px; --radius-md: 12px; --radius-lg: 24px; }'}">/*radius*/</style>
+    <style is:inline th:if="${theme.config?.style?.border_radius == 'large'}" th:utext="${':root { --radius-sm: 12px; --radius-md: 20px; --radius-lg: 36px; }'}">/*radius*/</style>
+    <style is:inline th:if="${theme.config?.style?.layout_container_width == 'narrow'}" th:utext="${'.wi-content-wrap { max-width: 680px; } .wi-content-wrap--wide { max-width: 1000px; } .wi-main--wide { max-width: 1200px; }'}">/*width*/</style>
+    <style is:inline th:if="${theme.config?.style?.layout_container_width == 'medium' or theme.config?.style?.layout_container_width == null}" th:utext="${'.wi-content-wrap { max-width: 800px; } .wi-content-wrap--wide { max-width: 1200px; } .wi-main--wide { max-width: 1400px; }'}">/*width*/</style>
+    <style is:inline th:if="${theme.config?.style?.layout_container_width == 'wide'}" th:utext="${'.wi-content-wrap { max-width: 900px; } .wi-content-wrap--wide { max-width: 1400px; } .wi-main--wide { max-width: 1600px; }'}">/*width*/</style>
+    <style is:inline th:if="${theme.config?.style?.custom_css}" th:utext="${theme.config?.style?.custom_css}">/*custom*/</style>
     <slot name="head" />
   </head>
   <body class="wi-body">
+    <script is:inline>
+      (function(){
+        var lang=document.documentElement.getAttribute("data-lang");
+        if(lang&&lang!=="auto"){
+          var tag=lang.replace(/_/g,"-");
+          var cookies=document.cookie.split(";");
+          var current="";
+          for(var i=0;i<cookies.length;i++){
+            var c=cookies[i].trim();
+            if(c.indexOf("language=")===0){current=c.substring(9);break;}
+          }
+          if(current!==tag){
+            document.cookie="language="+tag+";path=/;max-age=31536000;SameSite=Lax";
+            window.location.reload();
+          }
+        }else if(lang==="auto"){
+          var cookies2=document.cookie.split(";");
+          var hasCookie=false;
+          for(var j=0;j<cookies2.length;j++){
+            if(cookies2[j].trim().indexOf("language=")===0){hasCookie=true;break;}
+          }
+          if(hasCookie){
+            document.cookie="language=;path=/;max-age=0;SameSite=Lax";
+            window.location.reload();
+          }
+        }
+      })();
+    </script>
     <Navbar />
     <main class:list={["wi-main", { "wi-main--wide": wide || home, "wi-main--home": home }]}>
       {home ? (
@@ -124,4 +154,11 @@ html.wi-no-animations .wi-reveal {
   transform: none;
   transition: none;
 }
+
+.wi-post__content img {
+  max-width: 100%;
+  height: auto;
+}
+
+
 </style>

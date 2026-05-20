@@ -4,14 +4,14 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|分类 - ${site.title}|"></title>
+    <title th:text="|#{categories.title} - ${site.title}|"></title>
   </Fragment>
 
   <div class="wi-categories">
     <header class="wi-categories__header">
-      <h1 class="wi-categories__title">分类</h1>
+      <h1 class="wi-categories__title" th:text="#{categories.title}">分类</h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-categories__subtitle" th:text="|共 ${categories.size} 个分类|"></p>
+      <p class="wi-categories__subtitle" th:text="${#messages.msg('common.categoryCount', ${categories.size})}"></p>
     </header>
 
     <nav class="wi-categories__list" aria-label="Category list">

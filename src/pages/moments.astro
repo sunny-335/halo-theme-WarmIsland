@@ -5,13 +5,13 @@ import LightGallery from "../components/LightGallery.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.moments?.moments_page_title ?: '瞬间'} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.moments?.moments_page_title ?: #messages.msg('moments.title')} - ${site.title}|"></title>
   </Fragment>
 
-  <section class="wi-moments-page">
+  <section class="wi-moments-page" th:attr="data-i18n-all-moments-loaded=#{common.allMomentsLoaded}">
     <div class="wi-container">
       <div class="wi-moments-page__header">
-        <h1 class="wi-moments-page__title" th:text="${theme.config?.moments?.moments_page_title ?: '瞬间'}">瞬间</h1>
+        <h1 class="wi-moments-page__title" th:text="${theme.config?.moments?.moments_page_title ?: #messages.msg('moments.title')}">瞬间</h1>
         <span class="wi-page-accent"></span>
       </div>
 
@@ -77,7 +77,7 @@ import LightGallery from "../components/LightGallery.astro";
                 </th:block>
                 <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__empty">
-                    <p>还没有瞬间，快去记录当下的心情吧 🌙</p>
+                    <p th:text="#{moments.noMoments}">No moments yet</p>
                   </div>
                 </th:block>
               </div>
@@ -133,7 +133,7 @@ import LightGallery from "../components/LightGallery.astro";
                 </th:block>
                 <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__empty">
-                    <p>还没有瞬间，快去记录当下的心情吧 🌙</p>
+                    <p th:text="#{moments.noMoments}">No moments yet</p>
                   </div>
                 </th:block>
               </div>
@@ -189,7 +189,7 @@ import LightGallery from "../components/LightGallery.astro";
                 </th:block>
                 <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__empty">
-                    <p>还没有瞬间，快去记录当下的心情吧 🌙</p>
+                    <p th:text="#{moments.noMoments}">No moments yet</p>
                   </div>
                 </th:block>
               </div>
@@ -204,13 +204,13 @@ import LightGallery from "../components/LightGallery.astro";
               class="wi-moments-page__page-btn"
               th:if="${momentsResult.hasPrevious()}"
               th:href="${momentsResult.prevUrl}"
-            >← 较新</a>
+            th:text="#{common.newer}">Newer</a>
             <span class="wi-moments-page__page-spacer" th:if="${momentsResult.hasPrevious() and momentsResult.hasNext()}"></span>
             <a
               class="wi-moments-page__page-btn"
               th:if="${momentsResult.hasNext()}"
               th:href="${momentsResult.nextUrl}"
-            >较旧 →</a>
+            th:text="#{common.older}">Older</a>
           </nav>
 
           <div
@@ -220,7 +220,7 @@ import LightGallery from "../components/LightGallery.astro";
           ></div>
           <th:block th:if="${momentFinder == null}">
             <div class="wi-moments-page__empty">
-              <p>瞬间插件加载异常，请检查插件状态</p>
+              <p th:text="#{common.pluginError}">Plugin error</p>
             </div>
           </th:block>
         </div>
@@ -228,7 +228,7 @@ import LightGallery from "../components/LightGallery.astro";
 
       <th:block th:unless="${pluginFinder.available('PluginMoments')}">
         <div class="wi-moments-page__empty">
-          <p>瞬间功能需要安装「瞬间」插件，<a href="https://www.halo.run/store/apps/app-hqbe">前往应用市场安装</a></p>
+          <p th:utext="#{common.installPlugin('Moments', 'https://www.halo.run/store/apps/app-hqbe')}">This feature requires the Moments plugin</p>
         </div>
       </th:block>
     </div>
@@ -414,7 +414,9 @@ import LightGallery from "../components/LightGallery.astro";
                   sentinel.style.display = "none";
                   var endMsg = document.createElement("div");
                   endMsg.className = "wi-moments-page__empty";
-                  endMsg.innerHTML = "<p>已加载全部瞬间</p>";
+                  var momentsSection = document.querySelector(".wi-moments-page");
+                  var allMomentsText = momentsSection ? momentsSection.getAttribute("data-i18n-all-moments-loaded") : "All moments loaded";
+                  endMsg.innerHTML = "<p>" + allMomentsText + "</p>";
                   sentinel.parentNode.appendChild(endMsg);
                 }
 

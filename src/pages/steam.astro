@@ -55,35 +55,35 @@ import Layout from "../layouts/Layout.astro";
           th:href="${profile.summary?.profileUrl}"
           target="_blank"
           rel="noopener noreferrer"
-        >Steam 主页 →</a>
+          th:text="#{steam.homepage}">Steam Homepage &rarr;</a>
       </div>
       <div class="wi-steam__level" th:if="${profile.steamLevel != null}">
         <span class="wi-steam__level-num" th:text="${profile.steamLevel}"></span>
-        <span class="wi-steam__level-label">等级</span>
+        <span class="wi-steam__level-label" th:text="#{steam.level}">Level</span>
       </div>
     </div>
 
     <div class="wi-steam__stats" th:if="${stats != null}">
       <div class="wi-steam__stat-card">
         <span class="wi-steam__stat-value" th:text="${stats.totalGames} ?: 0">0</span>
-        <span class="wi-steam__stat-label">拥有游戏</span>
+        <span class="wi-steam__stat-label" th:text="#{steam.ownedGames}">Owned Games</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.totalPlaytimeFormatted} ?: '0 小时'">0 小时</span>
-        <span class="wi-steam__stat-label">总游玩时长</span>
+        <span class="wi-steam__stat-value" th:text="${stats.totalPlaytimeFormatted} ?: '0 hours'">0 hours</span>
+        <span class="wi-steam__stat-label" th:text="#{steam.totalPlaytime}">Total Playtime</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.recentPlaytimeFormatted} ?: '0 小时'">0 小时</span>
-        <span class="wi-steam__stat-label">近两周</span>
+        <span class="wi-steam__stat-value" th:text="${stats.recentPlaytimeFormatted} ?: '0 hours'">0 hours</span>
+        <span class="wi-steam__stat-label" th:text="#{steam.recentPlaytime}">Recent 2 Weeks</span>
       </div>
       <div class="wi-steam__stat-card">
         <span class="wi-steam__stat-value" th:text="${badges != null and badges.totalBadges != null ? badges.totalBadges : 0}">0</span>
-        <span class="wi-steam__stat-label">徽章</span>
+        <span class="wi-steam__stat-label" th:text="#{steam.badges}">Badges</span>
       </div>
     </div>
 
     <div class="wi-steam__section" th:if="${recentGames != null and !recentGames.isEmpty()}">
-      <h3 class="wi-steam__section-title">最近游玩</h3>
+      <h3 class="wi-steam__section-title" th:text="#{steam.recentlyPlayed}">Recently Played</h3>
       <div class="wi-steam__recent-scroll">
         <article class="wi-steam__recent-card" th:each="game : ${recentGames}">
           <a
@@ -107,7 +107,7 @@ import Layout from "../layouts/Layout.astro";
           <div class="wi-steam__recent-body">
             <h4 class="wi-steam__recent-name" th:text="${game.name}"></h4>
             <div class="wi-steam__recent-meta">
-              <span class="wi-steam__recent-time" th:text="${game.playtime2WeeksFormatted} ?: '0 小时'"></span>
+              <span class="wi-steam__recent-time" th:text="${game.playtime2WeeksFormatted} ?: #{steam.hours}"></span>
               <span
                 class="wi-steam__recent-achievements"
                 th:if="${game.achievementProgressText != null}"
@@ -122,7 +122,7 @@ import Layout from "../layouts/Layout.astro";
     </th:block>
 
     <div class="wi-steam__section">
-      <h3 class="wi-steam__section-title">游戏库</h3>
+      <h3 class="wi-steam__section-title" th:text="#{steam.gameLibrary}">Game Library</h3>
       <div class="wi-steam__games-grid">
         <article class="wi-steam__game-card" th:each="game : ${games.items}">
           <a
@@ -146,11 +146,11 @@ import Layout from "../layouts/Layout.astro";
           <div class="wi-steam__game-body">
             <h4 class="wi-steam__game-name" th:text="${game.name}"></h4>
             <div class="wi-steam__game-meta">
-              <span class="wi-steam__game-time" th:text="${game.playtimeFormatted} ?: '0 小时'"></span>
+              <span class="wi-steam__game-time" th:text="${game.playtimeFormatted} ?: #{steam.hours}"></span>
               <span
                 class="wi-steam__game-last"
                 th:if="${!#strings.isEmpty(game.lastPlayedFormatted)}"
-                th:text="|最后游玩 ${game.lastPlayedFormatted}|"
+                th:text="#{steam.lastPlayed(${game.lastPlayedFormatted})}"
               ></span>
             </div>
           </div>
@@ -166,13 +166,13 @@ import Layout from "../layouts/Layout.astro";
         class="wi-steam__page-btn"
         th:if="${games.hasPrevious()}"
         th:href="${games.prevUrl}"
-      >上一页</a>
+      th:text="#{common.newer}">Previous</a>
       <span class="wi-steam__page-spacer" th:if="${games.hasPrevious() and games.hasNext()}"></span>
       <a
         class="wi-steam__page-btn"
         th:if="${games.hasNext()}"
         th:href="${games.nextUrl}"
-      >下一页</a>
+      th:text="#{common.older}">Next</a>
     </nav>
     </div>
   </section>

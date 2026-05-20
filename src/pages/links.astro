@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout wide>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.links?.links_page_title ?: '友情链接'} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.links?.links_page_title ?: #messages.msg('links.title')} - ${site.title}|"></title>
   </Fragment>
 
   <section
@@ -16,11 +16,11 @@ import Layout from "../layouts/Layout.astro";
       <div class="wi-links__header">
         <h1
           class="wi-links__title"
-          th:text="${theme.config?.links?.links_page_title ?: '友情链接'}"
+          th:text="${theme.config?.links?.links_page_title ?: #messages.msg('links.title')}"
         >
           友情链接
         </h1>
-        <p class="wi-links__subtitle">山水一程，三生有幸</p>
+        <p class="wi-links__subtitle" th:text="#{links.subtitle}">Mountains and rivers, a journey of a thousand miles</p>
         <span class="wi-page-accent"></span>
       </div>
 
@@ -154,6 +154,7 @@ import Layout from "../layouts/Layout.astro";
     text-decoration: none;
     color: inherit;
     overflow: hidden;
+    display: flex;
   }
 
   .wi-links__card-glow {
@@ -184,6 +185,7 @@ import Layout from "../layouts/Layout.astro";
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
+    flex: 1;
     transition:
       transform var(--duration-normal) var(--ease-out-expo),
       box-shadow var(--duration-normal) var(--ease-out-expo),

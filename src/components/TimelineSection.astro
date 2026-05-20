@@ -6,7 +6,7 @@
 >
   <div class="wi-container">
     <div class="wi-section__header">
-      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_timeline_title ?: '时间线'}">时间线</h2>
+      <h2 class="wi-section__title" th:text="${theme.config?.home?.home_timeline_title ?: #messages.msg('common.timeline')}">时间线</h2>
       <span class="wi-section__accent"></span>
     </div>
 

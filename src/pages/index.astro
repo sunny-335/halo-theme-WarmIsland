@@ -13,6 +13,7 @@ import HeroSection from "../components/HeroSection.astro";
   <div
     class="wi-home-content"
     th:classappend="${theme.config?.hero?.hero_enabled != false} ? 'wi-home-content--with-hero'"
+    th:attr="data-i18n-all-loaded=#{common.allLoaded},data-i18n-loading=#{common.loading},data-i18n-words=#{common.words},data-i18n-read-time=#{common.readTime},data-i18n-views=#{common.views}"
   >
   <section
     class="wi-home-pinned"
@@ -20,7 +21,7 @@ import HeroSection from "../components/HeroSection.astro";
   >
     <div class="wi-container">
       <div class="wi-section__header">
-        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_pinned_title ?: '置顶'}">置顶</h2>
+        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_pinned_title ?: #messages.msg('hero.pinned')}">置顶</h2>
       </div>
       <div class="wi-pinned">
         <a
@@ -65,7 +66,7 @@ import HeroSection from "../components/HeroSection.astro";
   <section class="wi-home-posts" id="wi-home-posts">
     <div class="wi-container">
       <div class="wi-section__header">
-        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_posts_title ?: '文章'}">文章</h2>
+        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_posts_title ?: #messages.msg('hero.posts')}">文章</h2>
       </div>
       <div class="wi-flow" id="wi-post-grid">
         <article
@@ -128,7 +129,7 @@ import HeroSection from "../components/HeroSection.astro";
                   class="wi-flow__stat"
                   th:if="${theme.config?.home?.home_card_show_visit ?: true}"
                 >
-                  <th:block th:text="${post.stats?.visit ?: 0}"></th:block> 阅读
+                  <th:block th:text="${post.stats?.visit ?: 0}"></th:block> <th:block th:text="#{common.views}">阅读</th:block>
                 </span>
               </div>
             </div>
@@ -152,7 +153,7 @@ import HeroSection from "../components/HeroSection.astro";
           th:if="${posts.hasPrevious()}"
           th:href="@{${posts.prevUrl}}"
           class="wi-pagination__prev"
-          th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
+          th:text="${theme.config?.home?.home_label_newer ?: #messages.msg('common.newer')}"
         >&larr; 较新</a>
         <span
           class="wi-pagination__info"
@@ -162,18 +163,18 @@ import HeroSection from "../components/HeroSection.astro";
           th:if="${posts.hasNext()}"
           th:href="@{${posts.nextUrl}}"
           class="wi-pagination__next"
-          th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
+          th:text="${theme.config?.home?.home_label_older ?: #messages.msg('common.older')}"
         >较旧 &rarr;</a>
       </nav>
 
       <div
         th:if="${posts.hasNext() and theme.config?.home?.home_post_loading == 'infinite_scroll'}"
         id="wi-infinite-scroll-sentinel"
-        th:attr="data-next-url=${posts.nextUrl}, data-all-loaded-text=${theme.config?.home?.home_label_all_loaded ?: '已加载全部文章'}"
+        th:attr="data-next-url=${posts.nextUrl}, data-all-loaded-text=${theme.config?.home?.home_label_all_loaded ?: #messages.msg('common.allLoaded')}"
       >
         <div class="wi-infinite-scroll__loader">
           <div class="wi-infinite-scroll__spinner"></div>
-          <span th:text="${theme.config?.home?.home_label_loading ?: '加载中...'}">加载中...</span>
+          <span th:text="${theme.config?.home?.home_label_loading ?: #messages.msg('common.loading')}">加载中...</span>
         </div>
       </div>
 
@@ -181,7 +182,7 @@ import HeroSection from "../components/HeroSection.astro";
         th:if="${!posts.hasNext() and posts.totalPages gt 1 and theme.config?.home?.home_post_loading == 'infinite_scroll'}"
         class="wi-infinite-scroll__end"
       >
-        <span th:text="${theme.config?.home?.home_label_all_loaded ?: '已加载全部文章'}">已加载全部文章</span>
+        <span th:text="${theme.config?.home?.home_label_all_loaded ?: #messages.msg('common.allLoaded')}">已加载全部文章</span>
       </div>
     </div>
   </section>
@@ -194,9 +195,10 @@ import HeroSection from "../components/HeroSection.astro";
     if (!sentinel) return;
 
     var grid = document.getElementById("wi-post-grid");
+    var i18nEl = document.querySelector(".wi-home-content");
     var loading = false;
     var nextUrl = sentinel.getAttribute("data-next-url");
-    var allLoadedText = sentinel.getAttribute("data-all-loaded-text") || "已加载全部文章";
+    var allLoadedText = sentinel.getAttribute("data-all-loaded-text") || (i18nEl && i18nEl.getAttribute("data-i18n-all-loaded")) || "All posts loaded";
 
     var observer = new IntersectionObserver(
       function (entries) {
@@ -299,6 +301,71 @@ import HeroSection from "../components/HeroSection.astro";
 
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    var hero = document.getElementById("wi-hero");
+    var content = document.querySelector(".wi-home-content--with-hero");
+    if (!hero || !content) return;
+
+    var isSnapping = false;
+    var heroHeight = window.innerHeight;
+
+    window.addEventListener("resize", function () {
+      heroHeight = window.innerHeight;
+    }, { passive: true });
+
+    function snapTo(targetY) {
+      if (isSnapping) return;
+      isSnapping = true;
+      window.scrollTo({ top: targetY, behavior: "smooth" });
+      var timer = setTimeout(function () {
+        isSnapping = false;
+      }, 800);
+      if ("onscrollend" in window) {
+        window.addEventListener(
+          "scrollend",
+          function () {
+            clearTimeout(timer);
+            isSnapping = false;
+          },
+          { once: true }
+        );
+      }
+    }
+
+    window.addEventListener("wheel", function (e) {
+      if (isSnapping) {
+        e.preventDefault();
+        return;
+      }
+      var y = window.scrollY;
+      if (y < heroHeight && e.deltaY > 0) {
+        e.preventDefault();
+        snapTo(heroHeight);
+      } else if (y > 0 && y <= heroHeight && e.deltaY < 0) {
+        e.preventDefault();
+        snapTo(0);
+      }
+    }, { passive: false });
+
+    var touchStartY = 0;
+    window.addEventListener("touchstart", function (e) {
+      touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    window.addEventListener("touchend", function (e) {
+      if (isSnapping) return;
+      var diff = touchStartY - e.changedTouches[0].clientY;
+      var y = window.scrollY;
+      if (y < heroHeight && diff > 30) {
+        snapTo(heroHeight);
+      } else if (y > 0 && y <= heroHeight && diff < -30) {
+        snapTo(0);
+      }
+    }, { passive: true });
   })();
 </script>
 
