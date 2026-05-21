@@ -6,14 +6,10 @@
   import 'lightgallery/css/lg-zoom.css';
   import 'lightgallery/css/lg-thumbnail.css';
   import 'lightgallery/css/lg-fullscreen.css';
-  import 'lightgallery/css/lg-rotate.css';
-  import 'lightgallery/css/lg-autoplay.css';
   import lightGallery from 'lightgallery';
   import lgZoom from 'lightgallery/plugins/zoom';
   import lgThumbnail from 'lightgallery/plugins/thumbnail';
   import lgFullscreen from 'lightgallery/plugins/fullscreen';
-  import lgRotate from 'lightgallery/plugins/rotate';
-  import lgAutoplay from 'lightgallery/plugins/autoplay';
 
   var _initialized = new WeakSet();
 
@@ -74,7 +70,7 @@
   function createLgConfig() {
     return {
       selector: '.wi-lightgallery-item',
-      plugins: [lgZoom, lgThumbnail, lgFullscreen, lgRotate, lgAutoplay],
+      plugins: [lgZoom, lgThumbnail, lgFullscreen],
       speed: 280,
       mode: 'lg-fade',
       licenseKey: '0000-0000-0000-0000',
@@ -89,15 +85,6 @@
       showZoomInOutIcons: true,
       toggleThumb: true,
       allowMediaOverlap: true,
-      autoplay: true,
-      slideShowAutoplay: false,
-      slideShowInterval: 5000,
-      progressBar: true,
-      autoplayControls: true,
-      forceSlideShowAutoplay: false,
-      rotate: true,
-      flipHorizontal: false,
-      flipVertical: false,
       mobileSettings: {
         controls: true,
         showCloseIcon: true,
@@ -272,8 +259,18 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initLightGallery);
+    document.addEventListener('DOMContentLoaded', function() {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(initLightGallery, { timeout: 2000 });
+      } else {
+        setTimeout(initLightGallery, 200);
+      }
+    });
   } else {
-    initLightGallery();
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initLightGallery, { timeout: 2000 });
+    } else {
+      setTimeout(initLightGallery, 200);
+    }
   }
 </script>

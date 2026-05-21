@@ -135,11 +135,30 @@ article_related_title: "猜你喜欢"
 
 | 平台 | 说明 |
 | --- | --- |
+| QQ | 点击后弹出 QQ 分享窗口，自动携带文章标题和链接 |
+| 微信 | 扫码分享到微信（生成文章完整 URL 的二维码） |
 | 微博 | 分享到新浪微博 |
 | X (Twitter) | 分享到 X |
 | Facebook | 分享到 Facebook |
 | Telegram | 分享到 Telegram |
-| 复制链接 | 复制文章链接到剪贴板 |
+| 复制链接 | 复制文章链接到剪贴板（始终显示） |
+
+#### 分享渠道（article_share_channels）
+
+选择要显示的分享按钮，可多选。默认选中 QQ、微信、微博。复制链接按钮始终显示，不可关闭。
+
+| 渠道 | 默认选中 |
+| --- | --- |
+| QQ | ✅ |
+| 微信 | ✅ |
+| 微博 | ✅ |
+| X (Twitter) | ❌ |
+| Facebook | ❌ |
+| Telegram | ❌ |
+
+::: info 图标来源
+分享按钮图标来自 [Font Awesome](https://fontawesome.com/)（Free v7.2.0，CC BY 4.0 / SIL OFL 1.1 协议）和 [Simple Icons](https://simpleicons.org/)（CC0 协议）。微信图标点击后会弹出二维码弹窗，用户可使用微信扫码分享。
+:::
 
 #### 分享区域标题（article_share_title）
 
@@ -148,10 +167,14 @@ article_related_title: "猜你喜欢"
 ```yaml
 article_show_share: true
 article_share_title: "分享这篇文章"
+article_share_channels:
+  - qq
+  - wechat
+  - weibo
 ```
 
 ::: tip
-分享功能会自动携带文章标题和链接，无需手动配置分享内容。移动端会优先显示适合移动端的分享方式。
+分享功能会自动携带文章标题和完整链接，无需手动配置分享内容。微信分享通过二维码实现，二维码内容为文章的完整 URL（包含域名），用户扫码后可直接打开文章。QQ 分享通过弹窗方式打开 QQ 分享页面。移动端会优先显示适合移动端的分享方式。
 :::
 
 ## 阅读增强功能

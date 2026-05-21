@@ -2,8 +2,8 @@
 import "../styles/main.scss";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
-import ScrollReveal from "../components/ScrollReveal.vue";
-import CursorGlow from "../components/CursorGlow.vue";
+import ScrollReveal from "../components/ScrollReveal.astro";
+import CursorGlow from "../components/CursorGlow.astro";
 import MobileMenu from "../components/MobileMenu.astro";
 
 interface Props {
@@ -17,10 +17,11 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
 ---
 
 <!doctype html>
-<html class={home ? 'wi-home-snap' : ''} th:lang="${#locale.toLanguageTag()}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'" th:attr="data-lang=${theme.config?.basic?.language}">
+<html class={home ? 'wi-home-snap' : ''} style="overflow-x:hidden" th:lang="${#locale.toLanguageTag()}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'" th:attr="data-lang=${theme.config?.basic?.language}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#faf7f2" />
     <meta th:if="${theme.config?.basic?.site_description}" name="description" th:content="${theme.config?.basic?.site_description}" />
     <script is:inline th:attr="data-scheme=${theme.config?.style?.color_scheme}">
       (function () {
@@ -45,9 +46,13 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
         if (isDark) {
           document.documentElement.classList.add("dark");
           document.documentElement.setAttribute("data-color-scheme", "dark");
+          var tc = document.querySelector('meta[name="theme-color"]');
+          if (tc) tc.setAttribute("content", "#1a1614");
         } else {
           document.documentElement.classList.remove("dark");
           document.documentElement.setAttribute("data-color-scheme", "light");
+          var tc = document.querySelector('meta[name="theme-color"]');
+          if (tc) tc.setAttribute("content", "#faf7f2");
         }
       })();
     </script>
@@ -58,6 +63,8 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     <link rel="alternate" type="application/rss+xml" th:title="${site.title}" th:href="@{/feed.xml}" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" />
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="stylesheet" th:href="@{/assets/fonts/LXGWWenKai/result.css}" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" th:href="@{/assets/fonts/LXGWWenKai/result.css}" /></noscript>
     <style is:inline th:if="${theme.config?.style?.accent_color}" th:utext="${':root { --accent: ' + theme.config?.style?.accent_color + '; --accent-hover: ' + theme.config?.style?.accent_color + '; }'}">/*accent*/</style>
     <style is:inline th:if="${theme.config?.style?.border_radius == 'small'}" th:utext="${':root { --radius-sm: 4px; --radius-md: 8px; --radius-lg: 16px; }'}">/*radius*/</style>
     <style is:inline th:if="${theme.config?.style?.border_radius == 'medium' or theme.config?.style?.border_radius == null}" th:utext="${':root { --radius-sm: 8px; --radius-md: 12px; --radius-lg: 24px; }'}">/*radius*/</style>
@@ -71,8 +78,19 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
   <body class="wi-body">
     <script is:inline>
       (function(){
-        var lang=document.documentElement.getAttribute("data-lang");
-        if(lang&&lang!=="auto"){
+        try{
+          var lang=document.documentElement.getAttribute("data-lang");
+          if(!lang||lang==="auto"||lang==="null"||lang===""){
+            var cookies=document.cookie.split(";");
+            for(var i=0;i<cookies.length;i++){
+              var c=cookies[i].trim();
+              if(c.indexOf("language=")===0){
+                document.cookie="language=;path=/;max-age=0;SameSite=Lax";
+                break;
+              }
+            }
+            return;
+          }
           var tag=lang.replace(/_/g,"-");
           var cookies=document.cookie.split(";");
           var current="";
@@ -82,19 +100,8 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
           }
           if(current!==tag){
             document.cookie="language="+tag+";path=/;max-age=31536000;SameSite=Lax";
-            window.location.reload();
           }
-        }else if(lang==="auto"){
-          var cookies2=document.cookie.split(";");
-          var hasCookie=false;
-          for(var j=0;j<cookies2.length;j++){
-            if(cookies2[j].trim().indexOf("language=")===0){hasCookie=true;break;}
-          }
-          if(hasCookie){
-            document.cookie="language=;path=/;max-age=0;SameSite=Lax";
-            window.location.reload();
-          }
-        }
+        }catch(e){}
       })();
     </script>
     <Navbar />
@@ -109,8 +116,8 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     </main>
     <Footer />
     <MobileMenu />
-    <ScrollReveal th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_scroll_reveal != false}" client:visible />
-    <CursorGlow th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_cursor_glow == true}" client:idle />
+    <ScrollReveal th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_scroll_reveal != false}" />
+    <CursorGlow th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_cursor_glow == true}" />
   </body>
 </html>
 

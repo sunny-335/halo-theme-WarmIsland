@@ -548,6 +548,8 @@ import HeroSection from "../components/HeroSection.astro";
   .wi-home-posts {
     padding-block: 2rem;
     background: var(--bg);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
   }
 
   .wi-flow {
@@ -814,6 +816,16 @@ import HeroSection from "../components/HeroSection.astro";
       flex-direction: column;
       align-items: flex-start;
       gap: 0.4rem;
+    }
+
+    .wi-flow__tag-link {
+      padding: 4px 10px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wi-pinned__card {
+      border-radius: 12px;
     }
   }
 </style>

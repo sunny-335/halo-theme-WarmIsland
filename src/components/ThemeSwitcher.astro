@@ -1,0 +1,93 @@
+---
+---
+
+<button
+  class="theme-toggle"
+  type="button"
+  id="wi-theme-toggle"
+  aria-label="切换主题"
+  title="切换主题"
+>
+  <svg class="theme-toggle__icon theme-toggle__icon--sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+  <svg class="theme-toggle__icon theme-toggle__icon--moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<script is:inline>
+  (function(){
+    var btn = document.getElementById("wi-theme-toggle");
+    if (!btn) return;
+    var sunIcon = btn.querySelector(".theme-toggle__icon--sun");
+    var moonIcon = btn.querySelector(".theme-toggle__icon--moon");
+    var isDark = document.documentElement.classList.contains("dark");
+
+    function updateIcons() {
+      if (isDark) {
+        sunIcon.style.display = "";
+        moonIcon.style.display = "none";
+      } else {
+        sunIcon.style.display = "none";
+        moonIcon.style.display = "";
+      }
+    }
+
+    var labelEl = document.querySelector("[data-label]");
+    if (labelEl) {
+      var label = labelEl.getAttribute("data-label") || "切换主题";
+      btn.setAttribute("aria-label", label);
+      btn.setAttribute("title", label);
+    }
+
+    updateIcons();
+
+    btn.addEventListener("click", function() {
+      document.documentElement.classList.add("wi-theme-transition");
+      isDark = !isDark;
+      document.documentElement.classList.toggle("dark", isDark);
+      document.documentElement.setAttribute("data-color-scheme", isDark ? "dark" : "light");
+      localStorage.setItem("wi-theme", isDark ? "dark" : "light");
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute("content", isDark ? "#1a1614" : "#faf7f2");
+      updateIcons();
+      setTimeout(function() {
+        document.documentElement.classList.remove("wi-theme-transition");
+      }, 300);
+    });
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--bg-raised);
+    color: var(--ink);
+  }
+</style>

@@ -193,6 +193,7 @@ table {
   z-index: 1;
   background-color: var(--bg);
   width: 100%;
+  overflow-x: hidden;
 }
 
 .wi-main--wide.wi-main--home {
@@ -209,6 +210,7 @@ table {
   max-width: 800px;
   margin: 0 auto;
   padding-inline: clamp(1rem, 3vw, 2rem);
+  overflow-x: hidden;
 }
 
 .wi-content-wrap--wide {

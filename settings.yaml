@@ -334,6 +334,28 @@ spec:
           key: article_share_title
           label: 分享区域标题
           if: "$get(article_show_share).value !== false"
+        - $formkit: checkbox
+          name: article_share_channels
+          key: article_share_channels
+          label: 分享渠道
+          if: "$get(article_show_share).value !== false"
+          options:
+            - label: QQ
+              value: qq
+            - label: 微信
+              value: wechat
+            - label: 微博
+              value: weibo
+            - label: X (Twitter)
+              value: twitter
+            - label: Facebook
+              value: facebook
+            - label: Telegram
+              value: telegram
+          value:
+            - qq
+            - wechat
+            - weibo
     - group: moments
       label: 瞬间
       formSchema:

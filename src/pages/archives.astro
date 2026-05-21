@@ -123,6 +123,8 @@ import Layout from "../layouts/Layout.astro";
   .wi-archives__timeline {
     display: grid;
     gap: var(--space-3xl);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1000px;
   }
 
   .wi-archives__group {
@@ -257,6 +259,10 @@ import Layout from "../layouts/Layout.astro";
 
     .wi-archives__items {
       padding-left: var(--space-md);
+    }
+
+    .wi-archives__entry-title {
+      font-size: var(--text-base);
     }
   }
 </style>

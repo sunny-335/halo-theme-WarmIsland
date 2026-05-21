@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import LightGallery from "../components/LightGallery.astro";
 ---
 
-<Layout wide={true}>
+<Layout>
   <Fragment slot="head">
     <title th:text="|${post.spec.title} - ${site.title}|"></title>
     <meta th:if="${post.spec.cover}" property="og:image" th:content="${post.spec.cover}" />
@@ -48,7 +48,8 @@ import LightGallery from "../components/LightGallery.astro";
           class="wi-post__cover"
           th:src="${post.spec.cover}"
           th:alt="${post.spec.title}"
-          loading="lazy"
+          fetchpriority="high"
+          loading="eager"
           decoding="async"
         />
       </div>
@@ -156,24 +157,41 @@ import LightGallery from "../components/LightGallery.astro";
       </button>
     </div>
 
-    <div class="wi-post__share" th:if="${theme.config?.article?.article_show_share != false}" th:with="shareUrl=${post.status.permalink}, shareTitle=${post.spec.title}">
+    <div class="wi-post__share" th:if="${theme.config?.article?.article_show_share != false}" th:with="shareUrl=${post.status.permalink}, shareTitle=${post.spec.title}, shareChannels=${theme.config?.article?.article_share_channels ?: 'qq,wechat,weibo'}">
       <span class="wi-post__share-label" th:text="${theme.config?.article?.article_share_title ?: #messages.msg('share.title')}">分享</span>
       <div class="wi-post__share-buttons">
-        <a class="wi-post__share-btn wi-post__share-btn--weibo" th:href="'https://service.weibo.com/share/share.php?url=' + ${shareUrl} + '&title=' + ${shareTitle}" target="_blank" rel="noopener noreferrer" title="Weibo">
+        <button th:if="${#strings.contains(shareChannels, 'qq')}" class="wi-post__share-btn wi-post__share-btn--qq" type="button" th:attr="data-url=${shareUrl},data-title=${shareTitle}" title="QQ">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="18" height="18" fill="currentColor"><!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--><path d="M530.1 484.4C518.6 485.8 485.2 431.7 485.2 431.7C485.2 463 469.1 503.9 434.2 533.5C451 538.7 489 552.7 480 567.9C472.7 580.2 354.5 575.8 320.4 571.9C286.3 575.7 168.1 580.2 160.8 567.9C151.8 552.7 189.7 538.7 206.6 533.5C171.7 504 155.5 463.1 155.5 431.7C155.5 431.7 122.2 485.8 110.6 484.4C105.2 483.8 98.2 454.8 119.9 384.7C130.2 351.7 141.9 324.2 160 278.9C156.9 162 205.2 63.9 320.3 63.9C434 63.9 483.5 160 480.6 278.9C498.7 324.1 510.5 351.8 520.7 384.7C542.5 454.8 535.4 483.8 530 484.4z"/></svg>
+        </button>
+        <button th:if="${#strings.contains(shareChannels, 'wechat')}" class="wi-post__share-btn wi-post__share-btn--wechat" type="button" th:attr="data-url=${shareUrl}" title="WeChat">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.045c.134 0 .24-.11.24-.245 0-.06-.024-.12-.04-.178l-.325-1.233a.492.492 0 01.177-.554C23.025 18.265 24 16.572 24 14.71c0-3.382-3.125-5.852-7.062-5.852zm-2.095 2.96c.535 0 .969.44.969.983a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.544.434-.983.97-.983zm4.19 0c.535 0 .969.44.969.983a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.544.434-.983.97-.983z"/></svg>
+        </button>
+        <a th:if="${#strings.contains(shareChannels, 'weibo')}" class="wi-post__share-btn wi-post__share-btn--weibo" th:href="'https://service.weibo.com/share/share.php?url=' + ${shareUrl} + '&title=' + ${shareTitle}" target="_blank" rel="noopener noreferrer" title="Weibo">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M10.098 20.323c-3.977.391-7.414-1.406-7.672-4.02-.259-2.609 2.759-5.047 6.74-5.441 3.979-.394 7.413 1.404 7.671 4.018.259 2.6-2.759 5.049-6.739 5.443zM9.05 17.219c-.384.616-1.208.884-1.829.602-.612-.279-.793-.991-.406-1.593.379-.595 1.176-.861 1.793-.583.631.283.822.997.442 1.574zm1.27-1.627c-.141.237-.449.353-.689.253-.236-.09-.307-.361-.164-.584.14-.227.44-.34.682-.246.24.085.318.352.171.577zm.176-2.719c-1.893-.494-4.033.45-4.857 2.118-.836 1.704-.026 3.591 1.886 4.21 1.983.642 4.318-.341 5.132-2.145.8-1.752-.145-3.681-2.161-4.183zM17.616 3.68c-.998-.27-1.652-.068-1.877.136-.225.207-.094.544.28.726.377.186.856.072 1.122-.258.268-.328.391-.545.475-.604zm2.471 1.947c-1.278-1.399-3.398-1.878-5.217-1.176-1.818.704-2.478 2.523-1.527 4.099.956 1.582 3.168 2.202 5.011 1.395 1.84-.804 2.977-2.899 1.733-4.318zM20.4 4.44c1.462 1.599.936 4.076-.878 5.478-1.816 1.402-4.556 1.402-6.128-.006-1.573-1.404-1.3-3.834.554-5.314 1.854-1.478 4.99-1.759 6.452-.158z"/></svg>
         </a>
-        <a class="wi-post__share-btn wi-post__share-btn--twitter" th:href="'https://twitter.com/intent/tweet?url=' + ${shareUrl} + '&text=' + ${shareTitle}" target="_blank" rel="noopener noreferrer" title="X">
+        <a th:if="${#strings.contains(shareChannels, 'twitter')}" class="wi-post__share-btn wi-post__share-btn--twitter" th:href="'https://twitter.com/intent/tweet?url=' + ${shareUrl} + '&text=' + ${shareTitle}" target="_blank" rel="noopener noreferrer" title="X">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
-        <a class="wi-post__share-btn wi-post__share-btn--facebook" th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${shareUrl}" target="_blank" rel="noopener noreferrer" title="Facebook">
+        <a th:if="${#strings.contains(shareChannels, 'facebook')}" class="wi-post__share-btn wi-post__share-btn--facebook" th:href="'https://www.facebook.com/sharer/sharer.php?u=' + ${shareUrl}" target="_blank" rel="noopener noreferrer" title="Facebook">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         </a>
-        <a class="wi-post__share-btn wi-post__share-btn--telegram" th:href="'https://t.me/share/url?url=' + ${shareUrl} + '&text=' + ${shareTitle}" target="_blank" rel="noopener noreferrer" title="Telegram">
+        <a th:if="${#strings.contains(shareChannels, 'telegram')}" class="wi-post__share-btn wi-post__share-btn--telegram" th:href="'https://t.me/share/url?url=' + ${shareUrl} + '&text=' + ${shareTitle}" target="_blank" rel="noopener noreferrer" title="Telegram">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
         </a>
         <button class="wi-post__share-btn wi-post__share-btn--copy" type="button" th:attr="data-url=${shareUrl}" title="Copy Link">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         </button>
+      </div>
+    </div>
+
+    <div th:if="${theme.config?.article?.article_show_share != false and #strings.contains(theme.config?.article?.article_share_channels ?: 'qq,wechat,weibo', 'wechat')}" class="wi-wechat-qr" id="wi-wechat-qr">
+      <div class="wi-wechat-qr__card">
+        <button class="wi-wechat-qr__close" type="button" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+        <div class="wi-wechat-qr__title" th:text="#{share.wechatQR ?: '微信扫码分享'}">微信扫码分享</div>
+        <canvas class="wi-wechat-qr__canvas" id="wi-wechat-qr-canvas"></canvas>
+        <div class="wi-wechat-qr__hint" th:text="#{share.wechatHint ?: '打开微信，扫描二维码即可分享'}">打开微信，扫描二维码即可分享</div>
       </div>
     </div>
 
@@ -283,8 +301,10 @@ import LightGallery from "../components/LightGallery.astro";
     href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css"
   />
 
-  <script is:inline src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
-  <script is:inline src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+  <script th:if="${theme.config?.article?.article_show_share != false and #strings.contains(theme.config?.article?.article_share_channels ?: 'qq,wechat,weibo', 'wechat')}" is:inline defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+  <script is:inline defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script is:inline defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
   <script is:inline>
     (function () {
       if (typeof Prism !== "undefined") {
@@ -326,6 +346,15 @@ import LightGallery from "../components/LightGallery.astro";
 
       var body = document.getElementById("wi-post-body");
       if (!body) return;
+
+      body.querySelectorAll("img").forEach(function(img) {
+        if (!img.hasAttribute("loading")) {
+          img.setAttribute("loading", "lazy");
+        }
+        if (!img.hasAttribute("decoding")) {
+          img.setAttribute("decoding", "async");
+        }
+      });
 
       var showWordCount = document.getElementById("wi-word-count");
       var showReadTime = document.getElementById("wi-read-time");
@@ -491,6 +520,24 @@ import LightGallery from "../components/LightGallery.astro";
       var tocDrawer = document.getElementById("wi-toc-drawer");
       var tocDrawerNav = document.getElementById("wi-toc-drawer-nav");
 
+      if (tocFab) {
+        var footerEl = document.querySelector("footer");
+        function checkTocFabVisibility() {
+          if (!footerEl) return;
+          var footerRect = footerEl.getBoundingClientRect();
+          var viewportHeight = window.innerHeight;
+          if (footerRect.top < viewportHeight) {
+            tocFab.style.opacity = "0";
+            tocFab.style.pointerEvents = "none";
+          } else {
+            tocFab.style.opacity = "1";
+            tocFab.style.pointerEvents = "";
+          }
+        }
+        window.addEventListener("scroll", checkTocFabVisibility, { passive: true });
+        checkTocFabVisibility();
+      }
+
       if (tocFab && tocDrawer && tocDrawerNav && tocNav) {
         tocDrawerNav.innerHTML = tocNav.innerHTML;
 
@@ -534,7 +581,8 @@ import LightGallery from "../components/LightGallery.astro";
       var copyBtn = document.querySelector(".wi-post__share-btn--copy");
       if (copyBtn) {
         copyBtn.addEventListener("click", function () {
-          var url = copyBtn.getAttribute("data-url");
+          var rawUrl = copyBtn.getAttribute("data-url");
+          var url = rawUrl.startsWith("http") ? rawUrl : window.location.origin + rawUrl;
           if (navigator.clipboard) {
             navigator.clipboard.writeText(url).then(function () {
               copyBtn.classList.add("wi-post__share-btn--copied");
@@ -549,6 +597,83 @@ import LightGallery from "../components/LightGallery.astro";
             document.body.removeChild(ta);
             copyBtn.classList.add("wi-post__share-btn--copied");
             setTimeout(function () { copyBtn.classList.remove("wi-post__share-btn--copied"); }, 2000);
+          }
+        });
+      }
+
+      var qqBtn = document.querySelector(".wi-post__share-btn--qq");
+      if (qqBtn) {
+        qqBtn.addEventListener("click", function () {
+          var rawUrl = qqBtn.getAttribute("data-url") || window.location.pathname;
+          var url = rawUrl.startsWith("http") ? rawUrl : window.location.origin + rawUrl;
+          var title = qqBtn.getAttribute("data-title") || document.title;
+          var shareUrl = "https://connect.qq.com/widget/shareqq/index.html?url=" + encodeURIComponent(url) + "&title=" + encodeURIComponent(title) + "&summary=" + encodeURIComponent(title) + "&site=" + encodeURIComponent(window.location.origin);
+          window.open(shareUrl, "_blank", "width=600,height=520,scrollbars=yes");
+        });
+      }
+
+      var wechatBtn = document.querySelector(".wi-post__share-btn--wechat");
+      var wechatQr = document.getElementById("wi-wechat-qr");
+      var wechatQrCanvas = document.getElementById("wi-wechat-qr-canvas");
+      var wechatQrClose = wechatQr ? wechatQr.querySelector(".wi-wechat-qr__close") : null;
+      var wechatQrGenerated = false;
+
+      function generateQr(text, canvas) {
+        var size = 200;
+        var cellSize = 5;
+        var qr = null;
+        try {
+          var typeNumber = 0;
+          var errorCorrectionLevel = "M";
+          var qrData = [];
+          for (var i = 0; i < text.length; i++) {
+            qrData.push(text.charCodeAt(i));
+          }
+          qr = qrcode(typeNumber, errorCorrectionLevel);
+          qr.addData(text);
+          qr.make();
+        } catch (e) {
+          return;
+        }
+        var moduleCount = qr.getModuleCount();
+        var margin = 4;
+        var totalCells = moduleCount + margin * 2;
+        var canvasSize = totalCells * cellSize;
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+        ctx.fillStyle = "#000000";
+        for (var row = 0; row < moduleCount; row++) {
+          for (var col = 0; col < moduleCount; col++) {
+            if (qr.isDark(row, col)) {
+              ctx.fillRect((col + margin) * cellSize, (row + margin) * cellSize, cellSize, cellSize);
+            }
+          }
+        }
+      }
+
+      if (wechatBtn && wechatQr) {
+        wechatBtn.addEventListener("click", function () {
+          wechatQr.classList.add("wi-wechat-qr--visible");
+          if (!wechatQrGenerated && wechatQrCanvas) {
+            var rawUrl = wechatBtn.getAttribute("data-url") || window.location.pathname;
+            var url = rawUrl.startsWith("http") ? rawUrl : window.location.origin + rawUrl;
+            if (typeof qrcode !== "undefined") {
+              generateQr(url, wechatQrCanvas);
+              wechatQrGenerated = true;
+            }
+          }
+        });
+        if (wechatQrClose) {
+          wechatQrClose.addEventListener("click", function () {
+            wechatQr.classList.remove("wi-wechat-qr--visible");
+          });
+        }
+        wechatQr.addEventListener("click", function (e) {
+          if (e.target === wechatQr) {
+            wechatQr.classList.remove("wi-wechat-qr--visible");
           }
         });
       }
@@ -625,6 +750,7 @@ import LightGallery from "../components/LightGallery.astro";
     display: grid;
     gap: 1rem;
     padding-block: 1rem;
+    overflow-x: hidden;
   }
 
   .wi-post__header {
@@ -636,7 +762,8 @@ import LightGallery from "../components/LightGallery.astro";
   }
 
   .wi-post__cover-wrap {
-    margin-inline: calc(-1 * var(--space-xl));
+    border-radius: 12px;
+    overflow: hidden;
   }
 
   .wi-post__cover {
@@ -725,8 +852,6 @@ import LightGallery from "../components/LightGallery.astro";
 
   .wi-post__body {
     width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
     font-size: 1rem;
     line-height: 1.75;
     color: #3d3530;
@@ -897,7 +1022,7 @@ import LightGallery from "../components/LightGallery.astro";
     align-items: center;
     justify-content: center;
     box-shadow: var(--shadow-md);
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, opacity 0.3s ease;
   }
 
   .wi-toc-fab:hover {
@@ -908,16 +1033,25 @@ import LightGallery from "../components/LightGallery.astro";
   @media (max-width: 1279px) {
     .wi-toc-fab {
       display: inline-flex;
-      bottom: 152px;
+      bottom: 24px;
     }
   }
 
   @media (max-width: 640px) {
     .wi-toc-fab {
       right: 16px;
-      bottom: 152px;
+      bottom: 24px;
       width: 40px;
       height: 40px;
+    }
+
+    .wi-post__share-btn {
+      width: 44px;
+      height: 44px;
+    }
+
+    .wi-like-btn {
+      padding: 0.75rem 1.75rem;
     }
   }
 
@@ -1099,6 +1233,18 @@ import LightGallery from "../components/LightGallery.astro";
     transform: translateY(-1px);
   }
 
+  .wi-post__share-btn--qq:hover {
+    color: #12b7f5;
+    border-color: #12b7f5;
+    background: color-mix(in srgb, #12b7f5 6%, var(--bg));
+  }
+
+  .wi-post__share-btn--wechat:hover {
+    color: #07c160;
+    border-color: #07c160;
+    background: color-mix(in srgb, #07c160 6%, var(--bg));
+  }
+
   .wi-post__share-btn--weibo:hover {
     color: #e6162d;
     border-color: #e6162d;
@@ -1136,10 +1282,82 @@ import LightGallery from "../components/LightGallery.astro";
     position: relative;
   }
 
+  .wi-wechat-qr {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .wi-wechat-qr--visible {
+    display: flex;
+  }
+
+  .wi-wechat-qr__card {
+    background: var(--bg);
+    border-radius: var(--radius-lg, 24px);
+    padding: var(--space-2xl, 2rem);
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    position: relative;
+  }
+
+  .wi-wechat-qr__title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-wechat-qr__canvas {
+    display: block;
+    margin: 0 auto var(--space-md);
+    border-radius: var(--radius-sm, 8px);
+    background: #fff;
+    padding: 8px;
+  }
+
+  .wi-wechat-qr__hint {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    line-height: 1.6;
+  }
+
+  .wi-wechat-qr__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: var(--ink-3);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .wi-wechat-qr__close:hover {
+    background: var(--bg-raised);
+    color: var(--ink);
+  }
+
   .wi-post__comment {
     width: 100%;
     max-width: 600px;
     margin-inline: auto;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
   }
 
   halo\:comment {
@@ -1196,6 +1414,8 @@ import LightGallery from "../components/LightGallery.astro";
   .wi-post__related {
     padding-top: var(--space-xl);
     border-top: 1px solid var(--rule);
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
   }
 
   .wi-post__related-title {
@@ -1275,29 +1495,51 @@ import LightGallery from "../components/LightGallery.astro";
     .wi-post__related-grid {
       grid-template-columns: 1fr;
     }
-  }
 
-  @media (max-width: 768px) {
     .wi-post__cover-wrap {
-      margin-inline: calc(-1 * var(--space-md));
+      width: calc(100% + 2rem);
+      margin-inline: -1rem;
+      border-radius: 0;
     }
 
     .wi-post__cover {
-      border-radius: 8px;
+      border-radius: 0;
       max-height: 280px;
     }
 
     .wi-post__nav {
-      flex-direction: column;
-      gap: var(--space-md);
+      gap: var(--space-sm);
     }
 
     .wi-post__nav-link {
-      max-width: 100%;
+      max-width: 48%;
+      min-width: 0;
+    }
+
+    .wi-post__nav-title {
+      font-size: var(--text-xs);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .wi-post__nav-link--next {
-      text-align: left;
+      text-align: right;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wi-post__related-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-post__body {
+      font-size: 0.9375rem;
+      line-height: 1.8;
+    }
+
+    .wi-post__title {
+      font-size: clamp(1.5rem, 4vw, 2.8rem);
     }
   }
 </style>

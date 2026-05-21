@@ -470,6 +470,11 @@ import LightGallery from "../components/LightGallery.astro";
     color: var(--accent);
   }
 
+  .wi-moments-page__content {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 800px;
+  }
+
   .wi-moments-page__timeline {
     position: relative;
     display: flex;
@@ -885,6 +890,11 @@ import LightGallery from "../components/LightGallery.astro";
     .wi-moments-page__masonry-media {
       grid-template-columns: repeat(3, 1fr);
       gap: 4px;
+    }
+
+    .wi-moments-page__like-btn,
+    .wi-moments-page__comment-btn {
+      padding: 8px 14px;
     }
   }
 </style>

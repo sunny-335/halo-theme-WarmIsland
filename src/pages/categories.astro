@@ -11,7 +11,7 @@ import Layout from "../layouts/Layout.astro";
     <header class="wi-categories__header">
       <h1 class="wi-categories__title" th:text="#{categories.title}">分类</h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-categories__subtitle" th:text="${#messages.msg('common.categoryCount', ${categories.size})}"></p>
+      <p class="wi-categories__subtitle" th:text="${#messages.msg('common.categoryCount', categories.size())}"></p>
     </header>
 
     <nav class="wi-categories__list" aria-label="Category list">

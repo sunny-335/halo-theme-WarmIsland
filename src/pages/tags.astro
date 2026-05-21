@@ -11,7 +11,7 @@ import Layout from "../layouts/Layout.astro";
     <header class="wi-tags__header">
       <h1 class="wi-tags__title" th:text="#{tags.title}">标签</h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-tags__subtitle" th:text="${#messages.msg('common.tagCount', ${tags.size})}"></p>
+      <p class="wi-tags__subtitle" th:text="${#messages.msg('common.tagCount', tags.size())}"></p>
     </header>
 
     <div class="wi-tags__cloud" role="list" aria-label="Tag list">

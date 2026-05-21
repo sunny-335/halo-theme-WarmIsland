@@ -14,7 +14,7 @@
 
 ## 预览
 
-![WarmIsland Preview](./public/WarmIsland%20Preview.webp)
+![WarmIsland Preview](./WarmIsland%20Preview.webp)
 
 ## 已适配插件
 
@@ -87,3 +87,14 @@ npm run build
 ## 许可
 
 [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
+## 图标来源
+
+本主题使用的图标来自以下开源项目：
+
+| 来源 | 协议 | 用途 |
+| --- | --- | --- |
+| [Font Awesome](https://fontawesome.com/) Free v7.2.0 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) / [SIL OFL 1.1](https://scripts.sil.org/OFL) | QQ 分享图标 |
+| [Simple Icons](https://simpleicons.org/) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | 微博、X、Facebook、Telegram 分享图标 |
+| [Feather Icons](https://feathericons.com/) | [MIT](https://opensource.org/licenses/MIT) | 导航、界面交互图标 |
+| [Halo](https://halo.run/) | [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) | 主题内置图标 |
