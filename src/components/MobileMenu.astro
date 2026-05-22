@@ -16,7 +16,7 @@
             <a
               th:each="menuItem : ${menu.menuItems}"
               th:href="@{${menuItem.status.href}}"
-              th:target="${menuItem.spec.target}"
+              th:target="${menuItem.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
               th:text="${menuItem.status.displayName}"
               class="wi-mobile-menu__link"
               th:data-href="${menuItem.status.href}"

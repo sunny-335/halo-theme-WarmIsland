@@ -32,7 +32,7 @@ docker restart halo
 
 搜索功能依赖 Halo 搜索插件：
 
-1. 确认已安装 [搜索插件](https://www.halo.run/store/apps/app-search-widget)
+1. 确认已安装 [搜索插件](https://www.halo.run/store/apps/app-DlacW)
 2. 确认主题设置中「显示搜索按钮」已开启
 3. 确认插件已启用
 4. 支持快捷键 `Ctrl+K`（macOS 为 `⌘K`）唤起搜索
@@ -43,10 +43,10 @@ docker restart halo
 
 | 页面 | 所需插件 |
 |------|----------|
-| 瞬间 | [PluginMoments](https://www.halo.run/store/apps/app-moments) |
-| 图库 | [PluginPhotos](https://www.halo.run/store/apps/app-photos) |
-| 友链 | [PluginLinks](https://www.halo.run/store/apps/app-links) |
-| 朋友圈 | 朋友圈插件 |
+| 瞬间 | [PluginMoments](https://www.halo.run/store/apps/app-SnwWD) |
+| 图库 | [PluginPhotos](https://www.halo.run/store/apps/app-BmQJW) |
+| 友链 | [PluginLinks](https://www.halo.run/store/apps/app-hfbQg) |
+| 朋友圈 | [PluginFriends](https://www.halo.run/store/apps/app-yISsV) |
 
 安装并启用插件后，页面会自动显示内容。未安装插件时页面会显示友好的提示信息。
 
@@ -100,7 +100,7 @@ docker restart halo
 
 ### 如何报告 Bug？
 
-请在 [GitHub Issues](https://github.com/nxxy335top/halo-theme-WarmIsland/issues) 中提交，包含以下信息：
+请在 [GitHub Issues](https://github.com/sunny-335/halo-theme-WarmIsland/issues) 中提交，包含以下信息：
 
 - Halo 版本
 - 主题版本

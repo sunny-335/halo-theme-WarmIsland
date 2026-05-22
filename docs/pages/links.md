@@ -1,6 +1,6 @@
 # 友情链接
 
-友情链接页面展示友站信息，需要安装 [链接管理插件](https://www.halo.run/store/apps/app-links)。
+友情链接页面展示友站信息，需要安装 [链接管理插件](https://www.halo.run/store/apps/app-hfbQg)。
 
 ## 展示样式
 

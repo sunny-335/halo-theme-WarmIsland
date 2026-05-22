@@ -13,7 +13,7 @@
 ::: danger
 朋友圈功能依赖 Halo 的 **plugin-friends** 插件。如果未安装此插件，朋友圈页面将无法正常工作。
 
-安装方式：Halo 后台 → **插件** → **安装** → 搜索「Friends」或从 [GitHub Releases](https://github.com/halo-sigs/plugin-friends) 下载安装。
+安装方式：Halo 后台 → **插件** → **安装** → 搜索「朋友圈」或从 [GitHub Releases](https://www.halo.run/store/apps/app-yISsV) 下载安装。
 :::
 
 ## 详细说明
@@ -39,12 +39,9 @@ friends_page_title: "Friends"    # 英文站点
 ### 添加订阅源
 
 1. 登录 Halo 后台管理控制台
-2. 进入 **朋友圈** 或 **Friends** 管理页面
-3. 点击 **添加订阅** 填写：
-   - **站点名称** — 友站名称
-   - **RSS 地址** — 友站的 RSS/Atom 订阅地址
-   - **Logo** — 友站 Logo（可选）
-4. 保存后，插件会在下次抓取周期自动拉取内容
+2. 进入 **链接** 管理页面
+3. 点击 **新建** 或 **编辑** 填写：元数据 **RSS 地址** 友站的 RSS 订阅地址
+4. 保存后，插件会在下次抓取周期自动拉取内容，亦可进入 **朋友圈** 自行同步
 
 ::: tip
 大多数博客平台都提供 RSS 订阅功能。常见的 RSS 地址格式：

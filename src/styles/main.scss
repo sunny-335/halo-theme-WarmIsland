@@ -222,3 +222,52 @@ table {
   width: 100%;
   margin: 0 auto;
 }
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  body {
+    font-size: var(--text-base);
+  }
+
+  p {
+    margin-block-end: 1.2em;
+  }
+
+  .wi-content-wrap {
+    padding-inline: 1.25rem;
+  }
+
+  blockquote {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-base);
+  }
+
+  pre {
+    padding: var(--space-md);
+    font-size: var(--text-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: var(--text-base);
+  }
+
+  .wi-content-wrap {
+    padding-inline: 1rem;
+  }
+
+  blockquote {
+    padding: var(--space-sm) var(--space-sm);
+    font-size: var(--text-base);
+  }
+
+  table {
+    font-size: var(--text-sm);
+  }
+
+  th,
+  td {
+    padding: var(--space-sm) var(--space-sm);
+  }
+}

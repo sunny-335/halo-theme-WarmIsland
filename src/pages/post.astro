@@ -587,6 +587,17 @@ import LightGallery from "../components/LightGallery.astro";
             navigator.clipboard.writeText(url).then(function () {
               copyBtn.classList.add("wi-post__share-btn--copied");
               setTimeout(function () { copyBtn.classList.remove("wi-post__share-btn--copied"); }, 2000);
+            }).catch(function () {
+              var ta = document.createElement("textarea");
+              ta.value = url;
+              ta.style.position = "fixed";
+              ta.style.left = "-9999px";
+              document.body.appendChild(ta);
+              ta.select();
+              try { document.execCommand("copy"); } catch (e) {}
+              document.body.removeChild(ta);
+              copyBtn.classList.add("wi-post__share-btn--copied");
+              setTimeout(function () { copyBtn.classList.remove("wi-post__share-btn--copied"); }, 2000);
             });
           } else {
             var ta = document.createElement("textarea");
@@ -852,8 +863,8 @@ import LightGallery from "../components/LightGallery.astro";
 
   .wi-post__body {
     width: 100%;
-    font-size: 1rem;
-    line-height: 1.75;
+    font-size: 1.05rem;
+    line-height: 1.8;
     color: #3d3530;
     overflow-wrap: break-word;
     word-wrap: break-word;
@@ -1491,6 +1502,21 @@ import LightGallery from "../components/LightGallery.astro";
     color: var(--ink-3);
   }
 
+  @media (max-width: 480px) {
+    .wi-post__related-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-post__body {
+      font-size: 1.05rem;
+      line-height: 1.85;
+    }
+
+    .wi-post__title {
+      font-size: clamp(1.6rem, 5vw, 2.8rem);
+    }
+  }
+
   @media (max-width: 768px) {
     .wi-post__related-grid {
       grid-template-columns: 1fr;
@@ -1526,20 +1552,35 @@ import LightGallery from "../components/LightGallery.astro";
     .wi-post__nav-link--next {
       text-align: right;
     }
-  }
-
-  @media (max-width: 480px) {
-    .wi-post__related-grid {
-      grid-template-columns: 1fr;
-    }
 
     .wi-post__body {
-      font-size: 0.9375rem;
-      line-height: 1.8;
+      font-size: 1.025rem;
+      line-height: 1.82;
     }
 
-    .wi-post__title {
-      font-size: clamp(1.5rem, 4vw, 2.8rem);
+    .wi-post__body p {
+      margin-block-end: 1.4em;
+    }
+
+    .wi-post__body h2 {
+      font-size: 1.6rem;
+    }
+
+    .wi-post__body h3 {
+      font-size: 1.35rem;
+    }
+
+    .wi-post__body h4 {
+      font-size: 1.2rem;
+    }
+
+    .wi-post__body pre {
+      font-size: 0.9em;
+      padding: 1em;
+    }
+
+    .wi-post__body code {
+      font-size: 0.9em;
     }
   }
 </style>

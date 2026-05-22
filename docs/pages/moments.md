@@ -1,6 +1,6 @@
 # 瞬间
 
-瞬间页面展示短内容动态，需要安装 [瞬间插件](https://www.halo.run/store/apps/app-moments)。
+瞬间页面展示短内容动态，需要安装 [瞬间插件](https://www.halo.run/store/apps/app-SnwWD)。
 
 ## 展示样式
 

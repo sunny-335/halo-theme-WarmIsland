@@ -1,6 +1,6 @@
 # 朋友圈
 
-朋友圈页面展示订阅的友站最新文章动态，需要安装 [朋友圈插件](https://www.halo.run/store/apps/app-friends)。
+朋友圈页面展示订阅的友站最新文章动态，需要安装 [朋友圈插件](https://www.halo.run/store/apps/app-yISsV)。
 
 ## 功能说明
 

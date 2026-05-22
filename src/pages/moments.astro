@@ -19,70 +19,7 @@ import LightGallery from "../components/LightGallery.astro";
         <div class="wi-moments-page__content">
           <th:block th:if="${momentFinder != null}">
             <th:block th:with="pageSize = ${theme.config?.moments?.moments_page_size ?: 10}, momentsResult = ${momentFinder.list(1, pageSize)}">
-              <div
-                class="wi-moments-page__timeline"
-                th:if="${theme.config?.moments?.moments_style == 'timeline' or theme.config?.moments?.moments_style == null}"
-              >
-                <th:block th:if="${momentsResult != null and not #lists.isEmpty(momentsResult.items)}">
-                  <div class="wi-moments-page__item" th:each="moment : ${momentsResult.items}">
-                    <div class="wi-moments-page__dot"></div>
-                    <div class="wi-moments-page__line"></div>
-                    <div class="wi-moments-page__card">
-                      <div class="wi-moments-page__text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
-                      <div class="wi-moments-page__media" th:if="${moment.spec.content.medium != null and !#lists.isEmpty(moment.spec.content.medium)}">
-                        <th:block th:each="media : ${moment.spec.content.medium}">
-                          <img
-                            th:if="${media.type.name == 'PHOTO'}"
-                            th:src="${media.url}"
-                            th:alt="''"
-                            class="wi-moments-page__image"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </th:block>
-                      </div>
-                      <div class="wi-moments-page__footer">
-                        <time
-                          class="wi-moments-page__date"
-                          th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
-                        ></time>
-                        <div class="wi-moments-page__actions">
-                          <button
-                            class="wi-moments-page__like-btn"
-                            type="button"
-                            th:attr="data-moment-name=${moment.metadata.name}"
-                          >
-                            <svg class="wi-moments-page__like-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-                            <span class="wi-moments-page__like-count" th:text="${moment.stats?.upvote ?: 0}">0</span>
-                          </button>
-                          <button
-                            class="wi-moments-page__comment-btn"
-                            type="button"
-                            th:attr="data-moment-name=${moment.metadata.name}"
-                          >
-                            <svg class="wi-moments-page__comment-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            <span class="wi-moments-page__comment-count" th:text="${moment.stats?.approvedComment ?: 0}">0</span>
-                          </button>
-                        </div>
-                      </div>
-                      <div class="wi-moments-page__comment-area" th:attr="data-moment-name=${moment.metadata.name}" style="display:none;">
-                        <halo:comment
-                          group="moment.halo.run"
-                          kind="Moment"
-                          th:attr="name=${moment.metadata.name}"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </th:block>
-                <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
-                  <div class="wi-moments-page__empty">
-                    <p th:text="#{moments.noMoments}">No moments yet</p>
-                  </div>
-                </th:block>
-              </div>
-
-              <div class="wi-moments-page__cards" th:if="${theme.config?.moments?.moments_style == 'cards'}">
+<div class="wi-moments-page__cards" th:if="${theme.config?.moments?.moments_style == 'cards' or theme.config?.moments?.moments_style == null or theme.config?.moments?.moments_style == 'timeline'}">
                 <th:block th:if="${momentsResult != null and not #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__card-item" th:each="moment : ${momentsResult.items}">
                     <div class="wi-moments-page__card-text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
@@ -362,13 +299,12 @@ import LightGallery from "../components/LightGallery.astro";
                   ? sentinel.closest(".wi-moments-page__content").querySelector(
                       sentinel.previousElementSibling
                         ? sentinel.previousElementSibling.className.split(" ")[0]
-                        : ".wi-moments-page__timeline"
+                        : ".wi-moments-page__cards"
                     )
                   : null;
 
                 var container = null;
                 var selectors = [
-                  ".wi-moments-page__timeline",
                   ".wi-moments-page__cards",
                   ".wi-moments-page__masonry"
                 ];
@@ -475,117 +411,6 @@ import LightGallery from "../components/LightGallery.astro";
     contain-intrinsic-size: auto 800px;
   }
 
-  .wi-moments-page__timeline {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xl);
-    padding-left: var(--space-2xl);
-  }
-
-  .wi-moments-page__item {
-    position: relative;
-  }
-
-  .wi-moments-page__dot {
-    position: absolute;
-    left: calc(-1 * var(--space-2xl) - 5px);
-    top: 10px;
-    width: 10px;
-    height: 10px;
-    border-radius: 9999px;
-    background: var(--accent);
-    box-shadow: 0 0 0 3px var(--bg), 0 0 0 4px var(--accent);
-    z-index: 2;
-  }
-
-  .wi-moments-page__line {
-    position: absolute;
-    left: calc(-1 * var(--space-2xl));
-    top: 20px;
-    bottom: calc(-1 * var(--space-xl));
-    width: 1px;
-    background: var(--rule);
-    z-index: 1;
-  }
-
-  .wi-moments-page__item:last-child .wi-moments-page__line {
-    display: none;
-  }
-
-  .wi-moments-page__card {
-    background: var(--bg-raised);
-    border: 1px solid var(--rule);
-    border-radius: 16px;
-    padding: var(--space-xl);
-    transition:
-      box-shadow var(--duration-normal) var(--ease-out-expo),
-      transform var(--duration-normal) var(--ease-out-expo);
-  }
-
-  .wi-moments-page__card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-  }
-
-  .wi-moments-page__text {
-    font-size: var(--text-base);
-    line-height: var(--leading-relaxed);
-    color: var(--ink);
-    margin-bottom: var(--space-md);
-  }
-
-  .wi-moments-page__media {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-bottom: var(--space-md);
-  }
-
-  .wi-moments-page__image {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-  }
-
-  .wi-moments-page__image:hover {
-    transform: scale(1.03);
-  }
-
-  .wi-moments-page__media:has(.wi-moments-page__image:only-child) {
-    grid-template-columns: 1fr;
-  }
-
-  .wi-moments-page__media:has(.wi-moments-page__image:only-child) .wi-moments-page__image {
-    aspect-ratio: auto;
-    max-height: 300px;
-    max-width: 400px;
-  }
-
-  .wi-moments-page__media:has(.wi-moments-page__image:nth-child(2):last-child) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .wi-moments-page__media:has(.wi-moments-page__image:nth-child(4)) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .wi-moments-page__footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-md);
-  }
-
-  .wi-moments-page__date {
-    font-size: var(--text-xs);
-    color: var(--ink-3);
-    letter-spacing: var(--tracking-wide);
-  }
-
   .wi-moments-page__actions {
     display: flex;
     align-items: center;
@@ -656,9 +481,11 @@ import LightGallery from "../components/LightGallery.astro";
   }
 
   .wi-moments-page__cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: var(--space-lg);
+    max-width: 720px;
+    margin: 0 auto;
   }
 
   .wi-moments-page__card-item {
@@ -851,41 +678,20 @@ import LightGallery from "../components/LightGallery.astro";
   }
 
   @media (max-width: 768px) {
-    .wi-moments-page__timeline {
-      padding-left: var(--space-xl);
-    }
-
-    .wi-moments-page__dot {
-      left: calc(-1 * var(--space-xl) - 5px);
-    }
-
-    .wi-moments-page__line {
-      left: calc(-1 * var(--space-xl));
-    }
-
     .wi-moments-page__masonry {
       columns: 1;
     }
 
-    .wi-moments-page__cards {
-      grid-template-columns: 1fr;
+    .wi-moments-page__card-item {
+      padding: var(--space-md);
+    }
+
+    .wi-moments-page__card-text {
+      font-size: var(--text-base);
     }
   }
 
   @media (max-width: 480px) {
-    .wi-moments-page__timeline {
-      padding-left: var(--space-lg);
-    }
-
-    .wi-moments-page__dot {
-      left: calc(-1 * var(--space-lg) - 5px);
-    }
-
-    .wi-moments-page__line {
-      left: calc(-1 * var(--space-lg));
-    }
-
-    .wi-moments-page__media,
     .wi-moments-page__card-media,
     .wi-moments-page__masonry-media {
       grid-template-columns: repeat(3, 1fr);
@@ -895,6 +701,16 @@ import LightGallery from "../components/LightGallery.astro";
     .wi-moments-page__like-btn,
     .wi-moments-page__comment-btn {
       padding: 8px 14px;
+    }
+
+    .wi-moments-page__card-item,
+    .wi-moments-page__masonry-item {
+      padding: var(--space-md) var(--space-sm);
+    }
+
+    .wi-moments-page__card-text,
+    .wi-moments-page__masonry-text {
+      font-size: var(--text-base);
     }
   }
 </style>

@@ -1,6 +1,6 @@
 # 图库
 
-图库页面展示照片集，需要安装 [图库插件](https://www.halo.run/store/apps/app-photos)。
+图库页面展示照片集，需要安装 [图库插件](https://www.halo.run/store/apps/app-BmQJW)。
 
 ## 展示样式
 

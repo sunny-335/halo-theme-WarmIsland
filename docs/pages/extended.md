@@ -6,29 +6,29 @@ WarmIsland 主题深度集成了多款 Halo 插件，提供了丰富的扩展页
 
 | 页面 | 所需插件 | 路由 |
 |------|----------|------|
-| 瞬间 | PluginMoments | /moments |
-| 图库 | PluginPhotos | /photos |
-| 友情链接 | PluginLinks | /links |
-| 朋友圈 | plugin-friends | /friends |
-| 豆瓣 | 豆瓣插件 | /douban |
-| 装备 | 装备插件 | /equipments |
-| 足迹 | 足迹插件 | /footprints |
-| Steam | Steam 插件 | /steam |
+| 瞬间 | [PluginMoments](https://www.halo.run/store/apps/app-SnwWD) | /moments |
+| 图库 | [PluginPhotos](https://www.halo.run/store/apps/app-BmQJW) | /photos |
+| 友情链接 | [PluginLinks](https://www.halo.run/store/apps/app-hfbQg) | /links |
+| 朋友圈 | [plugin-friends](https://www.halo.run/store/apps/app-yISsV) | /friends |
+| 豆瓣 | [plugin-douban](https://www.halo.run/store/apps/app-srBOL) | /douban |
+| 装备 | [equipment](https://www.halo.run/store/apps/app-ytygyqml) | /equipments |
+| 足迹 | [footprint](https://www.halo.run/store/apps/app-XCtAQ) | /footprints |
+| Steam | [steam](https://www.halo.run/store/apps/app-0ojqyzfh) | /steam |
 
 ## 豆瓣页面
-
+[豆瓣插件](https://www.halo.run/store/apps/app-srBOL)
 展示豆瓣观影/读书/音乐记录，支持按类型和状态筛选。
 
 ## 装备页面
-
+[装备管理插件](https://www.halo.run/store/apps/app-ytygyqml)
 展示个人装备清单，按分组分类展示。
 
 ## 足迹页面
-
+[足迹插件](https://www.halo.run/store/apps/app-XCtAQ)
 展示个人足迹地图。
 
 ## Steam 页面
-
+[Steam](https://www.halo.run/store/apps/app-0ojqyzfh)
 展示 Steam 游戏资料，包括：
 
 - 玩家头像和昵称

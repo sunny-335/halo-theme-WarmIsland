@@ -366,13 +366,11 @@ spec:
           name: moments_style
           label: 展示样式
           options:
-            - label: Timeline
-              value: timeline
             - label: Cards
               value: cards
             - label: Masonry
               value: masonry
-          value: timeline
+          value: cards
         - $formkit: select
           name: moments_loading_mode
           label: 加载方式

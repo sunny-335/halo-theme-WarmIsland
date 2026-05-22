@@ -77,6 +77,13 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
   </head>
   <body class="wi-body">
     <script is:inline>
+      window.addEventListener("unhandledrejection", function (e) {
+        if (e.reason && e.reason.message && e.reason.message.indexOf("Could not establish connection") !== -1) {
+          e.preventDefault();
+        }
+      });
+    </script>
+    <script is:inline>
       (function(){
         try{
           var lang=document.documentElement.getAttribute("data-lang");

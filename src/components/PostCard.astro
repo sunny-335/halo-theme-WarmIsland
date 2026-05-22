@@ -244,5 +244,41 @@ const { variant = "default" } = Astro.props;
       width: 100%;
       aspect-ratio: 16 / 9;
     }
+
+    .post-card__content {
+      padding: var(--space-md);
+    }
+
+    .post-card__title {
+      font-size: clamp(1.15rem, 3vw, 1.5rem);
+    }
+
+    .post-card__excerpt {
+      font-size: var(--text-sm);
+      -webkit-line-clamp: 3;
+    }
+
+    .post-card--featured .post-card__content {
+      padding: var(--space-lg);
+    }
+
+    .post-card--featured .post-card__title {
+      font-size: clamp(1.3rem, 4vw, 1.7rem);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .post-card__content {
+      padding: var(--space-md) var(--space-sm);
+    }
+
+    .post-card__title {
+      font-size: clamp(1.05rem, 4vw, 1.25rem);
+    }
+
+    .post-card__excerpt {
+      font-size: var(--text-sm);
+      -webkit-line-clamp: 2;
+    }
   }
 </style>
