@@ -31,20 +31,42 @@ import LightGallery from "../components/LightGallery.astro";
 <div class="wi-moments-page__cards" th:if="${theme.config?.moments?.moments_style == 'cards' or theme.config?.moments?.moments_style == null or theme.config?.moments?.moments_style == 'timeline'}">
                 <th:block th:if="${momentsResult != null and not #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__card-item" th:each="moment : ${momentsResult.items}">
-                    <div class="wi-moments-page__card-text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
-                    <div class="wi-moments-page__card-media" th:if="${moment.spec.content.medium != null and !#lists.isEmpty(moment.spec.content.medium)}">
-                      <th:block th:each="media : ${moment.spec.content.medium}">
-                        <img
-                          th:if="${media.type.name == 'PHOTO'}"
-                          th:src="${media.url}"
-                          th:alt="''"
-                          class="wi-moments-page__card-image"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </th:block>
-                    </div>
-                    <div class="wi-moments-page__card-footer">
+                    <div class="wi-moments-page__card-layout">
+                      <img
+                        th:if="${moment.owner != null and !#strings.isEmpty(moment.owner.avatar)}"
+                        class="wi-moments-page__avatar"
+                        th:src="${moment.owner.avatar}"
+                        th:alt="''"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div
+                        th:unless="${moment.owner != null and !#strings.isEmpty(moment.owner.avatar)}"
+                        class="wi-moments-page__avatar wi-moments-page__avatar--fallback"
+                        aria-hidden="true"
+                      >
+                        <span th:text="${#strings.substring(site.title, 0, 1)}"></span>
+                      </div>
+
+                      <div class="wi-moments-page__main">
+                        <div
+                          class="wi-moments-page__name"
+                          th:text="${moment.owner != null and !#strings.isEmpty(moment.owner.displayName) ? moment.owner.displayName : site.title}"
+                        ></div>
+                        <div class="wi-moments-page__card-text" th:utext="${moment.spec?.content?.html ?: moment.spec?.content?.raw ?: moment.spec?.content}"></div>
+                        <div class="wi-moments-page__card-media" th:if="${moment.spec.content.medium != null and !#lists.isEmpty(moment.spec.content.medium)}">
+                          <th:block th:each="media : ${moment.spec.content.medium}">
+                            <img
+                              th:if="${media.type.name == 'PHOTO'}"
+                              th:src="${media.url}"
+                              th:alt="''"
+                              class="wi-moments-page__card-image"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </th:block>
+                        </div>
+                        <div class="wi-moments-page__card-footer">
                       <time
                         class="wi-moments-page__card-date"
                         th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
@@ -75,6 +97,8 @@ import LightGallery from "../components/LightGallery.astro";
                         th:attr="name=${moment.metadata.name}"
                       />
                     </div>
+                      </div>  <!-- /__main -->
+                    </div>  <!-- /__card-layout -->
                   </div>
                 </th:block>
                 <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
@@ -527,6 +551,43 @@ import LightGallery from "../components/LightGallery.astro";
     transform: translateY(-3px);
   }
 
+  /* 朋友圈式布局：头像在左，昵称/正文/九宫格在右 */
+  .wi-moments-page__card-layout {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  .wi-moments-page__avatar {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+
+  .wi-moments-page__avatar--fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: var(--text-lg);
+  }
+
+  .wi-moments-page__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wi-moments-page__name {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: var(--space-xs);
+  }
+
   .wi-moments-page__card-text {
     font-size: var(--text-base);
     line-height: var(--leading-relaxed);
@@ -568,8 +629,15 @@ import LightGallery from "../components/LightGallery.astro";
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .wi-moments-page__card-media:has(.wi-moments-page__card-image:nth-child(4)) {
-    grid-template-columns: repeat(3, 1fr);
+  /* 微信九宫格规则：4 张时 2x2 排布 */
+  .wi-moments-page__card-media:has(.wi-moments-page__card-image:nth-child(4)):not(:has(.wi-moments-page__card-image:nth-child(5))) {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 72%;
+  }
+
+  /* 三列九宫格限制宽度，避免大屏下图片单元过大 */
+  .wi-moments-page__card-media:has(.wi-moments-page__card-image:nth-child(3)) {
+    max-width: 100%;
   }
 
   .wi-moments-page__card-footer {

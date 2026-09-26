@@ -87,6 +87,92 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </th:block>
 
+      <div
+        class="wi-links__apply"
+        th:if="${theme.config?.links?.links_apply_form_enabled != false}"
+        th:with="applied=${param.applied != null and !#lists.isEmpty(param.applied) and param.applied[0] == 'true'},
+                 applyMsg=${param.message != null and !#lists.isEmpty(param.message) ? param.message[0] : null}"
+      >
+        <h2 class="wi-links__apply-title" th:text="'申请友链'">申请友链</h2>
+        <p
+          class="wi-links__apply-result"
+          th:if="${applied}"
+          th:text="'申请已提交，等待站长审核 🌙'"
+          role="status"
+        ></p>
+        <p
+          class="wi-links__apply-result wi-links__apply-result--error"
+          th:if="${not applied and applyMsg != null}"
+          th:text="${applyMsg}"
+          role="alert"
+        ></p>
+
+        <form
+          class="wi-links__apply-form"
+          method="post"
+          th:action="@{/links/apply/submit}"
+        >
+          <input type="hidden" name="_csrf" th:value="${csrfToken}" />
+          <div class="wi-links__apply-row">
+            <label class="wi-links__apply-field">
+              <span th:text="'站点名称 *'">站点名称 *</span>
+              <input type="text" name="displayName" required maxlength="50" placeholder="你的站点名称" th:attr="value=${param.value != null and !#lists.isEmpty(param.value) ? param.value[0] : ''}" />
+            </label>
+            <label class="wi-links__apply-field">
+              <span th:text="'站点链接 *'">站点链接 *</span>
+              <input type="url" name="url" required placeholder="https://" />
+            </label>
+          </div>
+          <div class="wi-links__apply-row">
+            <label class="wi-links__apply-field">
+              <span th:text="'图标地址'">图标地址</span>
+              <input type="url" name="logo" placeholder="https://" />
+            </label>
+            <label class="wi-links__apply-field">
+              <span th:text="'联系邮箱'">联系邮箱</span>
+              <input type="email" name="email" placeholder="用于通知审核结果" />
+            </label>
+          </div>
+          <label class="wi-links__apply-field">
+            <span th:text="'站点描述'">站点描述</span>
+            <input type="text" name="description" maxlength="120" placeholder="一句话介绍你的站点" />
+          </label>
+          <label class="wi-links__apply-field">
+            <span th:text="'反链页面'">反链页面</span>
+            <input type="url" name="backlink" placeholder="https://" />
+          </label>
+          <label class="wi-links__apply-field">
+            <span th:text="'RSS / Atom 地址（每行一个）'">RSS / Atom 地址（每行一个）</span>
+            <textarea name="feedUrls" rows="2" placeholder="https://"></textarea>
+          </label>
+          <div class="wi-links__apply-row">
+            <label class="wi-links__apply-field">
+              <span th:text="'验证码 *'">验证码 *</span>
+              <input type="text" name="captchaCode" required maxlength="8" autocomplete="off" placeholder="图中五位字符" />
+            </label>
+            <div class="wi-links__apply-captcha">
+              <img
+                class="wi-links__apply-captcha-img"
+                th:src="@{/links/apply/captcha}"
+                alt="验证码"
+                width="120"
+                height="44"
+                loading="lazy"
+                title="点击刷新验证码"
+                onclick="this.src=this.src.split('?')[0]+'?ts='+Date.now()"
+                th:onerror="|this.closest('.wi-links__apply').classList.add('wi-links__apply--unavailable')|"
+              />
+            </div>
+          </div>
+          <button class="wi-links__apply-submit" type="submit" th:text="'提交申请'">提交申请</button>
+        </form>
+        <p
+          class="wi-links__apply-unavailable-tip"
+          th:text="'友链申请暂未开放。'"
+          hidden
+        ></p>
+      </div>
+
       <div class="wi-links__comment" th:if="${theme.config?.links?.links_show_comment == true}">
         <halo:comment group="plugin.halo.run" kind="Plugin" name="PluginLinks"></halo:comment>
       </div>
@@ -187,6 +273,132 @@ import Layout from "../layouts/Layout.astro";
 
   .wi-links__comment {
     margin-top: var(--space-3xl);
+  }
+
+  /* ===== 友链申请表单 ===== */
+  .wi-links__apply {
+    margin-top: var(--space-3xl);
+    padding: var(--space-xl);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--bg-raised);
+  }
+
+  .wi-links__apply-title {
+    text-align: center;
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: var(--space-lg);
+  }
+
+  .wi-links__apply-result {
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--accent);
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-links__apply-result--error {
+    color: #e6162d;
+  }
+
+  html.dark .wi-links__apply-result--error {
+    color: #ff6b6b;
+  }
+
+  .wi-links__apply-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .wi-links__apply-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+
+  .wi-links__apply-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .wi-links__apply-field input,
+  .wi-links__apply-field textarea {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    resize: vertical;
+  }
+
+  .wi-links__apply-field input:focus,
+  .wi-links__apply-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+  }
+
+  .wi-links__apply-captcha {
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 2px;
+  }
+
+  .wi-links__apply-captcha-img {
+    border-radius: 8px;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+  }
+
+  .wi-links__apply-submit {
+    align-self: center;
+    padding: 0.65rem 2.2rem;
+    min-height: 44px;
+    border: none;
+    border-radius: 9999px;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    font-family: inherit;
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #000));
+    cursor: pointer;
+    transition: transform var(--duration-fast) var(--ease-out-quart), opacity 0.15s ease;
+  }
+
+  .wi-links__apply-submit:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+  }
+
+  .wi-links__apply-submit:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* 插件未开放申请时（验证码 404）自动隐藏表单并提示 */
+  .wi-links__apply--unavailable .wi-links__apply-form {
+    display: none;
+  }
+
+  .wi-links__apply--unavailable .wi-links__apply-unavailable-tip {
+    display: block !important;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+  }
+
+  @media (max-width: 640px) {
+    .wi-links__apply-row {
+      grid-template-columns: 1fr;
+    }
   }
 
   .wi-links__title {

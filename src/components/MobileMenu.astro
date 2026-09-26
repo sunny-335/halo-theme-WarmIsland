@@ -21,6 +21,16 @@
               class="wi-mobile-menu__link"
               th:data-href="${menuItem.status.href}"
             ></a>
+            <th:block th:if="${not #lists.isEmpty(menuItem.children)}">
+              <a
+                th:each="child : ${menuItem.children}"
+                th:href="@{${child.status.href}}"
+                th:target="${child.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
+                th:text="${'| ' + child.status.displayName}"
+                class="wi-mobile-menu__link wi-mobile-menu__link--sub"
+                th:data-href="${child.status.href}"
+              ></a>
+            </th:block>
           </th:block>
         </th:block>
       </th:block>
@@ -211,6 +221,14 @@
     transition:
       color var(--duration-fast) var(--ease-out-quart),
       background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  /* 二级菜单项：缩进 + 弱化，与一级项区分 */
+  .wi-mobile-menu__link--sub {
+    padding-left: 2rem;
+    font-size: var(--text-base);
+    font-weight: 400;
+    color: var(--ink-3);
   }
 
   .wi-mobile-menu__link:hover {

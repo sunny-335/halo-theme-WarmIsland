@@ -32,15 +32,34 @@ import ThemeSwitcher from "./ThemeSwitcher.astro";
       <th:block th:if="${menuFinder != null}">
         <th:block th:with="menu = ${menuFinder.getPrimary()}">
           <th:block th:if="${menu != null and menu.menuItems != null and not #lists.isEmpty(menu.menuItems)}">
-            <a
+            <div
               th:each="menuItem : ${menu.menuItems}"
-              th:href="@{${menuItem.status.href}}"
-              th:target="${menuItem.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
-              th:text="${menuItem.status.displayName}"
-              class="wi-navbar__link"
-              th:data-href="${menuItem.status.href}"
+              class="wi-navbar__item"
+              th:classappend="${not #lists.isEmpty(menuItem.children)} ? 'wi-navbar__item--has-children'"
             >
-            </a>
+              <a
+                th:href="@{${menuItem.status.href}}"
+                th:target="${menuItem.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
+                th:text="${menuItem.status.displayName}"
+                class="wi-navbar__link"
+                th:data-href="${menuItem.status.href}"
+                th:aria-haspopup="${not #lists.isEmpty(menuItem.children)} ? 'true' : null"
+              >
+              </a>
+              <div
+                class="wi-navbar__submenu"
+                th:if="${not #lists.isEmpty(menuItem.children)}"
+              >
+                <a
+                  th:each="child : ${menuItem.children}"
+                  th:href="@{${child.status.href}}"
+                  th:target="${child.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
+                  th:text="${child.status.displayName}"
+                  class="wi-navbar__submenu-link"
+                >
+                </a>
+              </div>
+            </div>
           </th:block>
         </th:block>
       </th:block>
@@ -255,6 +274,88 @@ import ThemeSwitcher from "./ThemeSwitcher.astro";
     flex: 1;
     justify-content: center;
     min-width: 0;
+  }
+
+  /* 一级菜单项容器（含子菜单时作为下拉的定位锚点） */
+  .wi-navbar__item {
+    position: relative;
+    display: inline-flex;
+  }
+
+  /* 二级下拉：纯 CSS 悬停/聚焦展开，无 JS 开销 */
+  .wi-navbar__submenu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    display: flex;
+    flex-direction: column;
+    min-width: 168px;
+    padding: 6px;
+    margin: 0;
+    list-style: none;
+    border-radius: var(--radius-md, 12px);
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, transform 0.18s var(--ease-out-quart),
+      visibility 0.18s;
+    z-index: 101;
+  }
+
+  /* 悬停桥：避免鼠标从一级移到二级途中经过空隙导致菜单关闭 */
+  .wi-navbar__item--has-children::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 10px;
+  }
+
+  .wi-navbar__item--has-children:hover .wi-navbar__submenu,
+  .wi-navbar__item--has-children:focus-within .wi-navbar__submenu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .wi-navbar__submenu-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .wi-navbar__submenu-link:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+  }
+
+  /* 有子菜单的一级项带下拉小箭头 */
+  .wi-navbar__item--has-children > .wi-navbar__link::after {
+    content: "";
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    margin-left: 0.3rem;
+    margin-top: -2px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.6;
+    transition: transform 0.18s var(--ease-out-quart);
+  }
+
+  .wi-navbar__item--has-children:hover > .wi-navbar__link::after {
+    transform: rotate(225deg);
+    margin-top: 2px;
   }
 
   .wi-navbar__link {

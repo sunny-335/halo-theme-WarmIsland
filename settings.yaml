@@ -575,6 +575,11 @@ spec:
     - group: links
       label: 友情链接
       formSchema:
+        - $formkit: switch
+          name: links_apply_form_enabled
+          label: 显示友链申请表单
+          value: true
+          help: 在友链页底部展示访客申请表单；需链接管理插件开启「友链申请」功能，未开启时表单自动隐藏
         - $formkit: text
           name: links_page_title
           label: 页面标题
