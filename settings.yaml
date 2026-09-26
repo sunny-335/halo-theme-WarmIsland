@@ -652,12 +652,13 @@ spec:
       formSchema:
         - $formkit: text
           name: weread_page_title
-          label: 页面标题
+          label: 页面标题（浏览器标签）
           placeholder: "书架"
+          help: 仅用于浏览器标签页标题；页面内的标题由插件返回的书架内容自带
         - $formkit: text
           name: weread_page_subtitle
           label: 页面副标题
-          placeholder: "我在读的书"
+          placeholder: "来自微信读书的同步藏书"
     - group: messageboard
       label: 留言板
       formSchema:

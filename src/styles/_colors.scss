@@ -22,12 +22,13 @@
 
 html.dark {
   --bg: #1a1614;
-  --bg-raised: #242018;
+  --bg-raised: #26211d;
   --bg-overlay: rgba(26, 22, 20, 0.85);
   --ink: #ede6de;
-  --ink-2: #9a8e84;
-  --ink-3: #5e544a;
-  --rule: #2e2822;
+  --ink-2: #a2978c;
+  /* 深色背景下人眼对低对比更敏感，次要文字与分隔线比浅色模式略提亮 */
+  --ink-3: #6f6459;
+  --rule: #38322b;
   --accent: #e8955f;
   --accent-hover: #f0a872;
   --accent-bg: #2a1e16;

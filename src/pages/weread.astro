@@ -9,21 +9,15 @@ import Layout from "../layouts/Layout.astro";
 
   <section class="wi-weread">
     <div class="wi-container">
+      <!-- 标题由插件返回的书架内容自带，主题不再重复输出 -->
       <div class="wi-weread__header">
-        <h1
-          class="wi-weread__title"
-          th:text="${theme.config?.weread?.weread_page_title ?: '书架'}"
-        >
-          书架
-        </h1>
         <p
           class="wi-weread__subtitle"
           th:if="${theme.config?.weread?.weread_page_subtitle}"
           th:text="${theme.config?.weread?.weread_page_subtitle}"
         >
-          我在读的书
+          来自微信读书的同步藏书
         </p>
-        <span class="wi-page-accent"></span>
       </div>
 
       <th:block th:if="${pluginFinder.available('halo-weread-plugin')}">
@@ -95,15 +89,6 @@ import Layout from "../layouts/Layout.astro";
     margin-bottom: var(--space-2xl);
   }
 
-  .wi-weread__title {
-    font-family: var(--font-sans);
-    font-size: var(--text-3xl);
-    font-weight: 700;
-    color: var(--ink);
-    letter-spacing: var(--tracking-tight);
-    margin-bottom: var(--space-sm);
-  }
-
   .wi-weread__subtitle {
     font-size: var(--text-base);
     color: var(--ink-3);
@@ -150,9 +135,4 @@ import Layout from "../layouts/Layout.astro";
     color: var(--accent);
   }
 
-  @media (max-width: 768px) {
-    .wi-weread__title {
-      font-size: var(--text-2xl);
-    }
-  }
 </style>
