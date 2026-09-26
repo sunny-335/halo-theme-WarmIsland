@@ -36,6 +36,7 @@ export default defineConfig({
           { text: '图库', link: '/config/photos' },
           { text: '友情链接', link: '/config/links' },
           { text: '朋友圈', link: '/config/friends' },
+          { text: '记得', link: '/config/important-dates' },
           { text: '留言板', link: '/config/messageboard' },
           { text: '评论', link: '/config/comment' },
           { text: '页脚', link: '/config/footer' },
@@ -53,6 +54,7 @@ export default defineConfig({
           { text: '图库', link: '/pages/photos' },
           { text: '友情链接', link: '/pages/links' },
           { text: '朋友圈', link: '/pages/friends' },
+          { text: '记得', link: '/pages/important-dates' },
           { text: '自定义页面', link: '/pages/custom-page' },
           { text: '扩展页面', link: '/pages/extended' },
         ]

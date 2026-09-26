@@ -14,6 +14,7 @@ WarmIsland 主题深度集成了多款 Halo 插件，提供了丰富的扩展页
 | 装备 | [equipment](https://www.halo.run/store/apps/app-ytygyqml) | /equipments |
 | 足迹 | [footprint](https://www.halo.run/store/apps/app-XCtAQ) | /footprints |
 | Steam | [steam](https://www.halo.run/store/apps/app-0ojqyzfh) | /steam |
+| 记得 | [plugin-important-dates](https://github.com/yyliucha/plugin-important-dates) | /important-dates |
 
 ## 豆瓣页面
 [豆瓣插件](https://www.halo.run/store/apps/app-srBOL)
@@ -35,6 +36,18 @@ WarmIsland 主题深度集成了多款 Halo 插件，提供了丰富的扩展页
 - 游戏统计
 - 徽章展示
 - 最近游戏
+
+## 记得页面
+
+[记得插件](https://github.com/yyliucha/plugin-important-dates)
+记录重要的日子、牵挂的人与座驾，「生活 / 爱车」双视图展示：
+
+- 重要日期（含农历）与倒计时便签
+- 牵挂的人：大头贴、昵称、关系与生日倒计时
+- 座驾：脱敏车牌、到期事项徽章、车主与驾驶人
+- 相册：点击车辆封面全屏只读浏览
+
+详见 [记得页面](/pages/important-dates)。
 
 ::: info
 扩展页面需要安装对应的 Halo 插件才能使用。如果插件未安装，页面会显示友好的提示信息。

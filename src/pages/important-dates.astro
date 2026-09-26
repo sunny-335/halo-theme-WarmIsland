@@ -1,0 +1,1360 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<!--
+  「记得」插件（plugin-important-dates）主题适配页面
+  - 路由由插件提供：/important-dates；插件通过 TemplateNameResolver 优先使用主题同名模板
+  - 可用数据见插件 README：title / dates / people / reminders / cars / carEvents /
+    carPeople / otherPeople / personCars / showCarSection / carSkinEnabled / showAvatar ...
+  - 注意：PersonVo 没有 gender 字段，不要写 ${p.gender}（SpEL 会抛 EL1008E 导致 500）
+-->
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${theme.config?.important_dates?.idates_page_title ?: (title ?: '记得')} - ${site.title}|"></title>
+  </Fragment>
+
+  <section class="wi-id" data-view="life">
+    <div class="wi-container">
+      <header class="wi-id__header">
+        <h1
+          class="wi-id__title"
+          th:text="${theme.config?.important_dates?.idates_page_title ?: (title ?: '记得')}"
+        >
+          记得
+        </h1>
+        <p
+          class="wi-id__subtitle"
+          th:text="${theme.config?.important_dates?.idates_page_subtitle ?: '记着重要的日子、惦记的人，还有陪你跑的爱车'}"
+        >
+          记着重要的日子、惦记的人，还有陪你跑的爱车
+        </p>
+        <span class="wi-page-accent"></span>
+      </header>
+
+      <div
+        class="wi-id__switch-wrap"
+        th:if="${showCarSection != null and showCarSection}"
+      >
+        <div class="wi-id__switch" role="tablist" aria-label="视图切换">
+          <button
+            type="button"
+            class="wi-id__switch-btn is-active"
+            data-view-btn="life"
+            role="tab"
+            aria-selected="true"
+            th:text="'生活'"
+          >
+            生活
+          </button>
+          <button
+            type="button"
+            class="wi-id__switch-btn"
+            data-view-btn="car"
+            role="tab"
+            aria-selected="false"
+            th:text="'爱车'"
+          >
+            爱车
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== 生活视图：即将到来的重要日期 ===== -->
+      <div
+        class="wi-id__notice wi-id--life"
+        th:if="${reminders != null and !reminders.isEmpty()}"
+        th:attr="data-allow-dismiss=${allowDismiss}"
+      >
+        <div
+          class="wi-id__notice-item"
+          th:each="r : ${reminders}"
+          th:attr="data-dismiss-key=${'date#' + r.title + '#' + (r.nextSolarDate != null ? r.nextSolarDate : r.dateText)}"
+        >
+          <span class="wi-id__notice-text">
+            <span
+              th:if="${r.stageText != null and !r.stageText.isBlank()}"
+              th:text="${r.stageText}"
+              >「结婚纪念日」明天就到啦～</span
+            >
+            <span
+              th:unless="${r.stageText != null and !r.stageText.isBlank()}"
+              th:text="|「${r.title}」还有 ${r.daysUntil} 天就到啦～|"
+              >「结婚纪念日」还有 3 天就到啦～</span
+            >
+          </span>
+          <button
+            type="button"
+            class="wi-id__notice-close"
+            data-dismiss="1"
+            title="本次到期周期内不再提示"
+            aria-label="本次到期周期内不再提示"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== 爱车视图：即将到期的座驾事项 ===== -->
+      <div
+        class="wi-id__notice wi-id--car"
+        th:if="${showCarSection != null and showCarSection and carEvents != null and !carEvents.isEmpty()}"
+        th:attr="data-allow-dismiss=${allowDismiss}"
+      >
+        <div
+          class="wi-id__notice-item"
+          th:each="e : ${carEvents}"
+          th:attr="data-dismiss-key=${'car#' + e.carName + '#' + e.label + '#' + e.date}"
+        >
+          <span class="wi-id__notice-text">
+            <span
+              th:if="${e.stageText != null and !e.stageText.isBlank()}"
+              th:text="${e.stageText}"
+              >「小白」的交强险还有 7 天到期</span
+            >
+            <span
+              th:unless="${e.stageText != null and !e.stageText.isBlank()}"
+              th:text="|「${e.carName}」的${e.label}还有 ${e.daysUntil} 天到期，记得安排一下呀～|"
+              >「小白」的交强险还有 7 天到期</span
+            >
+          </span>
+          <button
+            type="button"
+            class="wi-id__notice-close"
+            data-dismiss="1"
+            title="本次到期周期内不再提示"
+            aria-label="本次到期周期内不再提示"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== 爱车视图：我的爱车 ===== -->
+      <th:block th:if="${showCarSection != null and showCarSection and cars != null}">
+        <section class="wi-id__block wi-id--car">
+          <div class="wi-id__block-head">
+            <h2 class="wi-id__block-title" th:text="'我的爱车'">我的爱车</h2>
+            <span class="wi-id__count" th:text="${#lists.size(cars)}">0</span>
+          </div>
+
+          <p
+            class="wi-id__empty"
+            th:if="${#lists.isEmpty(cars)}"
+            th:text="'还没有添加座驾，去插件后台「座驾」里加一辆吧～'"
+          >
+            还没有添加座驾，去插件后台「座驾」里加一辆吧～
+          </p>
+
+          <div class="wi-id__cars" th:unless="${#lists.isEmpty(cars)}">
+            <article
+              class="wi-id__car"
+              th:each="c : ${cars}"
+              th:classappend="${(carSkinEnabled != null and carSkinEnabled) ? 'wi-id__car--' + c.skin : 'wi-id__car--neutral'}"
+            >
+              <div class="wi-id__car-head">
+                <button
+                  type="button"
+                  class="wi-id__car-cover"
+                  th:if="${c.coverUrl != null and !c.coverUrl.isBlank()}"
+                  th:attr="data-album-target=${c.name}"
+                  th:title="|查看相册（${c.photoCount} 张）|"
+                  aria-label="查看相册"
+                >
+                  <span class="wi-id__car-icon" th:text="${c.vehicleTypeIcon}"
+                    >🚗</span
+                  >
+                  <img
+                    th:src="${c.coverUrl}"
+                    th:alt="${c.displayName}"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                  />
+                  <span
+                    class="wi-id__car-more"
+                    th:if="${c.photoCount > 1}"
+                    th:text="|1/${c.photoCount}|"
+                    >1/3</span
+                  >
+                </button>
+                <button
+                  type="button"
+                  class="wi-id__car-cover wi-id__car-cover--empty"
+                  th:unless="${c.coverUrl != null and !c.coverUrl.isBlank()}"
+                  data-no-photo="1"
+                  th:attr="data-car-name=${c.displayName}"
+                  th:title="|${c.displayName} 还没有相册照片|"
+                >
+                  <span class="wi-id__car-icon" th:text="${c.vehicleTypeIcon}"
+                    >🚗</span
+                  >
+                  <span class="wi-id__car-hint" th:text="'暂无照片'"
+                    >暂无照片</span
+                  >
+                </button>
+
+                <div class="wi-id__car-info">
+                  <h3 class="wi-id__car-name">
+                    <span th:text="${c.displayName}">小白</span>
+                  </h3>
+                  <p class="wi-id__car-sub">
+                    <span th:text="${c.vehicleTypeLabel}">SUV</span>
+                    <th:block th:if="${c.brand != null and !c.brand.isBlank()}"
+                      >· <span th:text="${c.brand}">比亚迪</span></th:block
+                    >
+                    <th:block th:if="${c.model != null and !c.model.isBlank()}"
+                      ><span th:text="${c.model}">汉 EV</span></th:block
+                    >
+                  </p>
+                  <p
+                    class="wi-id__car-sub"
+                    th:if="${c.plateMasked != null and !c.plateMasked.isBlank()}"
+                  >
+                    车牌 <span th:text="${c.plateMasked}">粤B·****5</span>
+                  </p>
+                </div>
+              </div>
+
+              <div
+                class="wi-id__car-events"
+                th:if="${c.events != null and !c.events.isEmpty()}"
+              >
+                <span
+                  class="wi-id__event"
+                  th:each="e, it : ${c.events}"
+                  th:if="${it.index < 3}"
+                  th:classappend="${e.overdue} ? 'is-overdue' : (${e.daysUntil <= 15} ? 'is-soon' : '')"
+                >
+                  <span th:text="${e.label}">交强险</span>
+                  <th:block th:if="${e.overdue}" th:text="| · 已过期 ${-e.daysUntil} 天|"
+                    >· 已过期 5 天</th:block
+                  >
+                  <th:block
+                    th:unless="${e.overdue}"
+                    th:text="| · ${e.daysUntil == 0 ? '今天到期' : e.daysUntil + ' 天后'}|"
+                    >· 7 天后</th:block
+                  >
+                </span>
+              </div>
+
+              <div
+                class="wi-id__car-badges"
+                th:if="${(c.ownerName != null and !c.ownerName.isBlank()) or c.sharedPeople > 1}"
+              >
+                <span
+                  class="wi-id__badge"
+                  th:if="${c.sharedPeople > 1}"
+                  th:text="'共同使用'"
+                  >共同使用</span
+                >
+                <span
+                  class="wi-id__badge"
+                  th:if="${c.ownerName != null and !c.ownerName.isBlank()}"
+                  th:text="|车主 ${c.ownerName}|"
+                  >车主 孙铭</span
+                >
+                <span
+                  class="wi-id__badge"
+                  th:each="d : ${c.driverNames}"
+                  th:if="${d != c.ownerName}"
+                  th:text="|驾驶人 ${d}|"
+                  >驾驶人 宁琪儿</span
+                >
+              </div>
+            </article>
+          </div>
+        </section>
+      </th:block>
+
+      <!-- ===== 生活视图：重要日期 ===== -->
+      <section class="wi-id__block wi-id--life">
+        <div class="wi-id__block-head">
+          <h2 class="wi-id__block-title" th:text="'重要日期'">重要日期</h2>
+          <span class="wi-id__count" th:text="${#lists.size(dates)}">0</span>
+        </div>
+
+        <p
+          class="wi-id__empty"
+          th:if="${#lists.isEmpty(dates)}"
+          th:text="'还没有记录重要的日子，去插件后台加一个吧～'"
+        >
+          还没有记录重要的日子，去插件后台加一个吧～
+        </p>
+
+        <div class="wi-id__grid" th:unless="${#lists.isEmpty(dates)}">
+          <article class="wi-id__memo" th:each="d : ${dates}">
+            <div class="wi-id__memo-days">
+              <strong th:text="${d.daysUntil}">35</strong>
+              <span th:text="'天后'">天后</span>
+            </div>
+            <h3 class="wi-id__memo-title">
+              <span
+                class="wi-id__pin"
+                th:if="${showImportantTag != null and showImportantTag and d.important}"
+                title="重要"
+                aria-label="重要"
+              ></span>
+              <span th:text="${d.title}">结婚纪念日</span>
+            </h3>
+            <p class="wi-id__memo-date">
+              <span th:text="${d.dateText}">2021-10-02</span>
+              <span
+                class="wi-id__tag"
+                th:if="${d.dateType == 'LUNAR'}"
+                th:text="'农历'"
+                >农历</span
+              >
+            </p>
+            <p
+              class="wi-id__memo-people"
+              th:if="${d.personNames != null and !d.personNames.isEmpty()}"
+              th:text="|❤ ${#strings.listJoin(d.personNames, '、')}|"
+            >
+              ❤ 老婆
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===== 生活视图：牵挂的人 ===== -->
+      <section class="wi-id__block wi-id--life">
+        <div class="wi-id__block-head">
+          <h2 class="wi-id__block-title" th:text="'牵挂的人'">牵挂的人</h2>
+          <span class="wi-id__count" th:text="${#lists.size(people)}">0</span>
+        </div>
+
+        <p
+          class="wi-id__empty"
+          th:if="${#lists.isEmpty(people)}"
+          th:text="'还没有添加你惦记的人～'"
+        >
+          还没有添加你惦记的人～
+        </p>
+
+        <div class="wi-id__grid" th:unless="${#lists.isEmpty(people)}">
+          <article class="wi-id__memo" th:each="p : ${people}">
+            <div class="wi-id__person">
+              <span class="wi-id__avatar">
+                <span
+                  class="wi-id__avatar-fallback"
+                  th:text="${#strings.substring(p.displayName, 0, 1)}"
+                  >老</span
+                >
+                <img
+                  th:if="${showAvatar != null and showAvatar and p.avatar != null and !p.avatar.isBlank()}"
+                  th:src="${p.avatar}"
+                  th:alt="${p.displayName}"
+                  loading="lazy"
+                  onerror="this.style.display='none'"
+                />
+              </span>
+              <div class="wi-id__person-info">
+                <h3 class="wi-id__memo-title">
+                  <span th:text="${p.displayName}">老婆</span>
+                  <span
+                    class="wi-id__rel"
+                    th:if="${p.relation != null and !p.relation.isBlank()}"
+                    th:text="|（${p.relation}）|"
+                    >（配偶）</span
+                  >
+                </h3>
+                <p
+                  class="wi-id__memo-sub"
+                  th:if="${p.nickname != null and !p.nickname.isBlank()}"
+                  th:text="|昵称：${p.nickname}|"
+                >
+                  昵称：三哥
+                </p>
+              </div>
+            </div>
+            <div class="wi-id__memo-foot">
+              <span class="wi-id__memo-date">
+                生日 <span th:text="${p.birthdayText}">1999-10-**</span>
+                <span
+                  th:if="${p.nextSolarDate != null}"
+                  th:text="|（${p.nextSolarDate}）|"
+                  >（2026-10-**）</span
+                >
+              </span>
+              <span
+                class="wi-id__memo-count"
+                th:if="${p.daysUntil >= 0}"
+                th:text="|${p.daysUntil} 天后|"
+                >61 天后</span
+              >
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ===== 爱车视图：车主与驾驶人 / 其他重要的人 ===== -->
+      <th:block th:if="${showCarSection != null and showCarSection and cars != null}">
+        <section class="wi-id__block wi-id--car">
+          <div class="wi-id__block-head">
+            <h2 class="wi-id__block-title" th:text="'车主与驾驶人'">
+              车主与驾驶人
+            </h2>
+            <span class="wi-id__count" th:text="${#lists.size(carPeople)}">0</span>
+          </div>
+
+          <p
+            class="wi-id__empty"
+            th:if="${#lists.isEmpty(carPeople)}"
+            th:text="'还没给爱车配车主，去插件后台「座驾」里选一位吧～'"
+          >
+            还没给爱车配车主，去插件后台「座驾」里选一位吧～
+          </p>
+
+          <div class="wi-id__grid" th:unless="${#lists.isEmpty(carPeople)}">
+            <article class="wi-id__memo" th:each="p : ${carPeople}">
+              <div class="wi-id__person">
+                <span class="wi-id__avatar">
+                  <span
+                    class="wi-id__avatar-fallback"
+                    th:text="${#strings.substring(p.displayName, 0, 1)}"
+                    >老</span
+                  >
+                  <img
+                    th:if="${showAvatar != null and showAvatar and p.avatar != null and !p.avatar.isBlank()}"
+                    th:src="${p.avatar}"
+                    th:alt="${p.displayName}"
+                    loading="lazy"
+                    onerror="this.style.display='none'"
+                  />
+                </span>
+                <div class="wi-id__person-info">
+                  <h3 class="wi-id__memo-title">
+                    <span th:text="${p.displayName}">老婆</span>
+                    <span
+                      class="wi-id__rel"
+                      th:if="${p.relation != null and !p.relation.isBlank()}"
+                      th:text="|（${p.relation}）|"
+                      >（配偶）</span
+                    >
+                  </h3>
+                  <p
+                    class="wi-id__memo-sub"
+                    th:if="${p.nickname != null and !p.nickname.isBlank()}"
+                    th:text="|昵称：${p.nickname}|"
+                  >
+                    昵称：三哥
+                  </p>
+                </div>
+              </div>
+              <div
+                class="wi-id__badges"
+                th:if="${personCars[p.displayName] != null}"
+              >
+                <span
+                  class="wi-id__badge"
+                  th:each="rel : ${personCars[p.displayName]}"
+                  th:text="|${rel.carIcon} ${rel.role} · ${rel.carName}|"
+                  >🚗 车主 · 小白</span
+                >
+              </div>
+            </article>
+          </div>
+
+          <th:block th:if="${otherPeople != null and !#lists.isEmpty(otherPeople)}">
+            <div class="wi-id__block-head wi-id__block-head--sub">
+              <h3 class="wi-id__sub-title" th:text="'其他重要的人'">
+                其他重要的人
+              </h3>
+              <span class="wi-id__count" th:text="${#lists.size(otherPeople)}"
+                >0</span
+              >
+            </div>
+            <div class="wi-id__grid">
+              <article class="wi-id__memo" th:each="p : ${otherPeople}">
+                <div class="wi-id__person">
+                  <span class="wi-id__avatar">
+                    <span
+                      class="wi-id__avatar-fallback"
+                      th:text="${#strings.substring(p.displayName, 0, 1)}"
+                      >张</span
+                    >
+                    <img
+                      th:if="${showAvatar != null and showAvatar and p.avatar != null and !p.avatar.isBlank()}"
+                      th:src="${p.avatar}"
+                      th:alt="${p.displayName}"
+                      loading="lazy"
+                      onerror="this.style.display='none'"
+                    />
+                  </span>
+                  <div class="wi-id__person-info">
+                    <h3 class="wi-id__memo-title">
+                      <span th:text="${p.displayName}">张三</span>
+                      <span
+                        class="wi-id__rel"
+                        th:if="${p.relation != null and !p.relation.isBlank()}"
+                        th:text="|（${p.relation}）|"
+                        >（朋友）</span
+                      >
+                    </h3>
+                    <p
+                      class="wi-id__memo-sub"
+                      th:if="${p.nickname != null and !p.nickname.isBlank()}"
+                      th:text="|昵称：${p.nickname}|"
+                    >
+                      昵称：三哥
+                    </p>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </th:block>
+        </section>
+      </th:block>
+    </div>
+
+    <!-- ===== 相册浮层（只读查看；运行时会被移到 body 下） ===== -->
+    <div
+      class="wi-id__album"
+      th:each="c : ${cars}"
+      th:if="${cars != null}"
+      th:id="|album-${c.name}|"
+      th:attr="data-album=${c.name}"
+      role="dialog"
+      aria-modal="true"
+      th:aria-label="|${c.displayName} 相册|"
+    >
+      <div class="wi-id__album-bar">
+        <span th:text="|${c.displayName} · 相册（${c.photoCount} 张）|"
+          >小白 · 相册</span
+        >
+        <button
+          type="button"
+          class="wi-id__album-close"
+          data-album-close="1"
+          aria-label="关闭"
+        >
+          ✕
+        </button>
+      </div>
+      <div class="wi-id__album-body">
+        <img
+          th:each="photo : ${c.photos}"
+          th:src="${photo.url}"
+          th:alt="${c.displayName}"
+          loading="lazy"
+        />
+      </div>
+    </div>
+
+    <div class="wi-id__tip" id="wi-id-tip" role="status" aria-live="polite"></div>
+  </section>
+
+  <script is:inline th:inline="none">
+    (function () {
+      var app = document.querySelector(".wi-id");
+      if (!app) return;
+
+      /* 相册浮层是 position:fixed，但 .wi-main 有自己的层叠上下文（z-index:1），
+         留在里面会被导航栏（z-index:100）与页脚遮住，因此统一移到 body 下。 */
+      var albums = app.querySelectorAll(".wi-id__album");
+      for (var a = 0; a < albums.length; a++) {
+        document.body.appendChild(albums[a]);
+      }
+      var tipEl = document.getElementById("wi-id-tip");
+      if (tipEl && tipEl.parentNode !== document.body) {
+        document.body.appendChild(tipEl);
+      }
+
+      /* ===== 视图切换（地址栏记忆 ?view=car） ===== */
+      var buttons = app.querySelectorAll("[data-view-btn]");
+      var hasCar = buttons.length > 0;
+
+      function applyView(view, push) {
+        app.setAttribute("data-view", view);
+        for (var i = 0; i < buttons.length; i++) {
+          var on = buttons[i].getAttribute("data-view-btn") === view;
+          buttons[i].classList.toggle("is-active", on);
+          buttons[i].setAttribute("aria-selected", on ? "true" : "false");
+        }
+        if (!push) return;
+        try {
+          var url = new URL(window.location.href);
+          if (view === "car") {
+            url.searchParams.set("view", "car");
+          } else {
+            url.searchParams.delete("view");
+          }
+          history.replaceState(null, "", url.toString());
+        } catch (e) {
+          /* 忽略 */
+        }
+      }
+
+      for (var b = 0; b < buttons.length; b++) {
+        buttons[b].addEventListener("click", function () {
+          applyView(this.getAttribute("data-view-btn"), true);
+        });
+      }
+
+      var initial = "life";
+      try {
+        if (new URL(window.location.href).searchParams.get("view") === "car") {
+          initial = "car";
+        }
+      } catch (e) {
+        /* 忽略 */
+      }
+      applyView(hasCar ? initial : "life", false);
+
+      /* ===== 轻提示 ===== */
+      var tipTimer = null;
+      function showTip(text) {
+        if (!tipEl) return;
+        tipEl.textContent = text;
+        tipEl.classList.add("is-show");
+        if (tipTimer) clearTimeout(tipTimer);
+        tipTimer = setTimeout(function () {
+          tipEl.classList.remove("is-show");
+        }, 2600);
+      }
+
+      var emptyCovers = app.querySelectorAll("[data-no-photo]");
+      for (var q = 0; q < emptyCovers.length; q++) {
+        emptyCovers[q].addEventListener("click", function () {
+          var name = this.getAttribute("data-car-name") || "这辆车";
+          showTip(
+            "「" + name + "」还没有相册照片，可以在插件后台「座驾」里上传～"
+          );
+        });
+      }
+
+      /* ===== 相册浮层 ===== */
+      function closeAlbums() {
+        var open = document.querySelectorAll(".wi-id__album.is-open");
+        for (var k = 0; k < open.length; k++) {
+          open[k].classList.remove("is-open");
+        }
+        document.body.style.overflow = "";
+      }
+
+      var covers = app.querySelectorAll("[data-album-target]");
+      for (var j = 0; j < covers.length; j++) {
+        covers[j].addEventListener("click", function () {
+          var target = document.getElementById(
+            "album-" + this.getAttribute("data-album-target")
+          );
+          if (!target) return;
+          closeAlbums();
+          target.classList.add("is-open");
+          document.body.style.overflow = "hidden";
+        });
+      }
+
+      document.addEventListener("click", function (ev) {
+        var el = ev.target;
+        /* 点击照片本身不关闭，方便逐张查看 */
+        if (el && el.tagName === "IMG") return;
+        while (el && el !== document.body) {
+          if (el.getAttribute && el.getAttribute("data-album-close")) {
+            closeAlbums();
+            return;
+          }
+          if (el.classList && el.classList.contains("wi-id__album")) {
+            closeAlbums();
+            return;
+          }
+          el = el.parentNode;
+        }
+      });
+
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape") closeAlbums();
+      });
+
+      /* ===== 逐条忽略提醒（本次到期周期内不再提示，存浏览器） ===== */
+      var banners = app.querySelectorAll(".wi-id__notice[data-allow-dismiss]");
+      if (!banners.length) return;
+      var KEY = "important-dates:hidden-reminders";
+      var store = {};
+      try {
+        store = JSON.parse(localStorage.getItem(KEY) || "{}") || {};
+      } catch (e) {
+        store = {};
+      }
+      for (var i2 = 0; i2 < banners.length; i2++) {
+        if (banners[i2].getAttribute("data-allow-dismiss") === "false") continue;
+        var items = banners[i2].querySelectorAll("[data-dismiss-key]");
+        for (var k2 = 0; k2 < items.length; k2++) {
+          (function (el) {
+            var key = el.getAttribute("data-dismiss-key") || "";
+            if (key && store[key]) {
+              el.style.display = "none";
+              return;
+            }
+            var btn = el.querySelector("[data-dismiss]");
+            if (!btn) return;
+            btn.addEventListener("click", function (ev) {
+              ev.stopPropagation();
+              if (key) store[key] = 1;
+              try {
+                localStorage.setItem(KEY, JSON.stringify(store));
+              } catch (e) {
+                /* 隐私模式下忽略 */
+              }
+              el.style.display = "none";
+            });
+          })(items[k2]);
+        }
+      }
+
+      /* 只保留最近 300 条，避免长期累积 */
+      var keys = Object.keys(store);
+      if (keys.length > 300) {
+        var trimmed = {};
+        for (var s = keys.length - 300; s < keys.length; s++) {
+          trimmed[keys[s]] = 1;
+        }
+        try {
+          localStorage.setItem(KEY, JSON.stringify(trimmed));
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    })();
+  </script>
+</Layout>
+
+<style>
+  .wi-id {
+    padding-block: 1rem 3rem;
+  }
+
+  /* ===== 头部：与书架 / 友链 / 图库等页面保持一致 ===== */
+  .wi-id__header {
+    text-align: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .wi-id__title {
+    font-size: var(--text-4xl);
+    margin-bottom: var(--space-xs);
+  }
+
+  .wi-id__subtitle {
+    font-size: var(--text-sm);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wide);
+    margin-block-end: 0;
+  }
+
+  .wi-page-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    margin: var(--space-sm) auto 0;
+    border-radius: 9999px;
+    background: var(--accent);
+  }
+
+  /* ===== 生活 / 爱车 视图切换 ===== */
+  .wi-id__switch-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+  }
+
+  .wi-id__switch {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 9999px;
+    background: var(--bg-raised);
+    border: 1px solid var(--rule);
+  }
+
+  .wi-id__switch-btn {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--text-sm);
+    line-height: 1.2;
+    padding: 7px 22px;
+    border-radius: 9999px;
+    color: var(--ink-2);
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .wi-id__switch-btn:hover {
+    color: var(--ink);
+  }
+
+  .wi-id__switch-btn.is-active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* 视图显隐：由 .wi-id 上的 data-view 控制 */
+  .wi-id[data-view="life"] .wi-id--car,
+  .wi-id[data-view="car"] .wi-id--life {
+    display: none !important;
+  }
+
+  /* ===== 到期提醒横幅 ===== */
+  .wi-id__notice {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 18px;
+    margin-bottom: var(--space-lg);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+    border-radius: var(--radius-md, 12px);
+    background: color-mix(in srgb, var(--accent) 8%, var(--bg-raised));
+  }
+
+  .wi-id__notice-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--accent-hover);
+    font-size: var(--text-sm);
+    line-height: 1.9;
+  }
+
+  .wi-id__notice-text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wi-id__notice-close {
+    flex: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    opacity: 0.45;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 0 2px;
+    transition: opacity 0.15s ease;
+  }
+
+  .wi-id__notice-close:hover {
+    opacity: 0.9;
+  }
+
+  /* ===== 区块 ===== */
+  .wi-id__block {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-id__block-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: var(--space-md);
+  }
+
+  .wi-id__block-head--sub {
+    margin-top: var(--space-xl);
+  }
+
+  .wi-id__block-title {
+    font-size: var(--text-xl);
+    margin-bottom: 0;
+  }
+
+  .wi-id__sub-title {
+    font-size: var(--text-md);
+    padding-left: var(--space-lg);
+    margin-bottom: 0;
+  }
+
+  .wi-id__count {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  .wi-id__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: var(--space-md);
+  }
+
+  /* ===== 便签卡片（重要日期 / 人） ===== */
+  .wi-id__memo {
+    position: relative;
+    padding: 18px 16px 14px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-md, 12px);
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-sm);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+
+  .wi-id__memo:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .wi-id__memo-days {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    text-align: right;
+    color: var(--accent);
+    line-height: 1.05;
+  }
+
+  .wi-id__memo-days strong {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+
+  .wi-id__memo-days span {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+  }
+
+  .wi-id__memo-title {
+    font-size: var(--text-md);
+    padding-left: 0;
+    margin-bottom: 0;
+    margin-right: 62px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .wi-id__memo-title::before {
+    display: none;
+  }
+
+  .wi-id__person .wi-id__memo-title {
+    margin-right: 0;
+  }
+
+  .wi-id__pin {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f43f5e, #be123c);
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.25);
+  }
+
+  .wi-id__rel {
+    font-size: 0.8em;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  .wi-id__memo-date {
+    margin: 8px 0 0;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .wi-id__memo-sub {
+    margin: 4px 0 0;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+  }
+
+  .wi-id__memo-people {
+    margin: 8px 0 0;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .wi-id__tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    border: 1px solid var(--rule);
+    color: var(--ink-3);
+  }
+
+  .wi-id__person {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .wi-id__person-info {
+    min-width: 0;
+  }
+
+  .wi-id__avatar {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--accent) 14%, var(--bg-raised));
+    color: var(--accent-hover);
+    font-weight: 700;
+  }
+
+  .wi-id__avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .wi-id__avatar-fallback {
+    font-size: 1rem;
+  }
+
+  .wi-id__memo-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .wi-id__memo-foot .wi-id__memo-date {
+    margin: 0;
+  }
+
+  .wi-id__memo-count {
+    flex: none;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .wi-id__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  /* ===== 爱车卡片 ===== */
+  .wi-id__cars {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .wi-id__car {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-lg, 16px);
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+
+  .wi-id__car:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .wi-id__car-head {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .wi-id__car-cover {
+    position: relative;
+    flex: none;
+    width: 96px;
+    height: 72px;
+    border: 0;
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    cursor: zoom-in;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent) 14%, var(--bg-raised)),
+      var(--bg-raised)
+    );
+  }
+
+  .wi-id__car-cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .wi-id__car-icon {
+    line-height: 1;
+  }
+
+  .wi-id__car-more {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    z-index: 2;
+    background: rgba(15, 23, 42, 0.6);
+    color: #fff;
+    font-size: 0.68rem;
+    border-radius: 9999px;
+    padding: 1px 7px;
+  }
+
+  .wi-id__car-cover--empty {
+    cursor: help;
+    flex-direction: column;
+    gap: 2px;
+    border: 1px dashed var(--rule);
+  }
+
+  .wi-id__car-hint {
+    font-size: 0.62rem;
+    color: var(--ink-3);
+    letter-spacing: 0.02em;
+  }
+
+  .wi-id__car-info {
+    min-width: 0;
+  }
+
+  .wi-id__car-name {
+    font-size: var(--text-md);
+    padding-left: 0;
+    margin-bottom: 0;
+    word-break: keep-all;
+  }
+
+  .wi-id__car-name::before {
+    display: none;
+  }
+
+  .wi-id__car-sub {
+    margin: 2px 0 0;
+    font-size: var(--text-xs);
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  .wi-id__car-events {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .wi-id__event {
+    font-size: 0.76rem;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent-hover);
+  }
+
+  .wi-id__event.is-soon {
+    background: color-mix(in srgb, #f97316 16%, transparent);
+    color: #c2410c;
+  }
+
+  .wi-id__event.is-overdue {
+    background: color-mix(in srgb, #ef4444 16%, transparent);
+    color: #b91c1c;
+  }
+
+  html.dark .wi-id__event.is-soon {
+    color: #fdba74;
+  }
+
+  html.dark .wi-id__event.is-overdue {
+    color: #fca5a5;
+  }
+
+  .wi-id__car-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .wi-id__badge {
+    font-size: 0.72rem;
+    padding: 1px 9px;
+    border-radius: 9999px;
+    border: 1px solid var(--rule);
+    color: var(--ink-2);
+  }
+
+  /* 皮肤（插件设置「座驾卡片皮肤」开启时生效） */
+  .wi-id__car--cool {
+    background: linear-gradient(150deg, #111827, #0f172a 55%, #1e3a8a);
+    color: #e5e7eb;
+    border-color: rgba(148, 163, 184, 0.4);
+  }
+
+  .wi-id__car--cool .wi-id__car-name,
+  .wi-id__car--cool .wi-id__car-sub,
+  .wi-id__car--cool .wi-id__badge {
+    color: #e5e7eb;
+    border-color: rgba(147, 197, 253, 0.6);
+  }
+
+  .wi-id__car--cool .wi-id__event {
+    background: rgba(96, 165, 250, 0.18);
+    color: #bfdbfe;
+  }
+
+  .wi-id__car--cool .wi-id__event.is-soon {
+    background: rgba(251, 191, 36, 0.18);
+    color: #fde68a;
+  }
+
+  .wi-id__car--cool .wi-id__event.is-overdue {
+    background: rgba(248, 113, 113, 0.2);
+    color: #fecaca;
+  }
+
+  .wi-id__car--cute {
+    background: linear-gradient(150deg, #fff1f7, #ffe4ef 55%, #fdf2f8);
+    color: #831843;
+    border-color: rgba(244, 114, 182, 0.4);
+  }
+
+  .wi-id__car--cute .wi-id__car-name,
+  .wi-id__car--cute .wi-id__car-sub,
+  .wi-id__car--cute .wi-id__badge {
+    color: #831843;
+    border-color: rgba(236, 72, 153, 0.55);
+  }
+
+  .wi-id__car--cute .wi-id__event {
+    background: rgba(236, 72, 153, 0.12);
+    color: #9d174d;
+  }
+
+  .wi-id__car--neutral {
+    background: var(--bg-raised);
+  }
+
+  /* ===== 空状态 ===== */
+  .wi-id__empty {
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+    border: 1px dashed var(--rule);
+    border-radius: var(--radius-lg, 16px);
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+  }
+
+  /* ===== 相册浮层 / 轻提示（运行时移到 body 下，故不使用后代选择器） ===== */
+  .wi-id__album {
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 22px 14px;
+    background: rgba(12, 10, 9, 0.9);
+  }
+
+  .wi-id__album.is-open {
+    display: flex;
+  }
+
+  .wi-id__album-bar {
+    width: 100%;
+    max-width: 860px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: #f3ede5;
+    font-size: var(--text-sm);
+  }
+
+  .wi-id__album-close {
+    border: 0;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    border-radius: 9999px;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .wi-id__album-body {
+    width: 100%;
+    max-width: 860px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 20px;
+  }
+
+  .wi-id__album-body img {
+    width: 100%;
+    border-radius: 12px;
+    display: block;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  }
+
+  .wi-id__tip {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%) translateY(8px);
+    background: rgba(17, 24, 39, 0.94);
+    color: #f8fafc;
+    padding: 11px 20px;
+    border-radius: 12px;
+    font-size: var(--text-sm);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+    z-index: 12001;
+    max-width: min(90vw, 520px);
+    text-align: center;
+  }
+
+  .wi-id__tip.is-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  @media (max-width: 640px) {
+    .wi-id__grid,
+    .wi-id__cars {
+      grid-template-columns: 1fr;
+    }
+
+    .wi-id__memo-title {
+      margin-right: 56px;
+    }
+  }
+</style>

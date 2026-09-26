@@ -11,9 +11,9 @@
 ## 特点
 
 1. **响应式设计** — 适配桌面端与移动端，支持暗色模式，移动端使用动态视口单位适配地址栏
-2. **插件兼容性** — 适配 9 款常用 Halo 插件，安装即用；提供页面布局契约，插件前台页面自动复用主题外观
+2. **插件兼容性** — 适配 10 款常用 Halo 插件，安装即用；提供页面布局契约，插件前台页面自动复用主题外观
 3. **内置灯箱** — 主题内置 LightGallery 灯箱，支持 EXIF 信息展示；安装 lightgallery.js 插件后自动禁用
-4. **可配置性** — 16 个设置分组、117 个配置项，几乎所有模块可独立开关
+4. **可配置性** — 17 个设置分组、122 个配置项，几乎所有模块可独立开关
 5. **性能优化** — 服务端字数统计（API 扩展包）、图片懒加载与响应式缩略图、滚动吸附、CSS/HTML 压缩
 6. **页面布局契约** — 提供 `templates/layout.html`，插件页面不再回退到 Halo 内置布局
 
@@ -33,6 +33,7 @@
 | [豆瓣](https://github.com/chengzhongxue/plugin-douban) | `plugin-douban` | `/douban` | 豆瓣记录页面，支持类型/状态/标签筛选，默认电影 |
 | [Steam 信息展示](https://github.com/Tim0x0/halo-plugin-steam) | `PluginSteam` | `/steam` | Steam 游戏库页面，含用户资料、统计数据、最近游玩、游戏库分页 |
 | [微信读书](https://github.com/yeora26/halo-weread-plugin) | `halo-weread-plugin` | 自定义页面 | 书架展示页面，见下方「自定义页面模板」 |
+| [记得](https://github.com/yyliucha/plugin-important-dates) | `plugin-important-dates` | `/important-dates` | 重要日期 / 牵挂的人 / 爱车双视图页面，见下方「扩展页面」 |
 | [API 扩展包](https://github.com/HowieHz/halo-plugin-extra-api) | `extra-api` | 全站 | 服务端字数统计、中英文混排排版、可选服务端代码高亮 |
 
 > **注意**：插件需要单独安装，安装后主题会自动适配对应页面。若未安装某插件，对应页面或功能自动隐藏/降级，不会报错。

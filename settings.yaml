@@ -664,6 +664,18 @@ spec:
           name: weread_page_subtitle
           label: 页面副标题
           placeholder: "来自微信读书的同步藏书"
+    - group: important_dates
+      label: 记得
+      formSchema:
+        - $formkit: text
+          name: idates_page_title
+          label: 页面标题
+          placeholder: "记得"
+          help: 对应「记得」插件的前台页面 /important-dates；留空时使用插件自带的标题
+        - $formkit: text
+          name: idates_page_subtitle
+          label: 页面副标题
+          placeholder: "记着重要的日子、惦记的人，还有陪你跑的爱车"
     - group: messageboard
       label: 留言板
       formSchema:
