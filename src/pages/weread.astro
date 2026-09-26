@@ -69,6 +69,14 @@ import Layout from "../layouts/Layout.astro";
         .then(function (html) {
           container.innerHTML = html;
 
+          /* 笔记弹窗是 position:fixed，但 innerHTML 会把它留在 .wi-main 内，
+             而 .wi-main 有自己的层叠上下文（z-index:1），导致弹窗被导航栏
+             （z-index:100）和页脚遮挡。移到 body 下即可恢复正常层级。 */
+          var modal = document.getElementById("wrNotesModal");
+          if (modal && modal.parentNode !== document.body) {
+            document.body.appendChild(modal);
+          }
+
           /* innerHTML 插入的脚本不会执行，需要重建后才会运行 */
           var oldScripts = container.querySelectorAll("script");
           Array.prototype.forEach.call(oldScripts, function (oldScript) {
@@ -149,6 +157,19 @@ import Layout from "../layouts/Layout.astro";
     padding-top: 0;
   }
 
+  /* 统计数据水平居中，紧贴主题标题区（标题 + 强调线）下方 */
+  .wi-weread__shelf :global(.wr-head) {
+    justify-content: center;
+  }
+
+  .wi-weread__shelf :global(.wr-head-stats) {
+    justify-content: center;
+  }
+
+  .wi-weread__shelf :global(.wr-head-stats span) {
+    text-align: center;
+  }
+
   .wi-weread__shelf :global(img) {
     max-width: 100%;
     height: auto;
@@ -161,12 +182,13 @@ import Layout from "../layouts/Layout.astro";
 
   /* ===== 暗黑模式：插件内容为苹果风格浅色配色，深色下需要接管 ===== */
 
-  /* 覆盖插件内部变量（按其命名约定 --wr-*，未命中也无副作用） */
+  /* 覆盖插件内部变量（按其命名约定 --wr-*，未命中也无副作用）。
+     --wr-line 比全站分隔线略亮：年份分组等装饰线在深色底上需要保证可见 */
   html.dark .wi-weread__shelf :global(.wr-shelf) {
     --wr-ink: var(--ink);
     --wr-muted: var(--ink-2);
     --wr-bg: var(--bg-raised);
-    --wr-line: var(--rule);
+    --wr-line: #4a4238;
     --wr-fill: color-mix(in srgb, var(--ink) 8%, transparent);
   }
 
@@ -179,8 +201,30 @@ import Layout from "../layouts/Layout.astro";
     color: var(--ink-2);
   }
 
-  /* 笔记弹窗浅色底在深色页面中过于突兀 */
-  html.dark .wi-weread__shelf :global(.wr-notes-modal) {
-    background: color-mix(in srgb, var(--bg) 94%, transparent);
+  /* ===== 笔记弹窗：运行时被移到 body 下，脱离了 .wr-shelf 的变量作用域，
+     需要独立适配（选择器整体 :global，否则 scoped 属性匹配不到注入节点） ===== */
+  :global(html.dark .wr-notes-modal) {
+    --wr-ink: var(--ink);
+    --wr-muted: var(--ink-2);
+    --wr-bg: var(--bg-raised);
+    --wr-line: #4a4238;
+    --wr-fill: color-mix(in srgb, var(--ink) 8%, transparent);
+  }
+
+  :global(html.dark .wr-notes-dialog) {
+    background: var(--bg-raised);
+  }
+
+  :global(html.dark .wr-notes-close) {
+    background: color-mix(in srgb, var(--ink) 10%, transparent);
+    color: var(--ink);
+  }
+
+  :global(html.dark .wr-notes-modal :where(h3, h4, strong)) {
+    color: var(--ink);
+  }
+
+  :global(html.dark .wr-notes-modal :where(p, span, small, em, li)) {
+    color: var(--ink-2);
   }
 </style>
