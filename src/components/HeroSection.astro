@@ -100,6 +100,7 @@
       var top;
 
       if (content) {
+        /* 与首页滚动吸附逻辑保持一致：内容区顶部对齐视口顶部，完全盖住固定背景的 Hero */
         top = content.getBoundingClientRect().top + window.pageYOffset;
       } else if (hero) {
         top = hero.offsetTop + hero.offsetHeight;
@@ -107,16 +108,12 @@
         top = window.innerHeight;
       }
 
-      /* 预留固定导航栏的高度，避免内容被顶栏遮住 */
-      var navbar = document.getElementById("wi-navbar");
-      var offset = navbar ? navbar.offsetHeight + 8 : 8;
-
       var reduce =
         window.matchMedia &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       window.scrollTo({
-        top: Math.max(0, top - offset),
+        top: Math.max(0, top),
         behavior: reduce ? "auto" : "smooth",
       });
     });
@@ -158,17 +155,27 @@
           return res.json();
         })
         .then(function (data) {
-          el.style.opacity = "1";
           var text = data.hitokoto || "";
           var from = data.from || data.from_who || "";
           if (from) {
             text += " \u2014\u2014 " + from;
           }
-          el.textContent = text;
+
+          if (initial) {
+            el.style.opacity = "1";
+            el.textContent = text;
+          } else {
+            /* 自动刷新：淡出 → 换文案 → 淡入，避免生硬跳变 */
+            el.style.opacity = "0";
+            setTimeout(function () {
+              el.textContent = text;
+              el.style.opacity = "1";
+            }, 280);
+          }
         })
         .catch(function () {
+          // 失败时恢复可见：首次为空，刷新时保留原文案
           el.style.opacity = "1";
-          // 自动刷新失败时保留原文案，避免闪烁成空白
           if (initial) el.textContent = "";
         });
     }

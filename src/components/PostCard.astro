@@ -28,10 +28,18 @@ const { variant = "default" } = Astro.props;
   </div>
 
   <div class="post-card__content">
-    <time
-      class="post-card__date"
-      th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
-    ></time>
+    <div class="post-card__meta">
+      <time
+        class="post-card__date"
+        th:text="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}"
+      ></time>
+      <span
+        class="post-card__words"
+        th:if="${theme.config?.home?.home_card_show_wordcount == true and pluginFinder.available('extra-api')}"
+        th:with="words=${extraApiStatsFinder.getPostWordCount({name: post.metadata.name})}"
+        th:text="${words > 0 ? words + ' 字' : ''}"
+      ></span>
+    </div>
     <h3 class="post-card__title" th:text="${post.spec.title}"></h3>
     <p
       th:if="${variant != 'compact'}"
@@ -108,6 +116,20 @@ const { variant = "default" } = Astro.props;
     letter-spacing: var(--tracking-wider);
     color: var(--ink-3);
     line-height: var(--leading-none);
+  }
+
+  .post-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .post-card__words {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    line-height: var(--leading-none);
+    padding-left: 0.6rem;
+    border-left: 1px solid var(--rule);
   }
 
   .post-card__title {

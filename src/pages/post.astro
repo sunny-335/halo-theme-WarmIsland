@@ -1315,10 +1315,35 @@ import LightGallery from "../components/LightGallery.astro";
   .wi-post__nav-link {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.35rem;
     text-decoration: none;
-    max-width: 45%;
-    transition: color var(--duration-fast) var(--ease-out-quart);
+    max-width: 48%;
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius-md, 12px);
+    background: transparent;
+    transition: background 0.2s ease, transform 0.2s var(--ease-out-quart);
+  }
+
+  .wi-post__nav-link:hover {
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+  }
+
+  .wi-post__nav-link--prev:hover {
+    transform: translateX(-3px);
+  }
+
+  .wi-post__nav-link--next:hover {
+    transform: translateX(3px);
+  }
+
+  .wi-post__nav-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
   }
 
   .wi-post__nav-link--next {
@@ -1326,15 +1351,32 @@ import LightGallery from "../components/LightGallery.astro";
     margin-left: auto;
   }
 
+  .wi-post__nav-link--next .wi-post__nav-label {
+    justify-content: flex-end;
+  }
+
   .wi-post__nav-link--empty {
     visibility: hidden;
   }
 
-  .wi-post__nav-label {
-    font-size: var(--text-xs);
-    color: var(--ink-3);
-    letter-spacing: var(--tracking-wider);
-    text-transform: uppercase;
+  .wi-post__nav-link--prev .wi-post__nav-label::before {
+    content: "←";
+    font-size: 0.9em;
+    transition: transform 0.2s var(--ease-out-quart);
+  }
+
+  .wi-post__nav-link--next .wi-post__nav-label::after {
+    content: "→";
+    font-size: 0.9em;
+    transition: transform 0.2s var(--ease-out-quart);
+  }
+
+  .wi-post__nav-link--prev:hover .wi-post__nav-label::before {
+    transform: translateX(-2px);
+  }
+
+  .wi-post__nav-link--next:hover .wi-post__nav-label::after {
+    transform: translateX(2px);
   }
 
   .wi-post__nav-title {
@@ -1468,6 +1510,7 @@ import LightGallery from "../components/LightGallery.astro";
     .wi-post__nav-link {
       max-width: 48%;
       min-width: 0;
+      padding: 0.6rem 0.75rem;
     }
 
     .wi-post__nav-title {

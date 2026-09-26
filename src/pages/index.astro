@@ -129,6 +129,11 @@ import WelcomePopup from "../components/WelcomePopup.astro";
               <div class="wi-flow__stats">
                 <span
                   class="wi-flow__stat"
+                  th:if="${theme.config?.home?.home_card_show_wordcount == true and pluginFinder.available('extra-api')}"
+                  th:text="${extraApiStatsFinder.getPostWordCount({name: post.metadata.name}) + ' 字'}"
+                ></span>
+                <span
+                  class="wi-flow__stat"
                   th:if="${theme.config?.home?.home_card_show_visit ?: true}"
                 >
                   <th:block th:text="${post.stats?.visit ?: 0}"></th:block> <th:block th:text="'阅读'">阅读</th:block>

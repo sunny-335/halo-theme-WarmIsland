@@ -142,10 +142,6 @@ spec:
           label: 滚动渐入
           value: true
         - $formkit: switch
-          name: animation_cursor_glow
-          label: 光感跟随
-          value: false
-        - $formkit: switch
           name: click_effect_enabled
           id: click_effect_enabled
           label: 鼠标点击效果
@@ -155,7 +151,7 @@ spec:
           name: click_effect_type
           id: click_effect_type
           label: 点击效果类型
-          value: off
+          value: values
           if: "$get(click_effect_enabled).value === true"
           options:
             - label: 关闭

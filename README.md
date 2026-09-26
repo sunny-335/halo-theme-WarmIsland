@@ -4,13 +4,18 @@
 
 > 本项目由 AI 开发完成，人工仅进行部分功能测试及问题找寻
 
+## 环境要求
+
+- Halo **2.26.0 及以上**（页面布局契约、微信读书页面均依赖 2.26 的新能力）
+
 ## 特点
 
-1. **响应式设计** — 适配桌面端与移动端，支持暗色模式
-2. **插件兼容性** — 适配 8 款常用 Halo 插件，安装即用
-3. **内置灯箱** — 主题内置 LightGallery 灯箱，支持 EXIF 信息展示；安装 lightgallery.js 插件后自动禁用内置灯箱
-4. **可配置性** — 丰富的后台设置项，支持自定义首页模块、文章卡片、导航栏样式等
-5. **性能优化** — 图片懒加载、CSS/HTML 压缩、requestAnimationFrame 节流、Vue 组件按需加载
+1. **响应式设计** — 适配桌面端与移动端，支持暗色模式，移动端使用动态视口单位适配地址栏
+2. **插件兼容性** — 适配 9 款常用 Halo 插件，安装即用；提供页面布局契约，插件前台页面自动复用主题外观
+3. **内置灯箱** — 主题内置 LightGallery 灯箱，支持 EXIF 信息展示；安装 lightgallery.js 插件后自动禁用
+4. **可配置性** — 16 个设置分组、117 个配置项，几乎所有模块可独立开关
+5. **性能优化** — 服务端字数统计（API 扩展包）、图片懒加载与响应式缩略图、滚动吸附、CSS/HTML 压缩
+6. **页面布局契约** — 提供 `templates/layout.html`，插件页面不再回退到 Halo 内置布局
 
 ## 预览
 
@@ -20,15 +25,51 @@
 
 | 插件名称 | 插件标识 | 适配页面路由 | 说明 |
 |----------|---------|-------------|------|
-| [瞬间](https://halo.run/store/apps/app-SnwWD) | `PluginMoments` | `/moments` | 瞬间动态页面，支持点赞、评论、标签筛选 |
+| [瞬间](https://halo.run/store/apps/app-SnwWD) | `PluginMoments` | `/moments` | 瞬间动态页面，支持点赞、评论、标签筛选、顶部封面 |
 | [图库](https://halo.run/store/apps/app-BmQJW) | `PluginPhotos` | `/photos` | 图片展示页面，支持分组、灯箱预览 |
-| [友情链接](https://halo.run/store/apps/app-hqbe) | `PluginLinks` | `/links` | 友链展示页面，支持分组展示 |
+| [友情链接](https://halo.run/store/apps/app-hfbQg) | `PluginLinks` | `/links` | 友链展示页面，支持随机排列、随机传送门、评论区开关 |
 | [朋友圈](https://github.com/halo-sigs/plugin-friends) | `plugin-friends` | `/friends` | RSS 订阅朋友圈页面 |
 | [装备管理](https://github.com/chengzhongxue/plugin-equipment) | `equipment` | `/equipments` | 装备展示页面，按分组展示，支持封面图 |
 | [豆瓣](https://github.com/chengzhongxue/plugin-douban) | `plugin-douban` | `/douban` | 豆瓣记录页面，支持类型/状态/标签筛选，默认电影 |
 | [Steam 信息展示](https://github.com/Tim0x0/halo-plugin-steam) | `PluginSteam` | `/steam` | Steam 游戏库页面，含用户资料、统计数据、最近游玩、游戏库分页 |
+| [微信读书](https://github.com/yeora26/halo-weread-plugin) | `halo-weread-plugin` | 自定义页面 | 书架展示页面，见下方「自定义页面模板」 |
+| [API 扩展包](https://github.com/HowieHz/halo-plugin-extra-api) | `extra-api` | 全站 | 服务端字数统计、中英文混排排版、可选服务端代码高亮 |
 
-> **注意**：插件需要单独安装，安装后主题会自动适配对应页面。若未安装某插件，对应页面不会出现。
+> **注意**：插件需要单独安装，安装后主题会自动适配对应页面。若未安装某插件，对应页面或功能自动隐藏/降级，不会报错。
+
+## 自定义页面模板
+
+在 Halo 后台「页面 → 新建 → 自定义模板」中选择使用：
+
+| 模板名 | 模板文件 | 说明 |
+|--------|---------|------|
+| 留言板 | `page_messageboard.html` | 留言墙页面，标题与副标题可配置 |
+| 订阅 | `page_subscriptions.html` | 博友文章订阅动态，依赖链接管理插件的 RSS 订阅，支持分页/下滑加载与列表/网格布局 |
+| 微信读书 | `weread.html` | 微信读书书架展示，依赖微信读书插件，访客免登录查看 |
+
+## 主要功能
+
+### 首页
+
+- Hero 首屏：明暗双背景图、大标题/副标题独立配色、一言（支持自动刷新与淡入淡出过渡）、下滑箭头平滑滚动
+- 欢迎弹窗：基于访客 IP 地理定位的欢迎提示，支持 5 种位置、自定义 API 与会话去重开关
+- 滚动吸附：首屏与内容区之间滚轮/触摸自动吸附
+- 文章卡片：可配置显示字数（依赖 API 扩展包）、阅读量、分类、标签、摘要行数
+
+### 文章
+
+- 目录（TOC）：桌面端侧栏 + 移动端抽屉，滚动高亮、展开模式可选
+- 上下篇导航：悬停反馈与方向箭头动画
+- 相关推荐、分享按钮、赞赏、版权声明可独立开关
+- 字数与阅读时间：优先使用 API 扩展包的服务端统计，未安装时前端计算兜底
+
+### 全局
+
+- 点击特效：核心价值观 / 爱心 / 烟花 / 粒子等 9 种可选
+- 页脚全站统计：文章、分类、评论、访问、点赞、总字数，支持开关与统计项选择（默认开启）
+- 动效：呼吸动画、滚动渐入，可独立关闭
+- 备案信息：ICP 与公网安备号，公网安备自动带徽标
+- 鼠标光感跟随已移除（性能考量）
 
 ## 灯箱集成
 
@@ -56,33 +97,53 @@
 或从源码构建：
 
 ```bash
-git clone https://github.com/warm-island/theme-warm-island.git
-cd theme-warm-island
-npm install
-npm run build
+git clone https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland.git
+cd halo-theme-WarmIsland
+pnpm install
+pnpm build
 ```
 
-构建产物在 `templates/` 目录下，将其复制到 Halo 主题目录即可。
+构建产物在 `templates/` 目录下，同时会生成 `dist/` 内的安装包。
 
 ## 开发
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
-# 开发模式（监听文件变化）
-npm run dev
+# 开发模式（监听文件变化，自动构建到 templates/）
+pnpm dev
 
 # 构建
-npm run build
+pnpm build
 ```
+
+### 目录结构
+
+```
+├── src/
+│   ├── components/    # 组件（导航、页脚、Hero、弹窗、特效等）
+│   ├── layouts/       # Layout.astro（含页面布局契约渲染模式）
+│   ├── pages/         # 页面模板（构建后输出到 templates/）
+│   └── styles/        # SCSS 样式（正文样式在 _content.scss，全局生效）
+├── templates/         # 构建产物，Halo 实际加载的模板
+├── settings.yaml      # 后台设置项定义（16 分组 / 117 项）
+└── theme.yaml         # 主题清单与自定义页面模板注册
+```
+
+### 主题开发注意事项
+
+- **Thymeleaf 字符串字面量必须加单引号**：`th:text="'文本'"`，裸中文遇到逗号/空格/emoji 会导致页面 500
+- **正文样式必须写在全局样式表**（`src/styles/_content.scss`）：Astro scoped 样式对 Thymeleaf 运行时注入的内容无效
+- **内联脚本统一加 `th:inline="none"`**：避免 Thymeleaf 解析脚本中的 `[[` / `[(` / `${}`
+- 修改主题外观无需单独维护 `layout.astro`：页面布局契约复用 `Layout.astro`，构建时自动生成
 
 ## 技术栈
 
-- [Halo](https://halo.run) 2.24+
+- [Halo](https://halo.run) 2.26+
 - [Astro](https://astro.build) + [vite-plugin-halo-theme](https://github.com/halo-sigs/vite-plugin-halo-theme)
 - [Thymeleaf](https://www.thymeleaf.org) 模板引擎
-- [Vue 3](https://vuejs.org) Islands 交互组件
+- [Sass](https://sass-lang.com/) 样式
 
 ## 许可
 

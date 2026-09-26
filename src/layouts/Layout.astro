@@ -3,10 +3,8 @@ import "../styles/main.scss";
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import ScrollReveal from "../components/ScrollReveal.astro";
-import CursorGlow from "../components/CursorGlow.astro";
 import MobileMenu from "../components/MobileMenu.astro";
 import ClickEffect from "../components/ClickEffect.astro";
-
 interface Props {
   pageTitle?: string;
   contentClass?: string;
@@ -119,7 +117,6 @@ const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
     <Footer />
     <MobileMenu />
     <ScrollReveal th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_scroll_reveal != false}" />
-    <CursorGlow th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_cursor_glow == true}" />
     <ClickEffect />
   </body>
 </html>
