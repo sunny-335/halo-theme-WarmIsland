@@ -652,9 +652,9 @@ spec:
       formSchema:
         - $formkit: text
           name: weread_page_title
-          label: 页面标题（浏览器标签）
+          label: 页面标题
           placeholder: "书架"
-          help: 仅用于浏览器标签页标题；页面内的标题由插件返回的书架内容自带
+          help: 页面顶部标题与浏览器标签页标题；插件自带的标题区会自动隐藏以避免重复
         - $formkit: text
           name: weread_page_subtitle
           label: 页面副标题
