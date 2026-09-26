@@ -5,7 +5,7 @@ import LightGallery from "../components/LightGallery.astro";
 
 <Layout wide>
   <Fragment slot="head">
-    <title th:text="|${title ?: (theme.config?.photos?.photos_page_title ?: #messages.msg('photos.title'))} - ${site.title}|"></title>
+    <title th:text="|${title ?: (theme.config?.photos?.photos_page_title ?: '相册')} - ${site.title}|"></title>
   </Fragment>
 
   <section class="wi-photos-page">
@@ -13,7 +13,7 @@ import LightGallery from "../components/LightGallery.astro";
       <div class="wi-photos-page__header">
         <h1
           class="wi-photos-page__title"
-          th:text="${theme.config?.photos?.photos_page_title ?: #messages.msg('photos.title')}"
+          th:text="${theme.config?.photos?.photos_page_title ?: '相册'}"
         >
           Gallery
         </h1>
@@ -30,7 +30,7 @@ import LightGallery from "../components/LightGallery.astro";
               th:href="@{${photoUrl.list()}}"
               class="wi-photos-page__group-link"
               th:classappend="${#strings.isEmpty(currentGroup)} ? 'wi-photos-page__group-link--active' : ''"
-              th:text="#{common.all}"
+              th:text="'全部'"
             >
               All
             </a>
@@ -49,7 +49,7 @@ import LightGallery from "../components/LightGallery.astro";
               <div class="wi-photos-page__all-groups">
               <th:block th:if="${showUngrouped and photos != null and !#lists.isEmpty(photos.items)}">
                 <div class="wi-photos-page__section">
-                  <h2 class="wi-photos-page__section-title" th:text="#{common.all}">All</h2>
+                  <h2 class="wi-photos-page__section-title" th:text="'全部'">全部</h2>
                   <div
                     class="wi-photos-page__grid"
                     th:attr="data-style=${theme.config?.photos?.photos_style ?: 'masonry'}, data-columns=${theme.config?.photos?.photos_columns ?: 3}"
@@ -241,7 +241,7 @@ import LightGallery from "../components/LightGallery.astro";
                   </div>
                 </div>
                 <div class="wi-photos-page__empty" th:if="${#lists.isEmpty(group.photos)}">
-                  <p th:text="#{common.noPhotosInGroup}">No photos in this group.</p>
+                  <p th:text="'该分组暂无图片'">该分组暂无图片</p>
                 </div>
               </th:block>
             </th:block>
@@ -249,20 +249,20 @@ import LightGallery from "../components/LightGallery.astro";
           </th:block>
 
           <div class="wi-photos-page__empty" th:if="${#lists.isEmpty(groups) and !(showUngrouped and photos != null and !#lists.isEmpty(photos.items))}">
-            <p th:text="#{common.noPhotos}">No photos yet.</p>
+            <p th:text="'暂无图片'">暂无图片</p>
           </div>
         </th:block>
 
         <th:block th:if="${groups == null}">
           <div class="wi-photos-page__empty">
-            <p th:text="#{common.pluginError}">Plugin error</p>
+            <p th:text="'插件加载异常，请检查插件状态'">插件加载异常，请检查插件状态</p>
           </div>
         </th:block>
       </th:block>
 
       <th:block th:unless="${pluginFinder.available('PluginPhotos')}">
         <div class="wi-photos-page__empty">
-          <p th:utext="#{common.installPlugin('Gallery', 'https://www.halo.run/store/apps/app-PgHgw')}">This feature requires the Gallery plugin</p>
+          <p>该功能需要安装「相册」插件，<a href="https://www.halo.run/store/apps/app-BmQJW" target="_blank" rel="noopener noreferrer">前往应用市场安装</a></p>
         </div>
       </th:block>
     </div>
@@ -547,7 +547,7 @@ import LightGallery from "../components/LightGallery.astro";
   }
 </style>
 
-<script is:inline>
+<script is:inline th:inline="none">
   (function () {
     var rafPending = false;
 

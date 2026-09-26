@@ -4,7 +4,7 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout wide>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.friends?.friends_page_title ?: #messages.msg('friends.title')} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.friends?.friends_page_title ?: '友人圈'} - ${site.title}|"></title>
   </Fragment>
 
   <section
@@ -15,7 +15,7 @@ import Layout from "../layouts/Layout.astro";
       <div class="wi-friends-page__header">
         <h1
           class="wi-friends-page__title"
-          th:text="${theme.config?.friends?.friends_page_title ?: #messages.msg('friends.title')}"
+          th:text="${theme.config?.friends?.friends_page_title ?: '友人圈'}"
         >
           Friends Circle
         </h1>
@@ -87,7 +87,7 @@ import Layout from "../layouts/Layout.astro";
           th:if="${friends.hasPrevious()}"
           th:href="@{${friends.prevUrl}}"
           class="wi-friends-page__page-link"
-          th:text="#{common.newer}"
+          th:text="'较新'"
         >
           &larr; Newer
         </a>
@@ -99,7 +99,7 @@ import Layout from "../layouts/Layout.astro";
           th:if="${friends.hasNext()}"
           th:href="@{${friends.nextUrl}}"
           class="wi-friends-page__page-link"
-          th:text="#{common.older}"
+          th:text="'较旧'"
         >
           Older &rarr;
         </a>
@@ -113,11 +113,11 @@ import Layout from "../layouts/Layout.astro";
   >
     <div class="wi-container">
       <div class="wi-friends-page__header">
-        <h1 class="wi-friends-page__title" th:text="#{friends.title}">Friends Circle</h1>
+        <h1 class="wi-friends-page__title" th:text="'友人圈'">友人圈</h1>
         <span class="wi-page-accent"></span>
       </div>
       <div class="wi-friends-page__empty">
-        <p th:utext="#{common.installPlugin('Friends Circle', 'https://www.halo.run/store/apps/app-friends')}">This feature requires the Friends Circle plugin</p>
+        <p>该功能需要安装「朋友圈」插件，<a href="https://www.halo.run/store/apps/app-yISsV" target="_blank" rel="noopener noreferrer">前往应用市场安装</a></p>
       </div>
     </div>
   </section>

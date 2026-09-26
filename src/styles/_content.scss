@@ -1,0 +1,331 @@
+@use 'variables' as *;
+
+/* ==========================================================================
+   正文排版（文章页 .wi-post__body / 单页 .wi-page__body 共用）
+   --------------------------------------------------------------------------
+   目标：
+   1. 标题层级清晰、字号克制，移动端逐级收敛（而不是反向放大）
+   2. 图片 / 视频 / 嵌入 iframe / figure 一律水平居中且不破坏响应式
+   ========================================================================== */
+
+/* 正文容器：运行时由 Thymeleaf 注入内容，因此这里的规则必须是全局的，
+   不能写进组件的 scoped <style>（那样不会命中注入的内容）。 */
+.wi-post__body,
+.wi-page__body,
+.wi-messageboard__body {
+  /* ---------- 标题层级 ---------- */
+  :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-sans);
+    font-weight: 700;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    scroll-margin-top: 88px;
+    text-wrap: balance;
+    /* 覆盖全局标题装饰（左侧竖线 / 圆点），正文内保持干净 */
+    padding-left: 0;
+    border-left: 0;
+
+    &::before,
+    &::after {
+      content: none;
+    }
+  }
+
+  h1 {
+    font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
+    margin-top: 2em;
+    margin-bottom: 0.7em;
+  }
+
+  h2 {
+    font-size: clamp(1.3rem, 1.2rem + 0.5vw, 1.5rem);
+    margin-top: 1.9em;
+    margin-bottom: 0.65em;
+  }
+
+  h3 {
+    font-size: clamp(1.15rem, 1.08rem + 0.35vw, 1.28rem);
+    margin-top: 1.7em;
+    margin-bottom: 0.6em;
+  }
+
+  h4 {
+    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.13rem);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  h5 {
+    font-size: 1rem;
+    margin-top: 1.4em;
+    margin-bottom: 0.45em;
+  }
+
+  h6 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink-3);
+    margin-top: 1.4em;
+    margin-bottom: 0.45em;
+  }
+
+  /* 标题紧跟在另一个标题后时去掉多余上间距 */
+  :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-top: 0.6em;
+  }
+
+  /* 段落内首个元素不需要上间距 */
+  > :is(h1, h2, h3, h4, h5, h6):first-child {
+    margin-top: 0;
+  }
+
+  p {
+    margin-block-end: 1.2em;
+  }
+
+  /* ---------- 代码块 / 引用 / 列表 ---------- */
+
+  * {
+    max-width: 100%;
+  }
+
+  :is(pre, code, table) {
+    overflow-x: auto;
+  }
+
+  pre {
+    margin-block: 1.5em;
+    padding: 1.25em;
+    border-radius: $border-radius-md;
+    border: 1px solid var(--rule);
+    background: var(--bg-raised);
+    font-size: 0.875em;
+    line-height: 1.6;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-size: inherit;
+  }
+
+  code {
+    background: var(--bg-raised);
+    padding: 0.15em 0.4em;
+    border-radius: $border-radius-sm;
+    font-size: 0.875em;
+    border: 1px solid var(--rule);
+  }
+
+  blockquote {
+    margin-block: 2em;
+  }
+
+  :is(ul, ol) {
+    padding-inline-start: 1.5em;
+    margin-block-end: 1.2em;
+  }
+
+  li {
+    margin-block-end: 0.6em;
+  }
+
+  a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  /* 第三方摘要插件容器 */
+  :is(.ai-summary, .abstract),
+  [class*='ai-summary'],
+  [class*='ai-abstract'],
+  [class*='likcc-article-summary'] {
+    margin-bottom: 15px;
+  }
+
+  /* ---------- 媒体居中 ---------- */
+
+  /* 图片 / 视频：块级 + 自动外边距实现居中，max-width 保证不溢出容器 */
+  img,
+  video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+
+  img,
+  video {
+    border-radius: $border-radius-md;
+    margin-block: 1.5em;
+  }
+
+  /* 行内小图标 / 表情不受居中规则影响 */
+  img[role='presentation'],
+  img[aria-hidden='true'],
+  :is(.emoji, .icon, .avatar, .badge) {
+    display: inline;
+    margin-inline: 0;
+    border-radius: 0;
+  }
+
+  /* 编辑器可能输出 align="center|left|right" 或 text-align 样式，保持一致居中 */
+  [align='center'],
+  [style*='text-align:center'],
+  [style*='text-align: center'] {
+    text-align: center;
+  }
+
+  iframe {
+    display: block;
+    max-width: 100%;
+    margin-inline: auto;
+    border: none;
+  }
+
+  figure {
+    display: block;
+    max-width: 100%;
+    margin-inline: auto;
+    margin-block: 1.5em;
+    text-align: center;
+  }
+
+  figure :is(img, video) {
+    margin-block: 0;
+  }
+
+  figcaption {
+    color: var(--ink-3);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    text-align: center;
+    margin-top: 0.6em;
+  }
+
+  /* lightgallery 注入的 <a> 包裹层：收缩到图片宽度并居中 */
+  .wi-lightgallery-item {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    border-radius: $border-radius-md;
+    line-height: 0;
+  }
+
+  .wi-lightgallery-item > img {
+    margin-block: 0;
+  }
+
+  /* 响应式嵌入容器（由脚本按 width/height 生成 aspect-ratio） */
+  .wi-embed {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    margin-block: 1.5em;
+    overflow: hidden;
+    border-radius: $border-radius-md;
+    background: var(--bg-raised);
+  }
+
+  .wi-embed > :is(iframe, video, embed, object) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    border-radius: 0;
+    border: 0;
+  }
+
+  /* 图片懒加载占位模糊 */
+  .wi-media-loading {
+    filter: blur(20px);
+    opacity: 0.6;
+  }
+
+  .wi-media-loaded {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+/* 移动端：标题逐级收敛，正文行高放宽 */
+@media (max-width: 768px) {
+  .wi-post__body,
+  .wi-page__body,
+  .wi-messageboard__body {
+    h1 {
+      font-size: 1.4rem;
+    }
+
+    h2 {
+      font-size: 1.28rem;
+    }
+
+    h3 {
+      font-size: 1.16rem;
+    }
+
+    h4 {
+      font-size: 1.05rem;
+    }
+
+    h5 {
+      font-size: 1rem;
+    }
+
+    h6 {
+      font-size: 0.95rem;
+    }
+
+    p {
+      margin-block-end: 1.35em;
+    }
+
+    pre {
+      font-size: 0.9em;
+      padding: 1em;
+    }
+
+    code {
+      font-size: 0.9em;
+    }
+
+    img,
+    video {
+      margin-block: 1.2em;
+    }
+
+    /* 窄屏图片允许撑满内容宽度，避免留白过大 */
+    img,
+    video,
+    .wi-lightgallery-item,
+    figure {
+      max-width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .wi-post__body,
+  .wi-page__body,
+  .wi-messageboard__body {
+    h1 {
+      font-size: 1.32rem;
+    }
+
+    h2 {
+      font-size: 1.22rem;
+    }
+
+    h3 {
+      font-size: 1.12rem;
+    }
+  }
+}

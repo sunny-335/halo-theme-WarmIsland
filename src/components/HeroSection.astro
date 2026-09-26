@@ -1,6 +1,11 @@
 ---
 ---
 
+<style is:inline th:if="${theme.config?.hero?.hero_title_color_light != null and theme.config?.hero?.hero_title_color_light != ''}" th:utext="${' :root { --hero-title-text: ' + theme.config?.hero?.hero_title_color_light + '; } '}">/*hero-title-light*/</style>
+<style is:inline th:if="${theme.config?.hero?.hero_title_color_dark != null and theme.config?.hero?.hero_title_color_dark != ''}" th:utext="${' html.dark { --hero-title-text: ' + theme.config?.hero?.hero_title_color_dark + '; } '}">/*hero-title-dark*/</style>
+<style is:inline th:if="${theme.config?.hero?.hero_subtitle_color_light != null and theme.config?.hero?.hero_subtitle_color_light != ''}" th:utext="${' :root { --hero-subtitle-text: ' + theme.config?.hero?.hero_subtitle_color_light + '; } '}">/*hero-subtitle-light*/</style>
+<style is:inline th:if="${theme.config?.hero?.hero_subtitle_color_dark != null and theme.config?.hero?.hero_subtitle_color_dark != ''}" th:utext="${' html.dark { --hero-subtitle-text: ' + theme.config?.hero?.hero_subtitle_color_dark + '; } '}">/*hero-subtitle-dark*/</style>
+
 <section
   class="hero"
   id="wi-hero"
@@ -13,8 +18,23 @@
     <div class="hero__orb hero__orb--3"></div>
     <div
       class="hero__bg-image"
-      th:if="${theme.config?.hero?.hero_background_image}"
+      th:if="${!#strings.isEmpty(theme.config?.hero?.hero_background_image) and #strings.isEmpty(theme.config?.hero?.hero_background_image_dark)}"
       th:style="'background-image: url(' + ${theme.config?.hero?.hero_background_image} + ')'"
+    ></div>
+    <div
+      class="hero__bg-image"
+      th:if="${#strings.isEmpty(theme.config?.hero?.hero_background_image) and !#strings.isEmpty(theme.config?.hero?.hero_background_image_dark)}"
+      th:style="'background-image: url(' + ${theme.config?.hero?.hero_background_image_dark} + ')'"
+    ></div>
+    <div
+      class="hero__bg-image hero__bg-image--light"
+      th:if="${!#strings.isEmpty(theme.config?.hero?.hero_background_image) and !#strings.isEmpty(theme.config?.hero?.hero_background_image_dark)}"
+      th:style="'background-image: url(' + ${theme.config?.hero?.hero_background_image} + ')'"
+    ></div>
+    <div
+      class="hero__bg-image hero__bg-image--dark"
+      th:if="${!#strings.isEmpty(theme.config?.hero?.hero_background_image) and !#strings.isEmpty(theme.config?.hero?.hero_background_image_dark)}"
+      th:style="'background-image: url(' + ${theme.config?.hero?.hero_background_image_dark} + ')'"
     ></div>
   </div>
 
@@ -37,7 +57,7 @@
       class="hero__description"
       th:if="${theme.config?.hero?.hero_description_mode == 'hitokoto'}"
       id="wi-hitokoto"
-      th:attr="data-api=${theme.config?.hero?.hero_hitokoto_api ?: 'https://v1.hitokoto.cn/'},data-categories=${theme.config?.hero?.hero_hitokoto_categories}"
+      th:attr="data-api=${theme.config?.hero?.hero_hitokoto_api ?: 'https://v1.hitokoto.cn/'},data-categories=${theme.config?.hero?.hero_hitokoto_categories},data-auto-refresh=${theme.config?.hero?.hero_hitokoto_auto_refresh == true ? 'true' : 'false'},data-refresh-interval=${theme.config?.hero?.hero_hitokoto_refresh_interval ?: 10000}"
     ></p>
     <p
       class="hero__description"
@@ -46,7 +66,12 @@
     ></p>
   </div>
 
-  <div class="hero__scroll-indicator" id="wi-hero-scroll-indicator" aria-hidden="true">
+  <button
+    class="hero__scroll-indicator"
+    id="wi-hero-scroll-indicator"
+    type="button"
+    aria-label="向下浏览"
+  >
     <svg
       width="24"
       height="24"
@@ -56,53 +81,106 @@
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
+      aria-hidden="true"
     >
       <polyline points="6 9 12 15 18 9"></polyline>
     </svg>
-  </div>
+  </button>
 </section>
 
-<script is:inline>
+<script is:inline th:inline="none">
+  /* Hero 下滑箭头：平滑滚动到首屏内容区 */
+  (function () {
+    var indicator = document.getElementById("wi-hero-scroll-indicator");
+    if (!indicator) return;
+
+    indicator.addEventListener("click", function () {
+      var content = document.querySelector(".wi-home-content");
+      var hero = document.getElementById("wi-hero");
+      var top;
+
+      if (content) {
+        top = content.getBoundingClientRect().top + window.pageYOffset;
+      } else if (hero) {
+        top = hero.offsetTop + hero.offsetHeight;
+      } else {
+        top = window.innerHeight;
+      }
+
+      /* 预留固定导航栏的高度，避免内容被顶栏遮住 */
+      var navbar = document.getElementById("wi-navbar");
+      var offset = navbar ? navbar.offsetHeight + 8 : 8;
+
+      var reduce =
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      window.scrollTo({
+        top: Math.max(0, top - offset),
+        behavior: reduce ? "auto" : "smooth",
+      });
+    });
+  })();
+
   (function () {
     var el = document.getElementById("wi-hitokoto");
     if (!el) return;
 
     var api = el.getAttribute("data-api") || "https://v1.hitokoto.cn/";
     var categories = el.getAttribute("data-categories");
-    var url = api + "?encode=json";
+    var autoRefresh = el.getAttribute("data-auto-refresh") === "true";
+    var refreshInterval = parseInt(el.getAttribute("data-refresh-interval"), 10) || 10000;
 
-    if (categories) {
-      try {
-        var cats = JSON.parse(categories);
-        if (Array.isArray(cats)) {
-          cats.forEach(function (c) {
-            url += "&c=" + encodeURIComponent(c);
-          });
-        }
-      } catch (e) {}
+    function buildUrl() {
+      var url = api + "?encode=json";
+      if (categories) {
+        try {
+          var cats = JSON.parse(categories);
+          if (Array.isArray(cats)) {
+            cats.forEach(function (c) {
+              url += "&c=" + encodeURIComponent(c);
+            });
+          }
+        } catch (e) {}
+      }
+      return url;
     }
 
-    el.style.opacity = "0.5";
-    el.textContent = "\u2026";
+    function load(initial) {
+      if (initial) {
+        el.style.opacity = "0.5";
+        el.textContent = "\u2026";
+      }
 
-    fetch(url)
-      .then(function (res) {
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        return res.json();
-      })
-      .then(function (data) {
-        el.style.opacity = "1";
-        var text = data.hitokoto || "";
-        var from = data.from || data.from_who || "";
-        if (from) {
-          text += " \u2014\u2014 " + from;
-        }
-        el.textContent = text;
-      })
-      .catch(function () {
-        el.style.opacity = "1";
-        el.textContent = "";
-      });
+      return fetch(buildUrl())
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          el.style.opacity = "1";
+          var text = data.hitokoto || "";
+          var from = data.from || data.from_who || "";
+          if (from) {
+            text += " \u2014\u2014 " + from;
+          }
+          el.textContent = text;
+        })
+        .catch(function () {
+          el.style.opacity = "1";
+          // 自动刷新失败时保留原文案，避免闪烁成空白
+          if (initial) el.textContent = "";
+        });
+    }
+
+    load(true);
+
+    // 自动刷新：仅在开启且间隔不小于 3 秒时启用，避免请求过于频繁
+    if (autoRefresh && refreshInterval >= 3000) {
+      setInterval(function () {
+        load(false);
+      }, refreshInterval);
+    }
   })();
 </script>
 
@@ -199,6 +277,16 @@
     opacity: 0.15;
   }
 
+  /* 深色模式背景图切换：未配置双图时不生效，保持单一背景图 */
+  .hero__bg-image--dark,
+  html.dark .hero__bg-image--light {
+    display: none;
+  }
+
+  html.dark .hero__bg-image--dark {
+    display: block;
+  }
+
   .hero__content {
     position: relative;
     z-index: 2;
@@ -216,14 +304,14 @@
     font-size: clamp(3rem, 8vw, 6rem);
     font-weight: 700;
     letter-spacing: -0.03em;
-    color: var(--ink);
+    color: var(--hero-title-text, var(--ink));
     line-height: var(--leading-tight);
   }
 
   .hero__subtitle {
     font-family: var(--font-body);
     font-size: var(--text-xl);
-    color: var(--ink-2);
+    color: var(--hero-subtitle-text, var(--ink-2));
     letter-spacing: 0.05em;
     line-height: var(--leading-normal);
   }
@@ -243,9 +331,29 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
     color: var(--ink-3);
+    cursor: pointer;
     animation: scrollHint 2s ease-in-out infinite;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.4s ease, color 0.2s ease, background 0.2s ease;
+  }
+
+  .hero__scroll-indicator:hover {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  .hero__scroll-indicator:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 
   .hero--no-breath .hero__orb {

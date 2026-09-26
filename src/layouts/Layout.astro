@@ -5,19 +5,30 @@ import Footer from "../components/Footer.astro";
 import ScrollReveal from "../components/ScrollReveal.astro";
 import CursorGlow from "../components/CursorGlow.astro";
 import MobileMenu from "../components/MobileMenu.astro";
+import ClickEffect from "../components/ClickEffect.astro";
 
 interface Props {
   pageTitle?: string;
   contentClass?: string;
   wide?: boolean;
   home?: boolean;
+  /** 渲染为 Halo 页面布局契约（templates/layout.html 的 html(head, content) 片段） */
+  layoutFragment?: boolean;
 }
 
-const { pageTitle, contentClass, wide, home } = Astro.props;
+const { pageTitle, contentClass, wide, home, layoutFragment = false } = Astro.props;
+const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
 ---
 
 <!doctype html>
-<html class={home ? 'wi-home-snap' : ''} style="overflow-x:hidden" th:lang="${#locale.toLanguageTag()}" th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'" th:attr="data-lang=${theme.config?.basic?.language}">
+<html
+  lang="zh-CN"
+  class={home ? 'wi-home-snap' : ''}
+  style="overflow-x:hidden"
+  th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'"
+  xmlns:th={layoutFragment ? "https://www.thymeleaf.org" : undefined}
+  th:fragment={fragmentAttr}
+>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -73,47 +84,31 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     <style is:inline th:if="${theme.config?.style?.layout_container_width == 'medium' or theme.config?.style?.layout_container_width == null}" th:utext="${'.wi-content-wrap { max-width: 800px; } .wi-content-wrap--wide { max-width: 1200px; } .wi-main--wide { max-width: 1400px; }'}">/*width*/</style>
     <style is:inline th:if="${theme.config?.style?.layout_container_width == 'wide'}" th:utext="${'.wi-content-wrap { max-width: 900px; } .wi-content-wrap--wide { max-width: 1400px; } .wi-main--wide { max-width: 1600px; }'}">/*width*/</style>
     <style is:inline th:if="${theme.config?.style?.custom_css}" th:utext="${theme.config?.style?.custom_css}">/*custom*/</style>
+    {
+      layoutFragment && (
+        <title th:if="${head == null}" th:text="${site.title}"></title>
+        <th:block th:if="${head != null}">
+          <th:block th:replace="${head}" />
+        </th:block>
+      )
+    }
     <slot name="head" />
   </head>
   <body class="wi-body">
-    <script is:inline>
+    <script is:inline th:inline="none">
       window.addEventListener("unhandledrejection", function (e) {
         if (e.reason && e.reason.message && e.reason.message.indexOf("Could not establish connection") !== -1) {
           e.preventDefault();
         }
       });
     </script>
-    <script is:inline>
-      (function(){
-        try{
-          var lang=document.documentElement.getAttribute("data-lang");
-          if(!lang||lang==="auto"||lang==="null"||lang===""){
-            var cookies=document.cookie.split(";");
-            for(var i=0;i<cookies.length;i++){
-              var c=cookies[i].trim();
-              if(c.indexOf("language=")===0){
-                document.cookie="language=;path=/;max-age=0;SameSite=Lax";
-                break;
-              }
-            }
-            return;
-          }
-          var tag=lang.replace(/_/g,"-");
-          var cookies=document.cookie.split(";");
-          var current="";
-          for(var i=0;i<cookies.length;i++){
-            var c=cookies[i].trim();
-            if(c.indexOf("language=")===0){current=c.substring(9);break;}
-          }
-          if(current!==tag){
-            document.cookie="language="+tag+";path=/;max-age=31536000;SameSite=Lax";
-          }
-        }catch(e){}
-      })();
-    </script>
     <Navbar />
     <main class:list={["wi-main", { "wi-main--wide": wide || home, "wi-main--home": home }]}>
-      {home ? (
+      {layoutFragment ? (
+        <div class:list={["wi-content-wrap", { "wi-content-wrap--wide": wide }]}>
+          <th:block th:replace="${content}" />
+        </div>
+      ) : home ? (
         <slot />
       ) : (
         <div class:list={["wi-content-wrap", { "wi-content-wrap--wide": wide }]}>
@@ -125,6 +120,7 @@ const { pageTitle, contentClass, wide, home } = Astro.props;
     <MobileMenu />
     <ScrollReveal th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_scroll_reveal != false}" />
     <CursorGlow th:if="${theme.config?.animation?.animation_enabled != false and theme.config?.animation?.animation_cursor_glow == true}" />
+    <ClickEffect />
   </body>
 </html>
 
@@ -168,11 +164,5 @@ html.wi-no-animations .wi-reveal {
   transform: none;
   transition: none;
 }
-
-.wi-post__content img {
-  max-width: 100%;
-  height: auto;
-}
-
 
 </style>

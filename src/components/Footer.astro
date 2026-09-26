@@ -1,19 +1,42 @@
 ---
-const THEME_VERSION = "1.0.0";
-const today = new Date();
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+// 版本号直接读取 theme.yaml，避免与包版本不同步
+function readThemeVersion() {
+  try {
+    const yaml = readFileSync(resolve(process.cwd(), "theme.yaml"), "utf-8");
+    return yaml.match(/^\s*version:\s*"?([^"\s]+)"?/m)?.[1] ?? "";
+  } catch {
+    return "";
+  }
+}
+
+const THEME_VERSION = readThemeVersion();
 ---
 
-<footer th:with="showPowered=${theme.config?.footer?.footer_show_powered != false}, showTheme=${theme.config?.footer?.footer_show_theme != false}, hideRight=${showPowered == false and showTheme == false}">
+<footer
+  th:with="showPowered=${theme.config?.footer?.footer_show_powered != false}, showTheme=${theme.config?.footer?.footer_show_theme != false}, hideRight=${showPowered == false and showTheme == false}, icpText=${theme.config?.footer?.footer_icp}, mpsText=${theme.config?.footer?.footer_mps}, showIcp=${theme.config?.footer?.footer_show_icp == true and not #strings.isEmpty(#strings.trim(icpText ?: ''))}, showMps=${theme.config?.footer?.footer_show_mps == true and not #strings.isEmpty(#strings.trim(mpsText ?: ''))}"
+>
   <div class="footer-inner">
     <div class="footer-bottom" th:classappend="${hideRight} ? 'footer-bottom--center' : ''">
       <div class="footer-bottom__left">
         <span class="footer-copyright" th:if="${theme.config?.footer?.footer_copyright}" th:text="${theme.config?.footer?.footer_copyright}"></span>
         <span class="footer-copyright" th:unless="${theme.config?.footer?.footer_copyright}">
-          © {today.getFullYear()}
+          © <th:block th:text="${#dates.format(#dates.createNow(), 'yyyy')}">2026</th:block>
           <th:block th:text="${theme.config?.basic?.owner_name ?: site.title}"></th:block>
         </span>
-        <span class="footer-icp" th:if="${theme.config?.footer?.footer_icp}">
-          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" th:text="${theme.config?.footer?.footer_icp}"></a>
+        <span class="footer-icp" th:if="${showIcp}">
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" th:text="${#strings.trim(icpText)}"></a>
+        </span>
+        <span class="footer-mps" th:if="${showMps}" th:with="mpsUrl=${theme.config?.footer?.footer_mps_url ?: 'https://beian.mps.gov.cn/'}">
+          <a th:href="${mpsUrl}" target="_blank" rel="noopener noreferrer">
+            <svg class="footer-mps__icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2L2 7v6c0 5.5 3.8 10.7 10 12 6.2-1.3 10-6.5 10-12V7l-10-5z"></path>
+              <path d="M9.5 12.5l2 2 3.5-4" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span th:text="${#strings.trim(mpsText)}"></span>
+          </a>
         </span>
       </div>
       <div class="footer-socials" th:if="${theme.config?.footer?.footer_socials}">
@@ -33,6 +56,39 @@ const today = new Date();
         <span class="footer-separator" th:if="${showPowered and showTheme}">·</span>
         <span th:if="${showTheme}">WarmIsland v{THEME_VERSION}</span>
       </div>
+    </div>
+    <div
+      class="footer-stats"
+      th:if="${theme.config?.footer?.footer_show_stats != false}"
+      th:with="stats=${siteStatsFinder.getStats()}, items=${theme.config?.footer?.footer_stats_items ?: {'post','category','comment','visit'}}"
+    >
+      <span class="footer-stat" th:if="${#lists.contains(items, 'post')}">
+        <span class="footer-stat__value" th:text="${stats.post ?: 0}">0</span>
+        <span class="footer-stat__label">文章</span>
+      </span>
+      <span class="footer-stat" th:if="${#lists.contains(items, 'category')}">
+        <span class="footer-stat__value" th:text="${stats.category ?: 0}">0</span>
+        <span class="footer-stat__label">分类</span>
+      </span>
+      <span class="footer-stat" th:if="${#lists.contains(items, 'comment')}">
+        <span class="footer-stat__value" th:text="${stats.comment ?: 0}">0</span>
+        <span class="footer-stat__label">评论</span>
+      </span>
+      <span class="footer-stat" th:if="${#lists.contains(items, 'visit')}">
+        <span class="footer-stat__value" th:text="${stats.visit ?: 0}">0</span>
+        <span class="footer-stat__label">访问</span>
+      </span>
+      <span class="footer-stat" th:if="${#lists.contains(items, 'upvote')}">
+        <span class="footer-stat__value" th:text="${stats.upvote ?: 0}">0</span>
+        <span class="footer-stat__label">点赞</span>
+      </span>
+      <span
+        class="footer-stat"
+        th:if="${#lists.contains(items, 'word') and pluginFinder.available('extra-api')}"
+      >
+        <span class="footer-stat__value" th:text="${extraApiStatsFinder.getPostWordCount()}">0</span>
+        <span class="footer-stat__label">字数</span>
+      </span>
     </div>
     <div th:if="${theme.config?.footer?.footer_custom_html}" th:utext="${theme.config?.footer?.footer_custom_html}" class="footer-custom"></div>
     <div class="footer-injected">
@@ -102,6 +158,51 @@ const today = new Date();
 
   .footer-icp a:hover {
     color: var(--ink-2);
+  }
+
+  .footer-mps a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .footer-mps a:hover {
+    color: var(--ink-2);
+  }
+
+  .footer-mps__icon {
+    flex: none;
+    vertical-align: middle;
+  }
+
+  .footer-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    width: 100%;
+    font-size: 0.8rem;
+    color: var(--ink-3);
+  }
+
+  .footer-stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3rem;
+  }
+
+  .footer-stat__value {
+    font-weight: 600;
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .footer-stat__label {
+    opacity: 0.8;
   }
 
   .footer-socials {

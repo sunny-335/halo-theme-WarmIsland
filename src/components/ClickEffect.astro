@@ -1,0 +1,243 @@
+---
+---
+
+<div id="wi-click-effect" th:if="${theme.config?.style?.click_effect_enabled == true}" th:attr="data-effect=${theme.config?.style?.click_effect_type}">
+
+<script is:inline th:inline="none">
+(function () {
+    var container = document.getElementById("wi-click-effect");
+    if (!container) return;
+    var effect = container.getAttribute("data-effect") || "off";
+    if (effect === "off" || !effect) return;
+
+    /* 社会主义核心价值观 */
+    var CORE_VALUES = [
+      "富强", "民主", "文明", "和谐",
+      "自由", "平等", "公正", "法治",
+      "爱国", "敬业", "诚信", "友善"
+    ];
+
+    var RANDOM_COLORS = [
+      "#ff6b6b", "#f06595", "#cc5de8", "#845ef7",
+      "#5c7cfa", "#339af0", "#22b8cf", "#20c997",
+      "#51cf66", "#94d82d", "#fcc419", "#ff922b"
+    ];
+
+    /* 创建单个 DOM 元素并加入舞台 */
+    function spawn(el, x, y) {
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+      container.appendChild(el);
+    }
+
+    /* ========== 1. 社会主义核心价值观 ========== */
+    function spawnValueText(x, y) {
+      var el = document.createElement("span");
+      el.className = "wi-click-fx wi-click-fx--text";
+      el.textContent = CORE_VALUES[Math.floor(Math.random() * CORE_VALUES.length)];
+      el.style.color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+      spawn(el, x, y);
+      setTimeout(function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 1200);
+    }
+
+    /* ========== 2. 随机彩色爱心 ========== */
+    function spawnHeart(x, y) {
+      var el = document.createElement("span");
+      el.className = "wi-click-fx wi-click-fx--heart";
+      el.innerHTML = "&#10084;";
+      el.style.color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+      var dx = (Math.random() - 0.5) * 80;
+      spawn(el, x, y);
+      requestAnimationFrame(function () {
+        el.style.transform = "translate(" + dx + "px, -80px) scale(0.2)";
+        el.style.opacity = "0";
+      });
+      setTimeout(function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 1000);
+    }
+
+    /* ========== 3. 烟花 ========== */
+    function spawnFirework(x, y) {
+      var count = 16;
+      var color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+      for (var i = 0; i < count; i++) {
+        var el = document.createElement("span");
+        el.className = "wi-click-fx wi-click-fx--spark";
+        el.style.background = color;
+        el.style.boxShadow = "0 0 6px " + color;
+        var angle = (Math.PI * 2 * i) / count;
+        var dist = 40 + Math.random() * 30;
+        var dx = Math.cos(angle) * dist;
+        var dy = Math.sin(angle) * dist;
+        spawn(el, x, y);
+        requestAnimationFrame(function (e, tx, ty) {
+          return function () {
+            e.style.transform = "translate(" + tx + "px, " + ty + "px) scale(0)";
+            e.style.opacity = "0";
+          };
+        }(el, dx, dy));
+        (function (e) {
+          setTimeout(function () {
+            if (e.parentNode) e.parentNode.removeChild(e);
+          }, 800);
+        })(el);
+      }
+    }
+
+    /* ========== 4. 烟花波纹 ========== */
+    function spawnRipple(x, y) {
+      var color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+      for (var r = 0; r < 2; r++) {
+        var el = document.createElement("span");
+        el.className = "wi-click-fx wi-click-fx--ripple";
+        el.style.borderColor = color;
+        spawn(el, x, y);
+        (function (e, delay) {
+          setTimeout(function () {
+            requestAnimationFrame(function () {
+              e.style.transform = "translate(-50%, -50%) scale(4)";
+              e.style.opacity = "0";
+            });
+          }, delay);
+          setTimeout(function () {
+            if (e.parentNode) e.parentNode.removeChild(e);
+          }, delay + 700);
+        })(el, r * 150);
+      }
+    }
+
+    /* ========== 5. 粒子 ========== */
+    function spawnParticles(x, y, n) {
+      n = n || 8;
+      for (var i = 0; i < n; i++) {
+        var el = document.createElement("span");
+        el.className = "wi-click-fx wi-click-fx--particle";
+        el.style.background = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+        var dx = (Math.random() - 0.5) * 60;
+        var dy = (Math.random() - 0.5) * 60 - 20;
+        spawn(el, x, y);
+        requestAnimationFrame(function (e, tx, ty) {
+          return function () {
+            e.style.transform = "translate(" + tx + "px, " + ty + "px) scale(0)";
+            e.style.opacity = "0";
+          };
+        }(el, dx, dy));
+        (function (e) {
+          setTimeout(function () {
+            if (e.parentNode) e.parentNode.removeChild(e);
+          }, 700);
+        })(el);
+      }
+    }
+
+    /* ========== 6. 星星 ========== */
+    function spawnStar(x, y) {
+      var el = document.createElement("span");
+      el.className = "wi-click-fx wi-click-fx--star";
+      el.innerHTML = "&#9733;";
+      el.style.color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+      var dx = (Math.random() - 0.5) * 50;
+      var dy = (Math.random() - 0.5) * 50 - 30;
+      spawn(el, x, y);
+      requestAnimationFrame(function () {
+        el.style.transform = "translate(" + dx + "px, " + dy + "px) scale(1.6)";
+        el.style.opacity = "0";
+      });
+      setTimeout(function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 800);
+    }
+
+    /* 点击分发 */
+    var clickHandlers = {
+      "values": spawnValueText,
+      "hearts": spawnHeart,
+      "fireworks": spawnFirework,
+      "ripples": spawnRipple,
+      "particles": function (x, y) { spawnParticles(x, y, 10); },
+      "stars": spawnStar
+    };
+
+    /* 拖尾效果 */
+    var trailHandlers = {
+      "star-trail": function (x, y) {
+        var el = document.createElement("span");
+        el.className = "wi-click-fx wi-click-fx--trail-star";
+        el.innerHTML = "&#9733;";
+        el.style.color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+        spawn(el, x, y);
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 600);
+      },
+      "particle-trail": function (x, y) {
+        var el = document.createElement("span");
+        el.className = "wi-click-fx wi-click-fx--trail-particle";
+        el.style.background = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)];
+        spawn(el, x, y);
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, 500);
+      }
+    };
+
+    var isTrail = effect.indexOf("trail") !== -1;
+
+    if (isTrail) {
+      var handler = trailHandlers[effect];
+      if (!handler) return;
+      var lastX = 0, lastY = 0;
+      var throttle = false;
+      document.addEventListener("mousemove", function (e) {
+        lastX = e.clientX;
+        lastY = e.clientY;
+        if (throttle) return;
+        throttle = true;
+        requestAnimationFrame(function () {
+          throttle = false;
+          handler(lastX, lastY);
+        });
+      }, { passive: true });
+    } else {
+      var handler = clickHandlers[effect];
+      if (!handler) return;
+      document.addEventListener("click", function (e) {
+        handler(e.clientX, e.clientY);
+      }, { passive: true });
+    }
+  })();
+</script>
+
+<style is:global>
+.wi-click-fx{position:fixed;pointer-events:none;will-change:transform,opacity
+}
+
+.wi-click-fx--text{font-size:18px;font-weight:700;transform:translate(-50%,-50%);opacity:0;animation:wi-fx-text 1.2s ease-out forwards
+}
+
+.wi-click-fx--heart{font-size:20px;transform:translate(-50%,-50%) scale(1);opacity:1;transition:transform 1s cubic-bezier(.16,1,.3,1),opacity 1s ease-out
+}
+
+.wi-click-fx--spark{width:6px;height:6px;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:1;transition:transform .8s cubic-bezier(.16,1,.3,1),opacity .8s ease-out
+}
+
+.wi-click-fx--ripple{width:30px;height:30px;border:2px solid;border-radius:50%;transform:translate(-50%,-50%) scale(.5);opacity:1;transition:transform .7s ease-out,opacity .7s ease-out
+}
+
+.wi-click-fx--particle{width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:1;transition:transform .7s cubic-bezier(.16,1,.3,1),opacity .7s ease-out
+}
+
+.wi-click-fx--star{font-size:16px;transform:translate(-50%,-50%) scale(1);opacity:1;transition:transform .8s cubic-bezier(.16,1,.3,1),opacity .8s ease-out
+}
+
+.wi-click-fx--trail-star{font-size:12px;transform:translate(-50%,-50%) scale(1);opacity:.8;transition:opacity .6s ease-out,transform .6s ease-out
+}
+
+.wi-click-fx--trail-particle{width:6px;height:6px;border-radius:50%;transform:translate(-50%,-50%) scale(1);opacity:.8;transition:opacity .5s ease-out,transform .5s ease-out
+}
+
+@keyframes wi-fx-text{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}20%{opacity:1;transform:translate(-50%,-80%) scale(1.1)}to{opacity:0;transform:translate(-50%,-120%) scale(.9)}}
+</style>

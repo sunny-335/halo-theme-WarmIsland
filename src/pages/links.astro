@@ -4,24 +4,39 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout wide>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.links?.links_page_title ?: #messages.msg('links.title')} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.links?.links_page_title ?: '友链'} - ${site.title}|"></title>
   </Fragment>
 
   <section
     class="wi-links"
     th:if="${pluginFinder.available('PluginLinks')}"
-    th:attr="data-style=${theme.config?.links?.links_style ?: 'cards'}"
+    th:attr="data-style=${theme.config?.links?.links_style ?: 'cards'},data-random=${theme.config?.links?.links_random_order == true ? 'true' : 'false'}"
   >
     <div class="wi-container">
       <div class="wi-links__header">
         <h1
           class="wi-links__title"
-          th:text="${theme.config?.links?.links_page_title ?: #messages.msg('links.title')}"
+          th:text="${theme.config?.links?.links_page_title ?: '友链'}"
         >
           友情链接
         </h1>
-        <p class="wi-links__subtitle" th:text="#{links.subtitle}">Mountains and rivers, a journey of a thousand miles</p>
+        <p class="wi-links__subtitle" th:text="'山水一程，三生有幸'">山水一程，三生有幸</p>
         <span class="wi-page-accent"></span>
+        <button
+          type="button"
+          class="wi-links__portal"
+          id="wi-links-portal"
+          th:if="${theme.config?.links?.links_random_portal != false}"
+          title="随机传送"
+          aria-label="随机传送"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" transform="translate(0 8)"></polyline>
+          </svg>
+          <span class="wi-links__portal-text">随机传送</span>
+        </button>
       </div>
 
       <th:block th:each="group : ${groups}">
@@ -71,8 +86,50 @@ import Layout from "../layouts/Layout.astro";
           </a>
         </div>
       </th:block>
+
+      <div class="wi-links__comment" th:if="${theme.config?.links?.links_show_comment == true}">
+        <halo:comment group="plugin.halo.run" kind="Plugin" name="PluginLinks"></halo:comment>
+      </div>
     </div>
   </section>
+
+  <script is:inline th:inline="none">
+    (function () {
+      var section = document.querySelector(".wi-links");
+      if (!section) return;
+
+      var cards = Array.prototype.slice.call(section.querySelectorAll(".wi-links__card"));
+      if (!cards.length) return;
+
+      // 随机排列：Fisher-Yates 打乱每个分组内的卡片顺序
+      if (section.getAttribute("data-random") === "true") {
+        Array.prototype.forEach.call(section.querySelectorAll(".wi-links__grid"), function (grid) {
+          for (var i = grid.children.length; i >= 0; i--) {
+            var j = Math.floor(Math.random() * i);
+            grid.appendChild(grid.children[j]);
+          }
+        });
+      }
+
+      // 随机传送：从当前页所有友链中随机打开一个
+      var portal = document.getElementById("wi-links-portal");
+      if (portal) {
+        portal.addEventListener("click", function () {
+          var links = Array.prototype.slice
+            .call(section.querySelectorAll(".wi-links__card"))
+            .map(function (a) {
+              return a.getAttribute("href");
+            })
+            .filter(function (h) {
+              return h && h !== "#";
+            });
+          if (!links.length) return;
+          var target = links[Math.floor(Math.random() * links.length)];
+          window.open(target, "_blank", "noopener");
+        });
+      }
+    })();
+  </script>
 </Layout>
 
 <style>
@@ -83,6 +140,53 @@ import Layout from "../layouts/Layout.astro";
   .wi-links__header {
     text-align: center;
     margin-bottom: var(--space-3xl);
+  }
+
+  .wi-links__portal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.6rem 1.1rem;
+    min-height: 44px;
+    margin-top: var(--space-md);
+    border-radius: 9999px;
+    font-size: var(--text-sm);
+    color: #fff;
+    background: linear-gradient(
+      135deg,
+      var(--accent),
+      color-mix(in srgb, var(--accent) 70%, #000)
+    );
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+    transition: transform var(--duration-fast) var(--ease-out-quart),
+      box-shadow var(--duration-fast) var(--ease-out-quart),
+      opacity var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-links__portal:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 40%, transparent);
+    opacity: 0.95;
+  }
+
+  .wi-links__portal:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  .wi-links__portal svg {
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .wi-links__portal:hover svg {
+    transform: rotate(180deg) scale(1.1);
+  }
+
+  .wi-links__comment {
+    margin-top: var(--space-3xl);
   }
 
   .wi-links__title {

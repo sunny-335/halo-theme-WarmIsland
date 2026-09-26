@@ -20,7 +20,15 @@ spec:
         description: 留言板
         screenshot:
         file: page_messageboard.html
-  version: "1.1.1"
+      - name: Subscriptions
+        description: 订阅页面（展示博友文章订阅动态，依赖链接管理插件）
+        screenshot:
+        file: page_subscriptions.html
+      - name: WeRead
+        description: 微信读书书架（依赖微信读书插件）
+        screenshot:
+        file: weread.html
+  version: "1.1.5"
   requires: ">=2.24.0"
   license:
     - name: "GPL-3.0"

@@ -5,13 +5,22 @@ import LightGallery from "../components/LightGallery.astro";
 
 <Layout>
   <Fragment slot="head">
-    <title th:text="|${theme.config?.moments?.moments_page_title ?: #messages.msg('moments.title')} - ${site.title}|"></title>
+    <title th:text="|${theme.config?.moments?.moments_page_title ?: '动态'} - ${site.title}|"></title>
   </Fragment>
 
-  <section class="wi-moments-page" th:attr="data-i18n-all-moments-loaded=#{common.allMomentsLoaded}">
+  <section class="wi-moments-page">
+    <div class="wi-moments-page__hero" th:if="${theme.config?.moments?.moments_cover}">
+      <img
+        class="wi-moments-page__cover"
+        th:src="${theme.config?.moments?.moments_cover}"
+        alt=""
+        loading="eager"
+        decoding="async"
+      />
+    </div>
     <div class="wi-container">
-      <div class="wi-moments-page__header">
-        <h1 class="wi-moments-page__title" th:text="${theme.config?.moments?.moments_page_title ?: #messages.msg('moments.title')}">瞬间</h1>
+      <div class="wi-moments-page__header" th:unless="${theme.config?.moments?.moments_cover}">
+        <h1 class="wi-moments-page__title" th:text="${theme.config?.moments?.moments_page_title ?: '动态'}">瞬间</h1>
         <span class="wi-page-accent"></span>
       </div>
 
@@ -70,7 +79,7 @@ import LightGallery from "../components/LightGallery.astro";
                 </th:block>
                 <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__empty">
-                    <p th:text="#{moments.noMoments}">No moments yet</p>
+                    <p th:text="'还没有瞬间，快去记录当下的心情吧 🌙'">还没有瞬间，快去记录当下的心情吧 🌙</p>
                   </div>
                 </th:block>
               </div>
@@ -126,7 +135,7 @@ import LightGallery from "../components/LightGallery.astro";
                 </th:block>
                 <th:block th:if="${momentsResult == null or #lists.isEmpty(momentsResult.items)}">
                   <div class="wi-moments-page__empty">
-                    <p th:text="#{moments.noMoments}">No moments yet</p>
+                    <p th:text="'还没有瞬间，快去记录当下的心情吧 🌙'">还没有瞬间，快去记录当下的心情吧 🌙</p>
                   </div>
                 </th:block>
               </div>
@@ -141,13 +150,13 @@ import LightGallery from "../components/LightGallery.astro";
               class="wi-moments-page__page-btn"
               th:if="${momentsResult.hasPrevious()}"
               th:href="${momentsResult.prevUrl}"
-            th:text="#{common.newer}">Newer</a>
+            th:text="'较新'">较新</a>
             <span class="wi-moments-page__page-spacer" th:if="${momentsResult.hasPrevious() and momentsResult.hasNext()}"></span>
             <a
               class="wi-moments-page__page-btn"
               th:if="${momentsResult.hasNext()}"
               th:href="${momentsResult.nextUrl}"
-            th:text="#{common.older}">Older</a>
+            th:text="'较旧'">较旧</a>
           </nav>
 
           <div
@@ -157,7 +166,7 @@ import LightGallery from "../components/LightGallery.astro";
           ></div>
           <th:block th:if="${momentFinder == null}">
             <div class="wi-moments-page__empty">
-              <p th:text="#{common.pluginError}">Plugin error</p>
+              <p th:text="'插件加载异常，请检查插件状态'">插件加载异常，请检查插件状态</p>
             </div>
           </th:block>
         </div>
@@ -165,7 +174,7 @@ import LightGallery from "../components/LightGallery.astro";
 
       <th:block th:unless="${pluginFinder.available('PluginMoments')}">
         <div class="wi-moments-page__empty">
-          <p th:utext="#{common.installPlugin('Moments', 'https://www.halo.run/store/apps/app-hqbe')}">This feature requires the Moments plugin</p>
+          <p>该功能需要安装「瞬间」插件，<a href="https://www.halo.run/store/apps/app-SnwWD" target="_blank" rel="noopener noreferrer">前往应用市场安装</a></p>
         </div>
       </th:block>
     </div>
@@ -174,7 +183,7 @@ import LightGallery from "../components/LightGallery.astro";
   <LightGallery />
 </Layout>
 
-<script is:inline>
+<script is:inline th:inline="none">
   (function () {
     document.addEventListener("click", function (e) {
       var likeBtn = e.target.closest(".wi-moments-page__like-btn");
@@ -350,9 +359,7 @@ import LightGallery from "../components/LightGallery.astro";
                   sentinel.style.display = "none";
                   var endMsg = document.createElement("div");
                   endMsg.className = "wi-moments-page__empty";
-                  var momentsSection = document.querySelector(".wi-moments-page");
-                  var allMomentsText = momentsSection ? momentsSection.getAttribute("data-i18n-all-moments-loaded") : "All moments loaded";
-                  endMsg.innerHTML = "<p>" + allMomentsText + "</p>";
+                  endMsg.innerHTML = "<p>已加载全部瞬间</p>";
                   sentinel.parentNode.appendChild(endMsg);
                 }
 
@@ -374,6 +381,21 @@ import LightGallery from "../components/LightGallery.astro";
 <style>
   .wi-moments-page {
     padding-block: 1rem;
+  }
+
+  .wi-moments-page__hero {
+    position: relative;
+    width: 100%;
+    height: clamp(220px, 30vw, 380px);
+    overflow: hidden;
+    background: var(--bg-raised);
+  }
+
+  .wi-moments-page__cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .wi-moments-page__header {
@@ -678,6 +700,10 @@ import LightGallery from "../components/LightGallery.astro";
   }
 
   @media (max-width: 768px) {
+    .wi-moments-page__hero {
+      height: clamp(180px, 36vw, 260px);
+    }
+
     .wi-moments-page__masonry {
       columns: 1;
     }

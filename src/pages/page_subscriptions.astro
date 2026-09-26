@@ -1,0 +1,122 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${theme.config?.subscriptions?.subscriptions_page_title ?: '订阅'} - ${site.title}|"></title>
+  </Fragment>
+
+<div class="wi-content-wrap wi-content-wrap--wide">   <section class="wi-subs" th:if="${pluginFinder.available('PluginLinks')}" th:attr="data-layout=${theme.config?.subscriptions?.subscriptions_layout ?: 'list'}" th:with="
+      cursorDate=${param.beforePublishedAt != null and param.beforePublishedAt.length > 0 ? param.beforePublishedAt[0] : null},
+      cursorId=${param.beforeId != null and param.beforeId.length > 0 ? param.beforeId[0] : null},
+      pageSize=${theme.config?.subscriptions?.subscriptions_page_size ?: 20},
+      feedPage=${linkFeedFinder.list({limit: pageSize, beforePublishedAt: cursorDate, beforeId: cursorId})},
+      hasCursor=${cursorDate != null},
+      loadingMode=${theme.config?.subscriptions?.subscriptions_loading_mode ?: 'pagination'}
+    "> <div class="wi-container"> <div class="wi-subs__header"> <h1 class="wi-subs__title" th:text="${theme.config?.subscriptions?.subscriptions_page_title ?: '订阅'}">
+订阅
+</h1> <p class="wi-subs__subtitle" th:text="${theme.config?.subscriptions?.subscriptions_subtitle ?: '博友们的最新文章'}">
+博友们的最新文章
+</p> <span class="wi-page-accent"></span> </div> <th:block th:if="${feedPage != null and !#lists.isEmpty(feedPage.items)}"> <div class="wi-subs__flow"> <article class="wi-subs__card" th:each="item : ${feedPage.items}" th:with="authorName=${item.author ?: '匿名'}"> <div class="wi-subs__author"> <img th:if="${item.authorLogo}" th:src="${item.authorLogo}" th:alt="${authorName}" class="wi-subs__avatar" loading="lazy" decoding="async"> <div th:unless="${item.authorLogo}" class="wi-subs__avatar wi-subs__avatar--placeholder"> <span th:text="${#strings.substring(authorName, 0, 1)}"></span> </div> <div class="wi-subs__author-info"> <a th:if="${item.authorUrl}" th:href="${item.authorUrl}" target="_blank" rel="noopener noreferrer" class="wi-subs__author-name" th:text="${authorName}"></a> <span th:unless="${item.authorUrl}" class="wi-subs__author-name" th:text="${authorName}"></span> <time class="wi-subs__date" th:if="${item.publishedAt}" th:text="${#temporals.format(item.publishedAt, 'yyyy-MM-dd')}"></time> </div> </div> <div class="wi-subs__body"> <a th:href="${item.url}" target="_blank" rel="noopener noreferrer" class="wi-subs__title-link"> <h2 class="wi-subs__post-title" th:text="${item.title}"></h2> </a> <p class="wi-subs__summary" th:if="${item.summary}" th:text="${item.summary}"></p> </div> </article> </div> <nav class="wi-subs__pagination" th:if="${loadingMode != 'infinite_scroll' and (hasCursor or feedPage.hasNext)}" th:with="permalink=${singlePage.status.permalink}"> <a th:if="${hasCursor}" th:href="@{${permalink}}" class="wi-subs__page-link" th:text="'较新'">
+较新
+</a> <span th:unless="${hasCursor}" class="wi-subs__page-link wi-subs__page-link--placeholder" aria-hidden="true"></span> <span class="wi-subs__page-info"></span> <a th:if="${feedPage.hasNext}" th:href="@{|${permalink}?beforePublishedAt=${feedPage.nextBeforePublishedAt}&beforeId=${feedPage.nextBeforeId}|}" class="wi-subs__page-link" th:text="'较旧'">
+较旧
+</a> <span th:unless="${feedPage.hasNext}" class="wi-subs__page-link wi-subs__page-link--placeholder" aria-hidden="true"></span> </nav> <div class="wi-subs__infinite-sentinel" th:if="${loadingMode == 'infinite_scroll' and feedPage.hasNext}" th:with="permalink=${singlePage.status.permalink}" th:attr="data-next-url=@{|${permalink}?beforePublishedAt=${feedPage.nextBeforePublishedAt}&beforeId=${feedPage.nextBeforeId}|}, data-loading='加载中...', data-no-more='没有更多了'"></div> <div class="wi-subs__infinite-status" th:if="${loadingMode == 'infinite_scroll'}" aria-live="polite"></div> </th:block> <div class="wi-subs__empty" th:if="${feedPage == null or #lists.isEmpty(feedPage.items)}"> <p th:utext="'暂无订阅动态，安装并开启「链接管理」插件的 RSS 订阅后将在此展示'">暂无订阅动态</p> </div> </div> </section> <section class="wi-subs" th:unless="${pluginFinder.available('PluginLinks')}"> <div class="wi-container"> <div class="wi-subs__header"> <h1 class="wi-subs__title" th:text="'订阅'">订阅</h1> <span class="wi-page-accent"></span> </div> <div class="wi-subs__empty"> <p>该功能需要安装「链接管理」插件，<a href="https://www.halo.run/store/apps/app-hfbQg" target="_blank" rel="noopener noreferrer">前往应用市场安装</a></p> </div> </div> </section> <script is:inline th:inline="none">
+  (function () {
+    var sentinel = document.querySelector(".wi-subs__infinite-sentinel");
+    if (!sentinel) return;
+
+    var infiniteLoading = false;
+    var infiniteRetryCount = 0;
+    var infiniteMaxRetries = 3;
+    var infiniteNextUrl = sentinel.getAttribute("data-next-url");
+    var loadingText = sentinel.getAttribute("data-loading") || "Loading...";
+    var noMoreText = sentinel.getAttribute("data-no-more") || "No more items";
+    var statusEl = document.querySelector(".wi-subs__infinite-status");
+
+    var infiniteObserver = new IntersectionObserver(
+      function (entries) {
+        if (entries[0].isIntersecting && !infiniteLoading && infiniteNextUrl) {
+          infiniteLoading = true;
+          if (statusEl) {
+            statusEl.innerHTML = '<p class="wi-subs__infinite-loading">' + loadingText + "</p>";
+          }
+          fetch(infiniteNextUrl)
+            .then(function (res) {
+              if (!res.ok) throw new Error("Fetch failed");
+              return res.text();
+            })
+            .then(function (html) {
+              var parser = new DOMParser();
+              var doc = parser.parseFromString(html, "text/html");
+
+              var container = doc.querySelector(".wi-subs__flow");
+              var currentContainer = document.querySelector(".wi-subs__flow");
+              if (!container || !currentContainer) {
+                infiniteLoading = false;
+                return;
+              }
+
+              var newItems = container.querySelectorAll(".wi-subs__card");
+              newItems.forEach(function (item) {
+                var clone = item.cloneNode(true);
+                clone.style.opacity = "0";
+                clone.style.transform = "translateY(20px)";
+                currentContainer.appendChild(clone);
+                (function (el) {
+                  requestAnimationFrame(function () {
+                    el.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+                    el.style.opacity = "1";
+                    el.style.transform = "translateY(0)";
+                    setTimeout(function () {
+                      el.style.transition = "";
+                      el.style.opacity = "";
+                      el.style.transform = "";
+                    }, 450);
+                  });
+                })(clone);
+              });
+
+              var newSentinel = doc.querySelector(".wi-subs__infinite-sentinel");
+              if (newSentinel && newSentinel.getAttribute("data-next-url")) {
+                infiniteNextUrl = newSentinel.getAttribute("data-next-url");
+                sentinel.setAttribute("data-next-url", infiniteNextUrl);
+                infiniteRetryCount = 0;
+                if (statusEl) {
+                  statusEl.innerHTML = "";
+                }
+              } else {
+                infiniteNextUrl = null;
+                infiniteObserver.disconnect();
+                sentinel.style.display = "none";
+                if (statusEl) {
+                  statusEl.innerHTML = '<p class="wi-subs__infinite-end">' + noMoreText + "</p>";
+                }
+              }
+
+              infiniteLoading = false;
+            })
+            .catch(function () {
+              infiniteRetryCount++;
+              if (infiniteRetryCount >= infiniteMaxRetries) {
+                infiniteObserver.disconnect();
+                sentinel.style.display = "none";
+                return;
+              }
+              infiniteLoading = false;
+            });
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    infiniteObserver.observe(sentinel);
+  })();
+</script>  </div>
+
+</Layout>
+
+<style>
+.wi-subs{padding-block:1rem}.wi-subs__header{text-align:center;margin-bottom:var(--space-3xl)}.wi-subs__title{font-size:var(--text-4xl);margin-bottom:var(--space-sm)}.wi-subs__subtitle{font-size:var(--text-sm);color:var(--ink-3);margin-bottom:var(--space-sm)}.wi-page-accent{display:block;width:48px;height:3px;margin:var(--space-sm) auto 0;border-radius:9999px;background:var(--accent)}.wi-subs__flow{display:flex;flex-direction:column;gap:var(--space-lg);max-width:720px;margin-inline:auto}.wi-subs[data-layout=grid] .wi-subs__flow{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-lg);max-width:1200px}.wi-subs[data-layout=grid] .wi-subs__card{padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-md)}.wi-subs[data-layout=grid] .wi-subs__author{flex-direction:column;align-items:center;text-align:center;gap:var(--space-xs);margin-bottom:0}.wi-subs[data-layout=grid] .wi-subs__avatar{width:44px;height:44px}.wi-subs[data-layout=grid] .wi-subs__author-info{align-items:center;gap:2px}.wi-subs[data-layout=grid] .wi-subs__author-name{font-size:var(--text-sm);white-space:normal;text-align:center;line-height:var(--leading-tight);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden}.wi-subs[data-layout=grid] .wi-subs__date{font-size:var(--text-xs)}.wi-subs[data-layout=grid] .wi-subs__body{margin-bottom:0;flex:1;display:flex;flex-direction:column;gap:var(--space-xs)}.wi-subs[data-layout=grid] .wi-subs__post-title{font-size:var(--text-md);line-height:var(--leading-snug);-webkit-line-clamp:2;-webkit-box-orient:vertical;display:-webkit-box;overflow:hidden;margin:0}.wi-subs[data-layout=grid] .wi-subs__summary{font-size:var(--text-sm);-webkit-line-clamp:3;line-clamp:3}@media(max-width:768px){.wi-subs[data-layout=grid] .wi-subs__flow{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.wi-subs[data-layout=grid] .wi-subs__flow{grid-template-columns:1fr}.wi-subs[data-layout=grid] .wi-subs__card{padding:var(--space-md)}.wi-subs[data-layout=grid] .wi-subs__author{flex-direction:row;text-align:left}.wi-subs[data-layout=grid] .wi-subs__author-info{align-items:flex-start}.wi-subs[data-layout=grid] .wi-subs__author-name{text-align:left}}.wi-subs__card{background:var(--glass-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:16px;padding:var(--space-xl);transition:box-shadow var(--duration-normal) var(--ease-out-expo),transform var(--duration-normal) var(--ease-out-expo),border-color var(--duration-normal) var(--ease-out-expo)}.wi-subs__card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--accent)}.wi-subs__author{display:flex;align-items:center;gap:var(--space-md);margin-bottom:var(--space-md)}.wi-subs__avatar{width:44px;height:44px;border-radius:9999px;object-fit:cover;flex-shrink:0;box-shadow:var(--shadow-sm)}.wi-subs__avatar--placeholder{display:flex;align-items:center;justify-content:center;background:var(--accent-bg);color:var(--accent);font-family:var(--font-sans);font-size:var(--text-md);font-weight:700;box-shadow:none}.wi-subs__author-info{display:flex;flex-direction:column;gap:2px;min-width:0}.wi-subs__author-name{font-size:var(--text-md);font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;transition:color var(--duration-fast) var(--ease-out-quart)}a.wi-subs__author-name:hover{color:var(--accent)}.wi-subs__date{font-size:var(--text-xs);color:var(--ink-3);letter-spacing:.02em}.wi-subs__body{margin-bottom:var(--space-sm)}.wi-subs__title-link{text-decoration:none;display:block}.wi-subs__post-title{font-size:var(--text-lg);font-weight:600;color:var(--ink);line-height:var(--leading-snug);margin:0 0 var(--space-xs);transition:color var(--duration-fast) var(--ease-out-quart)}.wi-subs__title-link:hover .wi-subs__post-title{color:var(--accent)}.wi-subs__summary{font-size:var(--text-sm);color:var(--ink-2);line-height:var(--leading-relaxed);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-block-end:0}.wi-subs__pagination{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:var(--space-2xl);padding-top:var(--space-xl);border-top:1px solid var(--rule)}.wi-subs__page-link{display:inline-flex;align-items:center;padding:var(--space-sm) var(--space-md);min-height:44px;color:var(--accent);text-decoration:none;font-size:var(--text-sm);font-weight:500;border-radius:var(--radius-sm);transition:opacity var(--duration-fast) var(--ease-out-quart),background var(--duration-fast) var(--ease-out-quart)}.wi-subs__page-link:hover{opacity:.8;background:var(--bg-raised)}.wi-subs__page-link--placeholder{visibility:hidden;pointer-events:none}.wi-subs__page-info{color:var(--ink-3);font-size:var(--text-sm)}.wi-subs__empty{text-align:center;padding:var(--space-4xl) var(--space-xl);color:var(--ink-3);font-size:var(--text-md)}.wi-subs__empty a{color:var(--accent)}.wi-subs__infinite-sentinel{height:1px;width:100%}.wi-subs__infinite-status{text-align:center;padding:var(--space-xl) var(--space-md);color:var(--ink-3);font-size:var(--text-sm)}.wi-subs__infinite-status p{margin:0}.wi-subs__infinite-end{color:var(--ink-3)}@media(max-width:640px){.wi-subs__card{padding:var(--space-lg)}.wi-subs__avatar{width:38px;height:38px}.wi-subs__post-title{font-size:var(--text-base)}}
+</style>

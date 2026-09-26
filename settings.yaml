@@ -28,20 +28,63 @@ spec:
         - $formkit: text
           name: label_archives_title
           label: 归档页标题
+    - group: welcome_popup
+      label: 欢迎弹窗
+      formSchema:
+        - $formkit: switch
+          name: welcome_popup_enabled
+          id: welcome_popup_enabled
+          label: 启用欢迎弹窗
+          value: false
+          help: 首页显示"欢迎来自 XX·XX·XX 的朋友"的浮动提示弹窗，基于访客 IP 地理定位
         - $formkit: select
-          name: language
-          label: 语言
+          name: welcome_popup_position
+          id: welcome_popup_position
+          label: 弹窗位置
           options:
-            - label: 跟随浏览器
-              value: auto
-            - label: 简体中文
-              value: zh_CN
-            - label: 繁體中文
-              value: zh_TW
-            - label: English
-              value: en
-          value: auto
-          help: 设置主题界面语言，选择"跟随浏览器"将根据浏览器语言自动匹配
+            - label: 顶端漂窗（顶部居中）
+              value: top-center
+            - label: 右上
+              value: top-right
+            - label: 左上
+              value: top-left
+            - label: 右下
+              value: bottom-right
+            - label: 左下
+              value: bottom-left
+          value: top-center
+          if: "$get(welcome_popup_enabled).value === true"
+        - $formkit: number
+          name: welcome_popup_duration
+          id: welcome_popup_duration
+          label: 自动消失时间（秒）
+          value: 5
+          min: 3
+          max: 60
+          step: 1
+          help: 弹窗自动消失的秒数，范围 3-60
+          if: "$get(welcome_popup_enabled).value === true"
+        - $formkit: url
+          name: welcome_popup_api
+          id: welcome_popup_api
+          label: IP 定位主 API
+          value: "https://myip.ipip.net/json"
+          help: 返回 JSON 的 IP 定位主接口，默认 IPIP；留空使用默认值。支持 IPIP/腾讯/ipapi.co 等常见格式
+          if: "$get(welcome_popup_enabled).value === true"
+        - $formkit: url
+          name: welcome_popup_fallback_api
+          id: welcome_popup_fallback_api
+          label: IP 定位备选 API
+          value: "https://r.inews.qq.com/api/ip2city?otype=json"
+          help: 主接口失败时尝试的备选接口，默认腾讯 ip2city；留空则不使用备选
+          if: "$get(welcome_popup_enabled).value === true"
+        - $formkit: switch
+          name: welcome_popup_show_once
+          id: welcome_popup_show_once
+          label: 同会话仅显示一次
+          value: true
+          help: 开启后同一浏览器会话内不再重复弹出；关闭则每次访问首页都显示
+          if: "$get(welcome_popup_enabled).value === true"
     - group: style
       label: 总体样式
       formSchema:
@@ -102,6 +145,37 @@ spec:
           name: animation_cursor_glow
           label: 光感跟随
           value: false
+        - $formkit: switch
+          name: click_effect_enabled
+          id: click_effect_enabled
+          label: 鼠标点击效果
+          value: false
+          help: 在页面上点击鼠标时触发的视觉特效
+        - $formkit: select
+          name: click_effect_type
+          id: click_effect_type
+          label: 点击效果类型
+          value: off
+          if: "$get(click_effect_enabled).value === true"
+          options:
+            - label: 关闭
+              value: off
+            - label: 社会主义核心价值观
+              value: values
+            - label: 随机彩色爱心
+              value: hearts
+            - label: 烟花
+              value: fireworks
+            - label: 烟花波纹
+              value: ripples
+            - label: 粒子
+              value: particles
+            - label: 星星
+              value: stars
+            - label: 星星拖尾
+              value: star-trail
+            - label: 粒子拖尾
+              value: particle-trail
     - group: navbar
       label: 导航栏
       formSchema:
@@ -116,6 +190,35 @@ spec:
             - label: Float
               value: float
           value: glass
+        - $formkit: select
+          name: navbar_brand_type
+          id: navbar_brand_type
+          label: 左侧显示
+          options:
+            - label: 站点名称
+              value: title
+            - label: Logo
+              value: logo
+          value: title
+        - $formkit: attachment
+          name: navbar_logo
+          id: navbar_logo
+          label: 导航栏 Logo
+          help: 选择"Logo"模式后在此上传图片；留空则使用基础设置中的自定义 Logo
+          if: "$get(navbar_brand_type).value === 'logo'"
+        - $formkit: select
+          name: navbar_logo_radius
+          id: navbar_logo_radius
+          label: Logo 圆角
+          options:
+            - label: 直角
+              value: square
+            - label: 圆角
+              value: rounded
+            - label: 圆形
+              value: circle
+          value: rounded
+          if: "$get(navbar_brand_type).value === 'logo'"
         - $formkit: switch
           name: navbar_show_search
           label: 显示搜索按钮
@@ -188,9 +291,53 @@ spec:
           label: 自定义描述文案
           key: hero_custom_description
           if: "$get(hero_description_mode).value === 'custom'"
+        - $formkit: switch
+          name: hero_hitokoto_auto_refresh
+          id: hero_hitokoto_auto_refresh
+          label: 一言自动刷新
+          value: false
+          help: 开启后按设定间隔自动刷新一言内容
+        - $formkit: select
+          name: hero_hitokoto_refresh_interval
+          label: 一言刷新间隔
+          if: "$get(hero_hitokoto_auto_refresh).value === true"
+          options:
+            - label: 5 秒
+              value: 5000
+            - label: 10 秒
+              value: 10000
+            - label: 15 秒
+              value: 15000
+            - label: 20 秒
+              value: 20000
+            - label: 25 秒
+              value: 25000
+            - label: 30 秒
+              value: 30000
+          value: 10000
         - $formkit: attachment
           name: hero_background_image
           label: 背景图片
+        - $formkit: attachment
+          name: hero_background_image_dark
+          label: 深色模式背景图片
+          help: 深色模式下显示的背景图；留空则深色模式也使用上方背景图
+        - $formkit: color
+          name: hero_title_color_light
+          label: 浅色模式大标题颜色
+          help: Hero 大标题文字颜色（浅色模式）；留空使用主题默认
+        - $formkit: color
+          name: hero_title_color_dark
+          label: 深色模式大标题颜色
+          help: Hero 大标题文字颜色（深色模式）；留空使用主题默认
+        - $formkit: color
+          name: hero_subtitle_color_light
+          label: 浅色模式副标题颜色
+          help: Hero 副标题和一言文字颜色（浅色模式）；留空使用主题默认
+        - $formkit: color
+          name: hero_subtitle_color_dark
+          label: 深色模式副标题颜色
+          help: Hero 副标题和一言文字颜色（深色模式）；留空使用主题默认
     - group: home
       label: 首页
       formSchema:
@@ -304,6 +451,16 @@ spec:
             - label: Cold
               value: cold
           value: warm
+        - $formkit: switch
+          name: article_extra_spacing
+          label: 中英文混排自动加空格
+          value: true
+          help: 依赖「API 扩展包」插件，在服务端为正文自动添加中英文间距；插件未安装时自动跳过
+        - $formkit: switch
+          name: article_extra_highlight
+          label: 使用服务端代码高亮
+          value: false
+          help: 依赖「API 扩展包」全量版（含 JS 运行时），启用后由服务端渲染代码高亮并替代主题自带样式；如环境不支持请勿开启
         - $formkit: select
           name: article_toc_expand
           label: 目录展开模式
@@ -371,6 +528,10 @@ spec:
             - label: Masonry
               value: masonry
           value: cards
+        - $formkit: attachment
+          name: moments_cover
+          label: 顶部封面图
+          help: 朋友圈样式顶部的封面图片，建议尺寸 1500×500
         - $formkit: select
           name: moments_loading_mode
           label: 加载方式
@@ -432,12 +593,75 @@ spec:
             - label: Cards
               value: cards
           value: cards
+        - $formkit: switch
+          name: links_show_comment
+          label: 显示评论
+          value: false
+          help: 默认关闭评论功能，开启后在友情链接页面底部显示评论区
+        - $formkit: switch
+          name: links_random_order
+          label: 随机排列
+          value: false
+          help: 开启后友情链接卡片随机排列顺序
+        - $formkit: switch
+          name: links_random_portal
+          label: 随机传送门按钮
+          value: true
+          help: 开启后页面右上角显示"随机传送"按钮，点击随机访问一位博友
+    - group: subscriptions
+      label: 订阅
+      formSchema:
+        - $formkit: text
+          name: subscriptions_page_title
+          label: 页面标题
+          placeholder: "订阅"
+        - $formkit: text
+          name: subscriptions_subtitle
+          label: 页面副标题
+          placeholder: "博友们的最新文章"
+        - $formkit: number
+          name: subscriptions_page_size
+          label: 每页显示数量
+          value: 20
+          min: 1
+          max: 100
+          help: 单页展示的订阅动态条数，范围 1-100
+        - $formkit: select
+          name: subscriptions_loading_mode
+          label: 加载方式
+          options:
+            - label: 分页
+              value: pagination
+            - label: 下滑加载
+              value: infinite_scroll
+          value: pagination
+        - $formkit: select
+          name: subscriptions_layout
+          label: 布局样式
+          options:
+            - label: 列表卡片
+              value: list
+            - label: 网格卡片
+              value: grid
+          value: list
+          help: 网格卡片布局一行显示3个，内容区域更宽
     - group: friends
       label: 朋友圈
       formSchema:
         - $formkit: text
           name: friends_page_title
           label: 页面标题
+    - group: weread
+      label: 微信读书
+      formSchema:
+        - $formkit: text
+          name: weread_page_title
+          label: 页面标题
+          placeholder: "书架"
+        - $formkit: text
+          name: weread_page_subtitle
+          label: 页面副标题
+          placeholder: "我在读的书"
     - group: messageboard
       label: 留言板
       formSchema:
@@ -469,9 +693,61 @@ spec:
         - $formkit: text
           name: footer_copyright
           label: 版权信息（留空则使用默认格式 © 年份 站点标题）
+        - $formkit: switch
+          name: footer_show_stats
+          id: footer_show_stats
+          label: 显示全站统计
+          value: true
+          help: 在页脚展示文章数、分类数、评论数、访问量等站点统计数据
+        - $formkit: checkbox
+          name: footer_stats_items
+          id: footer_stats_items
+          label: 统计项
+          if: "$get(footer_show_stats).value !== false"
+          options:
+            - label: 文章数
+              value: post
+            - label: 分类数
+              value: category
+            - label: 评论数
+              value: comment
+            - label: 访问量
+              value: visit
+            - label: 点赞数
+              value: upvote
+            - label: 总字数
+              value: word
+          value:
+            - post
+            - category
+            - comment
+            - visit
+          help: 总字数依赖「API 扩展包」插件，未安装时自动隐藏该项
+        - $formkit: switch
+          name: footer_show_icp
+          label: 显示 ICP 备案号
+          value: false
+          help: 开启后页脚显示 ICP 备案链接
         - $formkit: text
           name: footer_icp
           label: ICP 备案号
+          help: 工信部ICP备案号，填写后页脚显示备案链接（指向 beian.miit.gov.cn）
+          if: "$get(footer_show_icp).value === true"
+        - $formkit: switch
+          name: footer_show_mps
+          label: 显示公网安备号
+          value: false
+          help: 开启后页脚显示公网安备图标和链接
+        - $formkit: text
+          name: footer_mps
+          label: 公网安备号
+          help: 公安部联网备案号，填写后页脚显示备案图标和链接（指向 beian.mps.gov.cn）
+          if: "$get(footer_show_mps).value === true"
+        - $formkit: text
+          name: footer_mps_url
+          label: 公网安备跳转链接
+          help: 留空时默认指向 https://beian.mps.gov.cn/ ，可填写其他备案查询链接
+          if: "$get(footer_show_mps).value === true"
         - $formkit: repeater
           name: footer_socials
           label: 社交链接

@@ -1,6 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import HeroSection from "../components/HeroSection.astro";
+import WelcomePopup from "../components/WelcomePopup.astro";
 ---
 
 <Layout home>
@@ -8,12 +9,13 @@ import HeroSection from "../components/HeroSection.astro";
     <title th:text="${site.title}"></title>
   </Fragment>
 
+  <WelcomePopup />
+
   <HeroSection />
 
   <div
     class="wi-home-content"
     th:classappend="${theme.config?.hero?.hero_enabled != false} ? 'wi-home-content--with-hero'"
-    th:attr="data-i18n-all-loaded=#{common.allLoaded},data-i18n-loading=#{common.loading},data-i18n-words=#{common.words},data-i18n-read-time=#{common.readTime},data-i18n-views=#{common.views}"
   >
   <section
     class="wi-home-pinned"
@@ -21,7 +23,7 @@ import HeroSection from "../components/HeroSection.astro";
   >
     <div class="wi-container">
       <div class="wi-section__header">
-        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_pinned_title ?: #messages.msg('hero.pinned')}">置顶</h2>
+        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_pinned_title ?: '置顶'}">置顶</h2>
       </div>
       <div class="wi-pinned">
         <a
@@ -66,7 +68,7 @@ import HeroSection from "../components/HeroSection.astro";
   <section class="wi-home-posts" id="wi-home-posts">
     <div class="wi-container">
       <div class="wi-section__header">
-        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_posts_title ?: #messages.msg('hero.posts')}">文章</h2>
+        <h2 class="wi-section__title" th:text="${theme.config?.home?.home_posts_title ?: '文章'}">文章</h2>
       </div>
       <div class="wi-flow" id="wi-post-grid">
         <article
@@ -129,7 +131,7 @@ import HeroSection from "../components/HeroSection.astro";
                   class="wi-flow__stat"
                   th:if="${theme.config?.home?.home_card_show_visit ?: true}"
                 >
-                  <th:block th:text="${post.stats?.visit ?: 0}"></th:block> <th:block th:text="#{common.views}">阅读</th:block>
+                  <th:block th:text="${post.stats?.visit ?: 0}"></th:block> <th:block th:text="'阅读'">阅读</th:block>
                 </span>
               </div>
             </div>
@@ -153,7 +155,7 @@ import HeroSection from "../components/HeroSection.astro";
           th:if="${posts.hasPrevious()}"
           th:href="@{${posts.prevUrl}}"
           class="wi-pagination__prev"
-          th:text="${theme.config?.home?.home_label_newer ?: #messages.msg('common.newer')}"
+          th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
         >&larr; 较新</a>
         <span
           class="wi-pagination__info"
@@ -163,18 +165,18 @@ import HeroSection from "../components/HeroSection.astro";
           th:if="${posts.hasNext()}"
           th:href="@{${posts.nextUrl}}"
           class="wi-pagination__next"
-          th:text="${theme.config?.home?.home_label_older ?: #messages.msg('common.older')}"
+          th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
         >较旧 &rarr;</a>
       </nav>
 
       <div
         th:if="${posts.hasNext() and theme.config?.home?.home_post_loading == 'infinite_scroll'}"
         id="wi-infinite-scroll-sentinel"
-        th:attr="data-next-url=${posts.nextUrl}, data-all-loaded-text=${theme.config?.home?.home_label_all_loaded ?: #messages.msg('common.allLoaded')}"
+        th:attr="data-next-url=${posts.nextUrl}, data-all-loaded-text=${theme.config?.home?.home_label_all_loaded ?: '已加载全部文章'}"
       >
         <div class="wi-infinite-scroll__loader">
           <div class="wi-infinite-scroll__spinner"></div>
-          <span th:text="${theme.config?.home?.home_label_loading ?: #messages.msg('common.loading')}">加载中...</span>
+          <span th:text="${theme.config?.home?.home_label_loading ?: '加载中...'}">加载中...</span>
         </div>
       </div>
 
@@ -182,23 +184,22 @@ import HeroSection from "../components/HeroSection.astro";
         th:if="${!posts.hasNext() and posts.totalPages gt 1 and theme.config?.home?.home_post_loading == 'infinite_scroll'}"
         class="wi-infinite-scroll__end"
       >
-        <span th:text="${theme.config?.home?.home_label_all_loaded ?: #messages.msg('common.allLoaded')}">已加载全部文章</span>
+        <span th:text="${theme.config?.home?.home_label_all_loaded ?: '已加载全部文章'}">已加载全部文章</span>
       </div>
     </div>
   </section>
   </div>
 </Layout>
 
-<script is:inline>
+<script is:inline th:inline="none">
   (function () {
     var sentinel = document.getElementById("wi-infinite-scroll-sentinel");
     if (!sentinel) return;
 
     var grid = document.getElementById("wi-post-grid");
-    var i18nEl = document.querySelector(".wi-home-content");
     var loading = false;
     var nextUrl = sentinel.getAttribute("data-next-url");
-    var allLoadedText = sentinel.getAttribute("data-all-loaded-text") || (i18nEl && i18nEl.getAttribute("data-i18n-all-loaded")) || "All posts loaded";
+    var allLoadedText = sentinel.getAttribute("data-all-loaded-text") || "已加载全部文章";
 
     var observer = new IntersectionObserver(
       function (entries) {
@@ -240,7 +241,9 @@ import HeroSection from "../components/HeroSection.astro";
                 sentinel.style.display = "none";
                 var endMsg = document.createElement("div");
                 endMsg.className = "wi-infinite-scroll__end";
-                endMsg.innerHTML = "<span>" + allLoadedText + "</span>";
+                var endText = document.createElement("span");
+                endText.textContent = allLoadedText;
+                endMsg.appendChild(endText);
                 sentinel.parentNode.appendChild(endMsg);
               }
 
@@ -260,7 +263,7 @@ import HeroSection from "../components/HeroSection.astro";
   })();
 </script>
 
-<script is:inline>
+<script is:inline th:inline="none">
   (function () {
     var hero = document.getElementById("wi-hero");
     var blurOverlay = document.getElementById("wi-hero-blur-overlay");
@@ -304,7 +307,7 @@ import HeroSection from "../components/HeroSection.astro";
   })();
 </script>
 
-<script is:inline>
+<script is:inline th:inline="none">
   (function () {
     var hero = document.getElementById("wi-hero");
     var content = document.querySelector(".wi-home-content--with-hero");

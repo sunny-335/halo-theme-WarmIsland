@@ -1,0 +1,443 @@
+---
+---
+
+<section
+  class="wi-welcome-popup"
+  id="wi-welcome-popup"
+  th:if="${theme.config?.welcome_popup?.welcome_popup_enabled == true}"
+  th:attr="data-position=${theme.config?.welcome_popup?.welcome_popup_position ?: 'top-center'},data-duration=${theme.config?.welcome_popup?.welcome_popup_duration ?: 5},data-api=${theme.config?.welcome_popup?.welcome_popup_api},data-fallback-api=${theme.config?.welcome_popup?.welcome_popup_fallback_api},data-show-once=${theme.config?.welcome_popup?.welcome_popup_show_once != false ? 'true' : 'false'}"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  <div class="wi-welcome-popup__inner">
+    <div class="wi-welcome-popup__icon" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+    </div>
+    <div class="wi-welcome-popup__content" id="wi-welcome-popup-text">加载中…</div>
+    <button class="wi-welcome-popup__close" type="button" aria-label="关闭">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+  </div>
+  <div class="wi-welcome-popup__progress" id="wi-welcome-popup-progress" aria-hidden="true"></div>
+</section>
+
+<script is:inline th:inline="none">
+  (function () {
+    var popup = document.getElementById("wi-welcome-popup");
+    if (!popup) return;
+
+    /* 同会话已显示过则不再弹出（可通过"同会话仅显示一次"开关关闭） */
+    var sessionKey = "wi-welcome-shown";
+    var showOnce = popup.getAttribute("data-show-once") !== "false";
+    try {
+      if (showOnce && sessionStorage.getItem(sessionKey)) {
+        popup.style.display = "none";
+        return;
+      }
+    } catch (e) {}
+
+    var textEl = document.getElementById("wi-welcome-popup-text");
+    var closeBtn = popup.querySelector(".wi-welcome-popup__close");
+    var progress = document.getElementById("wi-welcome-popup-progress");
+    var duration = parseInt(popup.getAttribute("data-duration"), 10) || 5;
+    var api = popup.getAttribute("data-api") || "https://myip.ipip.net/json";
+    var fallbackApi = popup.getAttribute("data-fallback-api") || "https://r.inews.qq.com/api/ip2city?otype=json";
+
+    var hideTimer = null;
+    var progressRaf = null;
+    var progressStart = 0;
+    var isHidden = false;
+
+    function hidePopup() {
+      if (isHidden) return;
+      isHidden = true;
+      popup.classList.remove("wi-welcome-popup--visible");
+      popup.classList.add("wi-welcome-popup--leaving");
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+      if (progressRaf) {
+        cancelAnimationFrame(progressRaf);
+        progressRaf = null;
+      }
+      try {
+        if (showOnce) sessionStorage.setItem(sessionKey, "1");
+      } catch (e) {}
+      setTimeout(function () {
+        popup.style.display = "none";
+      }, 400);
+    }
+
+    function startAutoHide() {
+      progressStart = performance.now();
+      var step = function (now) {
+        var elapsed = (now - progressStart) / 1000;
+        var ratio = Math.min(elapsed / duration, 1);
+        if (progress) {
+          progress.style.transform = "scaleX(" + (1 - ratio) + ")";
+        }
+        if (ratio < 1 && !isHidden) {
+          progressRaf = requestAnimationFrame(step);
+        }
+      };
+      progressRaf = requestAnimationFrame(step);
+      hideTimer = setTimeout(hidePopup, duration * 1000);
+    }
+
+    function renderMessage(location) {
+      var loc = (location || "").trim();
+      if (!loc) loc = "未知星球";
+      if (textEl) {
+        textEl.textContent = "欢迎来自 " + loc + " 的朋友";
+      }
+      popup.classList.add("wi-welcome-popup--visible");
+      startAutoHide();
+    }
+
+    function fetchLocation() {
+      if (textEl) {
+        textEl.textContent = "加载中…";
+      }
+      popup.classList.add("wi-welcome-popup--visible");
+
+      /* 按顺序尝试主 API -> 备选 API */
+      var endpoints = [];
+      if (api) endpoints.push(api);
+      if (fallbackApi && fallbackApi !== api) endpoints.push(fallbackApi);
+
+      if (endpoints.length === 0) {
+        renderMessage("");
+        return;
+      }
+
+      var idx = 0;
+
+      function tryNext() {
+        if (idx >= endpoints.length) {
+          renderMessage("");
+          return;
+        }
+        var url = endpoints[idx++];
+        fetchSingle(url, 6000)
+          .then(function (location) {
+            if (location) {
+              renderMessage(location);
+            } else {
+              tryNext();
+            }
+          })
+          .catch(function () {
+            tryNext();
+          });
+      }
+
+      tryNext();
+    }
+
+    function fetchSingle(url, timeoutMs) {
+      var controller = null;
+      var timeoutId = null;
+
+      if (window.AbortController) {
+        controller = new AbortController();
+        timeoutId = setTimeout(function () {
+          controller.abort();
+        }, timeoutMs);
+      }
+
+      return fetch(url, controller ? { signal: controller.signal } : {})
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          if (timeoutId) clearTimeout(timeoutId);
+          return parseLocation(data);
+        })
+        .catch(function (err) {
+          if (timeoutId) clearTimeout(timeoutId);
+          throw err;
+        });
+    }
+
+    /* 解析多种 IP API 的返回格式：
+       - IPIP: {"ret":"ok","data":{"location":["中国","河北","张家口","","联通"]}}
+       - 腾讯 ip2city: {"ret":0,"province":"河北","city":"张家口",...}
+       - ipapi.co / ip-api.com: {"country":"China","regionName":"Hebei","city":"Zhangjiakou"}
+       - 太平洋: {"pro":"广东省","city":"广州市",...} */
+    function parseLocation(data) {
+      if (!data) return "";
+
+      /* IPIP: data.data.location 数组 */
+      if (data.data && Array.isArray(data.data.location)) {
+        var loc = data.data.location
+          .filter(function (s) {
+            return s && String(s).trim();
+          })
+          .map(function (s) {
+            return String(s).trim();
+          });
+        /* 去掉末尾的运营商字段（如"联通""电信""移动"） */
+        var ispKeywords = ["联通", "电信", "移动", "铁通", "广电", "教育网", "长城"];
+        while (loc.length > 1 && ispKeywords.indexOf(loc[loc.length - 1]) !== -1) {
+          loc.pop();
+        }
+        return loc.length ? loc.join("·") : "";
+      }
+
+      var country = data.country || data.country_name || data.nation || "";
+      var region = data.regionName || data.region || data.province || data.pro || "";
+      var city = data.city || data.cityName || "";
+      var district = data.district || data.area || data.info3 || "";
+
+      /* 短英文国家代码（如 CN）舍弃，避免显示无意义的两字母 */
+      if (country && country.length <= 3 && !/[一-龥]/.test(country)) {
+        country = "";
+      }
+
+      var parts = [];
+      if (country) parts.push(country);
+      if (region && region !== country) parts.push(region);
+      if (city && city !== region) parts.push(city);
+      if (district && district !== city) parts.push(district);
+
+      return parts.length ? parts.join("·") : "";
+    }
+
+    /* 交互：悬停/触摸暂停倒计时，离开恢复 */
+    function pauseTimer() {
+      if (hideTimer) {
+        clearTimeout(hideTimer);
+        hideTimer = null;
+      }
+      if (progressRaf) {
+        cancelAnimationFrame(progressRaf);
+        progressRaf = null;
+      }
+    }
+
+    function resumeTimer() {
+      var remaining = duration;
+      if (progress) {
+        var matrix = progress.style.transform;
+        var match = matrix && matrix.match(/scaleX\(([\d.]+)\)/);
+        if (match) {
+          var ratio = parseFloat(match[1]);
+          remaining = duration * ratio;
+        }
+      }
+      progressStart = performance.now() - (duration - remaining) * 1000;
+      var step = function (now) {
+        var elapsed = (now - progressStart) / 1000;
+        var ratio = Math.min(elapsed / duration, 1);
+        if (progress) {
+          progress.style.transform = "scaleX(" + (1 - ratio) + ")";
+        }
+        if (ratio < 1 && !isHidden) {
+          progressRaf = requestAnimationFrame(step);
+        }
+      };
+      progressRaf = requestAnimationFrame(step);
+      hideTimer = setTimeout(hidePopup, remaining * 1000);
+    }
+
+    popup.addEventListener("mouseenter", pauseTimer);
+    popup.addEventListener("mouseleave", resumeTimer);
+    popup.addEventListener("touchstart", pauseTimer, { passive: true });
+    popup.addEventListener("touchend", resumeTimer, { passive: true });
+
+    if (closeBtn) closeBtn.addEventListener("click", hidePopup);
+
+    /* 延迟 800ms 显示，避免与首屏渲染争抢资源 */
+    setTimeout(fetchLocation, 800);
+  })();
+</script>
+
+<style>
+  .wi-welcome-popup {
+    position: fixed;
+    z-index: 9999;
+    max-width: min(380px, calc(100vw - 32px));
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-12px);
+    transition: opacity 0.4s var(--ease-out-expo), transform 0.4s var(--ease-out-expo);
+    will-change: opacity, transform;
+  }
+
+  .wi-welcome-popup[data-position="top-left"] {
+    top: 88px;
+    left: 24px;
+  }
+
+  .wi-welcome-popup[data-position="top-right"] {
+    top: 88px;
+    right: 24px;
+  }
+
+  .wi-welcome-popup[data-position="bottom-left"] {
+    bottom: 24px;
+    left: 24px;
+    transform: translateY(12px);
+  }
+
+  .wi-welcome-popup[data-position="bottom-right"] {
+    bottom: 24px;
+    right: 24px;
+    transform: translateY(12px);
+  }
+
+  .wi-welcome-popup[data-position="top-center"] {
+    top: 88px;
+    left: 50%;
+    transform: translate(-50%) translateY(-12px);
+  }
+
+  .wi-welcome-popup--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .wi-welcome-popup--visible[data-position="top-left"],
+  .wi-welcome-popup--visible[data-position="top-right"],
+  .wi-welcome-popup--visible[data-position="bottom-left"],
+  .wi-welcome-popup--visible[data-position="bottom-right"] {
+    transform: translateY(0);
+  }
+
+  .wi-welcome-popup--visible[data-position="top-center"] {
+    transform: translate(-50%) translateY(0);
+  }
+
+  .wi-welcome-popup--leaving {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .wi-welcome-popup--leaving[data-position^="top"] {
+    transform: translateY(-12px);
+  }
+
+  .wi-welcome-popup--leaving[data-position="bottom-left"],
+  .wi-welcome-popup--leaving[data-position="bottom-right"] {
+    transform: translateY(12px);
+  }
+
+  .wi-welcome-popup--leaving[data-position="top-center"] {
+    transform: translate(-50%) translateY(-12px);
+  }
+
+  .wi-welcome-popup__inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--bg-raised) 92%, transparent);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--rule);
+    box-shadow: 0 8px 24px -8px #0000001f, 0 2px 8px -2px #0000000f;
+    color: var(--ink);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+  }
+
+  .wi-welcome-popup__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+
+  .wi-welcome-popup__icon svg {
+    animation: wi-welcome-popup-pulse 2s ease-in-out infinite;
+  }
+
+  .wi-welcome-popup__content {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wi-welcome-popup__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-3);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .wi-welcome-popup__close:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--ink-3) 12%, transparent);
+    color: var(--ink);
+  }
+
+  .wi-welcome-popup__progress {
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 4px;
+    height: 2px;
+    border-radius: 1px;
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+    transform-origin: left center;
+    transform: scaleX(1);
+    opacity: 0.7;
+  }
+
+  .wi-welcome-popup--visible .wi-welcome-popup__progress {
+    opacity: 1;
+  }
+
+  @keyframes wi-welcome-popup-pulse {
+    0%,
+    to {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.12);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wi-welcome-popup[data-position] {
+      max-width: calc(100vw - 24px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wi-welcome-popup,
+    .wi-welcome-popup--visible,
+    .wi-welcome-popup--leaving,
+    .wi-welcome-popup__icon svg {
+      transition: opacity 0.2s ease !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
+</style>

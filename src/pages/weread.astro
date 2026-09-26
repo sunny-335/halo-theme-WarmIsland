@@ -1,0 +1,158 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout wide>
+  <Fragment slot="head">
+    <title th:text="|${theme.config?.weread?.weread_page_title ?: '书架'} - ${site.title}|"></title>
+  </Fragment>
+
+  <section class="wi-weread">
+    <div class="wi-container">
+      <div class="wi-weread__header">
+        <h1
+          class="wi-weread__title"
+          th:text="${theme.config?.weread?.weread_page_title ?: '书架'}"
+        >
+          书架
+        </h1>
+        <p
+          class="wi-weread__subtitle"
+          th:if="${theme.config?.weread?.weread_page_subtitle}"
+          th:text="${theme.config?.weread?.weread_page_subtitle}"
+        >
+          我在读的书
+        </p>
+        <span class="wi-page-accent"></span>
+      </div>
+
+      <th:block th:if="${pluginFinder.available('halo-weread-plugin')}">
+        <div
+          class="wi-weread__shelf"
+          id="weread-shelf-wrapper"
+          th:attr="data-endpoint=@{/halo-weread-plugin/shelf-html}"
+        >
+          <p class="wi-weread__loading">正在展开书架…</p>
+        </div>
+      </th:block>
+
+      <div
+        class="wi-weread__empty"
+        th:unless="${pluginFinder.available('halo-weread-plugin')}"
+      >
+        <p>
+          该功能需要安装「微信读书（WeRead）信息展示」插件，<a
+            href="https://github.com/yeora26/halo-weread-plugin"
+            target="_blank"
+            rel="noopener noreferrer"
+            >前往插件仓库了解</a
+          >
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline th:inline="none">
+    (function () {
+      var container = document.getElementById("weread-shelf-wrapper");
+      if (!container) return;
+
+      var endpoint =
+        container.getAttribute("data-endpoint") ||
+        "/halo-weread-plugin/shelf-html";
+
+      fetch(endpoint)
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.text();
+        })
+        .then(function (html) {
+          container.innerHTML = html;
+
+          /* innerHTML 插入的脚本不会执行，需要重建后才会运行 */
+          var oldScripts = container.querySelectorAll("script");
+          Array.prototype.forEach.call(oldScripts, function (oldScript) {
+            var script = document.createElement("script");
+            script.textContent = oldScript.textContent;
+            oldScript.parentNode.replaceChild(script, oldScript);
+          });
+        })
+        .catch(function () {
+          container.innerHTML =
+            '<p class="wi-weread__loading">书架暂时无法展开，请稍后再试。</p>';
+        });
+    })();
+  </script>
+</Layout>
+
+<style>
+  .wi-weread {
+    padding-block: 2rem 3rem;
+  }
+
+  .wi-weread__header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+
+  .wi-weread__title {
+    font-family: var(--font-sans);
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: var(--tracking-tight);
+    margin-bottom: var(--space-sm);
+  }
+
+  .wi-weread__subtitle {
+    font-size: var(--text-base);
+    color: var(--ink-3);
+    line-height: var(--leading-relaxed);
+  }
+
+  .wi-weread__shelf {
+    min-height: 200px;
+  }
+
+  .wi-weread__loading {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+    padding: var(--space-2xl) 0;
+  }
+
+  .wi-weread__empty {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-lg);
+    border: 1px dashed var(--rule);
+    border-radius: var(--radius-lg, 16px);
+    color: var(--ink-3);
+    font-size: var(--text-sm);
+  }
+
+  .wi-weread__empty a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .wi-weread__empty a:hover {
+    text-decoration: underline;
+  }
+
+  /* 插件返回的书架内容：收敛为与主题一致的卡片观感 */
+  .wi-weread__shelf :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .wi-weread__shelf :global(a) {
+    color: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .wi-weread__title {
+      font-size: var(--text-2xl);
+    }
+  }
+</style>

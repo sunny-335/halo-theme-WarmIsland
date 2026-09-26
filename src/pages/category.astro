@@ -14,7 +14,7 @@ import Layout from "../layouts/Layout.astro";
         th:text="${category.spec.displayName}"
       ></h1>
       <span class="wi-page-accent"></span>
-      <p class="wi-category__subtitle" th:text="#{common.postCount(${posts.total})}"></p>
+      <p class="wi-category__subtitle" th:text="|共 ${posts.total} 篇文章|">共 0 篇文章</p>
       <p
         th:if="${not #strings.isEmpty(category.spec.description)}"
         class="wi-category__description"
@@ -58,7 +58,7 @@ import Layout from "../layouts/Layout.astro";
     <div
       th:if="${posts.total == 0}"
       class="wi-category__empty"
-        th:text="${theme.config?.home?.home_label_no_posts ?: #messages.msg('common.noPosts')}"
+        th:text="${theme.config?.home?.home_label_no_posts ?: '暂无文章'}"
       >No posts yet.</div>
 
     <nav
@@ -70,7 +70,7 @@ import Layout from "../layouts/Layout.astro";
         th:if="${posts.hasPrevious()}"
         th:href="@{${posts.prevUrl}}"
         class="wi-category__page-link wi-category__page-link--prev"
-        th:text="${theme.config?.home?.home_label_newer ?: #messages.msg('common.newer')}"
+        th:text="${theme.config?.home?.home_label_newer ?: '较新'}"
       >&larr; Newer</a>
       <span
         class="wi-category__page-info"
@@ -80,7 +80,7 @@ import Layout from "../layouts/Layout.astro";
         th:if="${posts.hasNext()}"
         th:href="@{${posts.nextUrl}}"
         class="wi-category__page-link wi-category__page-link--next"
-        th:text="${theme.config?.home?.home_label_older ?: #messages.msg('common.older')}"
+        th:text="${theme.config?.home?.home_label_older ?: '较旧'}"
       >Older &rarr;</a>
     </nav>
   </div>
