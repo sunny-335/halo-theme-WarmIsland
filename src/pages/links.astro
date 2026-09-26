@@ -87,42 +87,66 @@ import Layout from "../layouts/Layout.astro";
         </div>
       </th:block>
 
+      <!--
+        友链申请：表单 POST 到插件的 /links/apply/submit，插件以 303 回跳 /links，
+        并带上 applied（success / error / disabled）、message、field、value 四个查询参数。
+
+        注意（踩过坑）：th:attr 的赋值里不能调用 #lists 等表达式对象的方法，
+        Thymeleaf 会对 th:attr 走受限求值并抛
+        "Instantiation of new objects and access to static classes or parameters is forbidden"。
+        取值逻辑一律先在 th:with 里算成变量，再用 th:value 之类的单值属性输出。
+      -->
       <div
         class="wi-links__apply"
         th:if="${theme.config?.links?.links_apply_form_enabled != false}"
-        th:with="applied=${param.applied != null and !#lists.isEmpty(param.applied) and param.applied[0] == 'true'},
-                 applyMsg=${param.message != null and !#lists.isEmpty(param.message) ? param.message[0] : null}"
+        th:with="appliedList=${param?.applied},
+                 applied=${appliedList != null and appliedList.length > 0 ? appliedList[0] : null},
+                 messageList=${param?.message},
+                 applyMsg=${messageList != null and messageList.length > 0 ? messageList[0] : null},
+                 fieldList=${param?.field},
+                 applyField=${fieldList != null and fieldList.length > 0 ? fieldList[0] : null},
+                 valueList=${param?.value},
+                 applyValue=${valueList != null and valueList.length > 0 ? valueList[0] : null}"
       >
         <h2 class="wi-links__apply-title" th:text="'申请友链'">申请友链</h2>
         <p
           class="wi-links__apply-result"
-          th:if="${applied}"
-          th:text="'申请已提交，等待站长审核 🌙'"
+          th:if="${applied != null}"
+          th:classappend="${applied == 'success'} ? 'wi-links__apply-result--ok' : 'wi-links__apply-result--error'"
+          th:text="${applyMsg != null ? applyMsg : '申请已提交，等待站长审核 🌙'}"
           role="status"
         ></p>
-        <p
-          class="wi-links__apply-result wi-links__apply-result--error"
-          th:if="${not applied and applyMsg != null}"
-          th:text="${applyMsg}"
-          role="alert"
-        ></p>
 
-        <form
-          class="wi-links__apply-form"
-          method="post"
-          th:action="@{/links/apply/submit}"
-        >
-          <input type="hidden" name="_csrf" th:value="${csrfToken}" />
-          <div class="wi-links__apply-row">
-            <label class="wi-links__apply-field">
-              <span th:text="'站点名称 *'">站点名称 *</span>
-              <input type="text" name="displayName" required maxlength="50" placeholder="你的站点名称" th:attr="value=${param.value != null and !#lists.isEmpty(param.value) ? param.value[0] : ''}" />
-            </label>
-            <label class="wi-links__apply-field">
-              <span th:text="'站点链接 *'">站点链接 *</span>
-              <input type="url" name="url" required placeholder="https://" />
-            </label>
-          </div>
+        <th:block th:unless="${applied == 'disabled'}">
+          <form
+            class="wi-links__apply-form"
+            method="post"
+            th:action="@{/links/apply/submit}"
+          >
+            <input type="hidden" name="_csrf" th:value="${csrfToken}" />
+            <div class="wi-links__apply-row">
+              <label class="wi-links__apply-field">
+                <span th:text="'站点名称 *'">站点名称 *</span>
+                <input
+                  type="text"
+                  name="displayName"
+                  required
+                  maxlength="50"
+                  placeholder="你的站点名称"
+                  th:value="${applyField == 'displayName' ? applyValue : null}"
+                />
+              </label>
+              <label class="wi-links__apply-field">
+                <span th:text="'站点链接 *'">站点链接 *</span>
+                <input
+                  type="url"
+                  name="url"
+                  required
+                  placeholder="https://"
+                  th:value="${applyField == 'url' ? applyValue : null}"
+                />
+              </label>
+            </div>
           <div class="wi-links__apply-row">
             <label class="wi-links__apply-field">
               <span th:text="'图标地址'">图标地址</span>
@@ -164,8 +188,15 @@ import Layout from "../layouts/Layout.astro";
               />
             </div>
           </div>
-          <button class="wi-links__apply-submit" type="submit" th:text="'提交申请'">提交申请</button>
-        </form>
+            <button
+              class="wi-links__apply-submit"
+              type="submit"
+              th:text="'提交申请'"
+            >
+              提交申请
+            </button>
+          </form>
+        </th:block>
         <p
           class="wi-links__apply-unavailable-tip"
           th:text="'友链申请暂未开放。'"
@@ -297,6 +328,10 @@ import Layout from "../layouts/Layout.astro";
     font-size: var(--text-sm);
     color: var(--accent);
     margin-bottom: var(--space-md);
+  }
+
+  .wi-links__apply-result--ok {
+    color: var(--accent);
   }
 
   .wi-links__apply-result--error {
