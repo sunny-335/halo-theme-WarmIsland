@@ -5,12 +5,14 @@
 <style is:inline th:if="${theme.config?.hero?.hero_title_color_dark != null and theme.config?.hero?.hero_title_color_dark != ''}" th:utext="${' html.dark { --hero-title-text: ' + theme.config?.hero?.hero_title_color_dark + '; } '}">/*hero-title-dark*/</style>
 <style is:inline th:if="${theme.config?.hero?.hero_subtitle_color_light != null and theme.config?.hero?.hero_subtitle_color_light != ''}" th:utext="${' :root { --hero-subtitle-text: ' + theme.config?.hero?.hero_subtitle_color_light + '; } '}">/*hero-subtitle-light*/</style>
 <style is:inline th:if="${theme.config?.hero?.hero_subtitle_color_dark != null and theme.config?.hero?.hero_subtitle_color_dark != ''}" th:utext="${' html.dark { --hero-subtitle-text: ' + theme.config?.hero?.hero_subtitle_color_dark + '; } '}">/*hero-subtitle-dark*/</style>
+<style is:inline th:if="${theme.config?.hero?.hero_quote_color_light != null and theme.config?.hero?.hero_quote_color_light != ''}" th:utext="${' :root { --hero-quote-text: ' + theme.config?.hero?.hero_quote_color_light + '; } '}">/*hero-quote-light*/</style>
+<style is:inline th:if="${theme.config?.hero?.hero_quote_color_dark != null and theme.config?.hero?.hero_quote_color_dark != ''}" th:utext="${' html.dark { --hero-quote-text: ' + theme.config?.hero?.hero_quote_color_dark + '; } '}">/*hero-quote-dark*/</style>
 
 <section
   class="hero"
   id="wi-hero"
   th:if="${theme.config?.hero?.hero_enabled != false}"
-  th:classappend="${theme.config?.animation?.animation_breath == false} ? 'hero--no-breath'"
+  th:classappend="${(theme.config?.animation?.animation_breath == false ? 'hero--no-breath ' : '') + 'hero--fx-' + (theme.config?.hero?.hero_text_effect ?: 'none')}"
 >
   <div class="hero__bg">
     <div class="hero__orb hero__orb--1"></div>
@@ -313,12 +315,6 @@
     letter-spacing: -0.03em;
     color: var(--hero-title-text, var(--ink));
     line-height: var(--leading-tight);
-    /* 背景图完整显示后，用轻投影保证文字在复杂图片上仍可读 */
-    text-shadow: 0 1px 3px rgba(255, 253, 250, 0.6), 0 1px 14px rgba(255, 253, 250, 0.4);
-  }
-
-  html.dark .hero__title {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 1px 14px rgba(0, 0, 0, 0.35);
   }
 
   .hero__subtitle {
@@ -327,25 +323,93 @@
     color: var(--hero-subtitle-text, var(--ink-2));
     letter-spacing: 0.05em;
     line-height: var(--leading-normal);
-    text-shadow: 0 1px 3px rgba(255, 253, 250, 0.6), 0 1px 10px rgba(255, 253, 250, 0.4);
-  }
-
-  html.dark .hero__subtitle {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), 0 1px 10px rgba(0, 0, 0, 0.35);
   }
 
   .hero__description {
     font-size: var(--text-lg);
-    color: var(--ink-2);
+    color: var(--hero-quote-text, var(--ink-2));
     line-height: var(--leading-relaxed);
     max-width: 560px;
     text-align: center;
     transition: opacity 0.3s ease;
-    text-shadow: 0 1px 3px rgba(255, 253, 250, 0.55);
   }
 
-  html.dark .hero__description {
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  /* ===== 文字显示效果（后台「Hero 首屏 → 文字显示效果」，默认 none 无任何附加效果） ===== */
+  .hero--fx-shadow .hero__title,
+  .hero--fx-shadow .hero__subtitle,
+  .hero--fx-shadow .hero__description {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22), 0 2px 10px rgba(0, 0, 0, 0.16);
+  }
+
+  html.dark .hero--fx-shadow .hero__title,
+  html.dark .hero--fx-shadow .hero__subtitle,
+  html.dark .hero--fx-shadow .hero__description {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 2px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .hero--fx-glow .hero__title,
+  .hero--fx-glow .hero__subtitle,
+  .hero--fx-glow .hero__description {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.85), 0 0 26px rgba(255, 255, 255, 0.5);
+  }
+
+  html.dark .hero--fx-glow .hero__title,
+  html.dark .hero--fx-glow .hero__subtitle,
+  html.dark .hero--fx-glow .hero__description {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.45), 0 0 24px rgba(255, 255, 255, 0.22);
+  }
+
+  /* 半透明遮罩层：文字背后垫一块毛玻璃衬底 */
+  .hero--fx-scrim .hero__content {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: var(--space-2xl);
+  }
+
+  html.dark .hero--fx-scrim .hero__content {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* 渐变遮罩：斜向渐变衬底 */
+  .hero--fx-gradient .hero__content {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.18) 100%
+    );
+    border-radius: 24px;
+    padding: var(--space-2xl);
+  }
+
+  html.dark .hero--fx-gradient .hero__content {
+    background: linear-gradient(
+      135deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.16) 100%
+    );
+  }
+
+  /* 容器：半透明边框圆角矩形 + 更大留白，把文字"装"进设计好的容器里 */
+  .hero--fx-frame .hero__content {
+    border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+    background: color-mix(in srgb, var(--bg) 30%, transparent);
+    border-radius: 24px;
+    padding: var(--space-2xl) var(--space-3xl);
+    gap: var(--space-xl);
+  }
+
+  html.dark .hero--fx-frame .hero__content {
+    border-color: color-mix(in srgb, #ffffff 32%, transparent);
+  }
+
+  .hero--fx-frame .hero__title {
+    letter-spacing: 0.08em;
+  }
+
+  .hero--fx-frame .hero__subtitle {
+    letter-spacing: 0.22em;
   }
 
   .hero__scroll-indicator {
@@ -439,6 +503,16 @@
     .hero__content {
       padding: var(--space-lg);
       gap: var(--space-md);
+    }
+
+    .hero--fx-scrim .hero__content,
+    .hero--fx-gradient .hero__content {
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    .hero--fx-frame .hero__content {
+      padding: var(--space-xl) var(--space-lg);
+      gap: var(--space-lg);
     }
 
     .hero__description {

@@ -1,7 +1,9 @@
 :root {
   --bg: #faf7f2;
   --bg-raised: #f3ede5;
-  --bg-overlay: rgba(250, 247, 242, 0.85);
+  /* 派生变量基于 --bg / --rule 动态混合：调色板只需覆盖核心变量，
+     玻璃拟态、遮罩层等会自动跟随当前配色（暖屿默认时与旧值完全一致） */
+  --bg-overlay: color-mix(in srgb, var(--bg) 85%, transparent);
   --ink: #2c2420;
   --ink-2: #7a6e64;
   --ink-3: #b5a99e;
@@ -12,19 +14,20 @@
   --mist-pink: #f0e4de;
   --sea-salt: #e8e0d6;
   --caramel: #8b6f5e;
-  --glass-bg: rgba(250, 247, 242, 0.72);
-  --glass-border: rgba(232, 224, 214, 0.5);
-  --shadow-sm: 0 1px 3px rgba(44, 36, 32, 0.06);
-  --shadow-md: 0 4px 16px rgba(44, 36, 32, 0.08);
-  --shadow-lg: 0 8px 32px rgba(44, 36, 32, 0.12);
-  --shadow-glow: 0 0 40px rgba(212, 118, 78, 0.15);
+  --glass-bg: color-mix(in srgb, var(--bg) 72%, transparent);
+  --glass-border: color-mix(in srgb, var(--rule) 50%, transparent);
+  /* 阴影色由墨色动态混合，保证换配色后阴影色调一致 */
+  --shadow-sm: 0 1px 3px color-mix(in srgb, var(--ink) 6%, transparent);
+  --shadow-md: 0 4px 16px color-mix(in srgb, var(--ink) 8%, transparent);
+  --shadow-lg: 0 8px 32px color-mix(in srgb, var(--ink) 12%, transparent);
+  --shadow-glow: 0 0 40px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 html.dark {
   /* 暗色基准：偏中性、只保留一丝暖意，避免大面积黄褐底色带来的闷感 */
   --bg: #1e1c1a;
   --bg-raised: #292623;
-  --bg-overlay: rgba(30, 28, 26, 0.85);
+  --bg-overlay: color-mix(in srgb, var(--bg) 85%, transparent);
   --ink: #e9e4dd;
   --ink-2: #aaa096;
   /* 深色背景下人眼对低对比更敏感，次要文字与分隔线比浅色模式略提亮 */
@@ -36,8 +39,8 @@ html.dark {
   --mist-pink: #2e2823;
   --sea-salt: #302b26;
   --caramel: #a38b7b;
-  --glass-bg: rgba(30, 28, 26, 0.72);
-  --glass-border: rgba(59, 54, 47, 0.5);
+  --glass-bg: color-mix(in srgb, var(--bg) 72%, transparent);
+  --glass-border: color-mix(in srgb, var(--rule) 50%, transparent);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.24);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);

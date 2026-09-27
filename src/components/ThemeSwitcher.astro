@@ -57,8 +57,9 @@
       document.documentElement.classList.toggle("dark", isDark);
       document.documentElement.setAttribute("data-color-scheme", isDark ? "dark" : "light");
       localStorage.setItem("wi-theme", isDark ? "dark" : "light");
+      var bgPair = window.WI_PALETTE_BG || { light: "#faf7f2", dark: "#1e1c1a" };
       var tc = document.querySelector('meta[name="theme-color"]');
-      if (tc) tc.setAttribute("content", isDark ? "#1e1c1a" : "#faf7f2");
+      if (tc) tc.setAttribute("content", isDark ? bgPair.dark : bgPair.light);
       updateIcons();
       setTimeout(function() {
         document.documentElement.classList.remove("wi-theme-transition");

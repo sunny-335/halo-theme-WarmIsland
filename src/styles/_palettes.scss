@@ -1,0 +1,320 @@
+/*
+ * 主题配色系统：官方预设调色板
+ * ---------------------------------------------------------------
+ * 每个[调色板]覆盖核心色彩变量（浅色 html[data-palette="x"] /
+ * 深色 html[data-palette="x"].dark 两套）。
+ * 派生变量（--bg-overlay、--glass-*、阴影色等）在 _colors.scss 中
+ * 由 --bg / --rule / --ink / --accent 动态混合而成，会自动跟随。
+ * data-palette 由 layout 头部根据后台「总体样式 → 主题配色」输出；
+ * 默认值 warm-island（暖屿·赤陶）即 _colors.scss 的基准值，无需覆盖。
+ */
+
+/* 抹茶 */
+html[data-palette="matcha"] {
+  --bg: #f6f8f1;
+  --bg-raised: #ecf1e3;
+  --ink: #26302a;
+  --ink-2: #6d7a6e;
+  --ink-3: #a8b3a4;
+  --rule: #dde5d4;
+  --accent: #6f9d52;
+  --accent-hover: #5d8943;
+  --accent-bg: #ecf3e2;
+  --mist-pink: #e7eddc;
+  --sea-salt: #dfe8d3;
+  --caramel: #7d8a68;
+}
+
+html[data-palette="matcha"].dark {
+  --bg: #1b1f1a;
+  --bg-raised: #252b22;
+  --ink: #e6e9e0;
+  --ink-2: #a3ab9c;
+  --ink-3: #767e70;
+  --rule: #363d33;
+  --accent: #9cc47f;
+  --accent-hover: #aed493;
+  --accent-bg: #242c1f;
+  --mist-pink: #262d22;
+  --sea-salt: #282f24;
+  --caramel: #98a387;
+}
+
+/* 黛蓝 */
+html[data-palette="indigo"] {
+  --bg: #f5f7fa;
+  --bg-raised: #eaeff5;
+  --ink: #232a33;
+  --ink-2: #66707d;
+  --ink-3: #a3adb8;
+  --rule: #dce2ea;
+  --accent: #4a6fa5;
+  --accent-hover: #3d5d8c;
+  --accent-bg: #e9eff8;
+  --mist-pink: #e2e8f0;
+  --sea-salt: #dbe4ee;
+  --caramel: #707c8e;
+}
+
+html[data-palette="indigo"].dark {
+  --bg: #191d23;
+  --bg-raised: #222831;
+  --ink: #e4e7ec;
+  --ink-2: #9aa4b1;
+  --ink-3: #6d7683;
+  --rule: #323a45;
+  --accent: #7fa3d1;
+  --accent-hover: #93b4dc;
+  --accent-bg: #1f2632;
+  --mist-pink: #232830;
+  --sea-salt: #252b34;
+  --caramel: #8b95a6;
+}
+
+/* 樱粉 */
+html[data-palette="sakura"] {
+  --bg: #faf5f6;
+  --bg-raised: #f3eaec;
+  --ink: #322a2c;
+  --ink-2: #7d6e72;
+  --ink-3: #b4a6aa;
+  --rule: #ecdfe2;
+  --accent: #d97387;
+  --accent-hover: #c85d72;
+  --accent-bg: #fbeef1;
+  --mist-pink: #f2e2e6;
+  --sea-salt: #eddfe3;
+  --caramel: #96757e;
+}
+
+html[data-palette="sakura"].dark {
+  --bg: #201b1c;
+  --bg-raised: #2a2425;
+  --ink: #ece5e6;
+  --ink-2: #b0a4a7;
+  --ink-3: #7f7276;
+  --rule: #3c3436;
+  --accent: #e89aab;
+  --accent-hover: #f0aec0;
+  --accent-bg: #2d2225;
+  --mist-pink: #2f2729;
+  --sea-salt: #31282a;
+  --caramel: #a88d94;
+}
+
+/* 暮紫 */
+html[data-palette="violet"] {
+  --bg: #f7f5fa;
+  --bg-raised: #eeeaf5;
+  --ink: #2b2733;
+  --ink-2: #6f6a7c;
+  --ink-3: #aaa5b6;
+  --rule: #e2ddeb;
+  --accent: #8a6fc0;
+  --accent-hover: #7759ae;
+  --accent-bg: #f0eaf9;
+  --mist-pink: #e8e2f0;
+  --sea-salt: #e3dcee;
+  --caramel: #7f7590;
+}
+
+html[data-palette="violet"].dark {
+  --bg: #1c1a21;
+  --bg-raised: #26222f;
+  --ink: #e8e5ee;
+  --ink-2: #a49eaf;
+  --ink-3: #746e80;
+  --rule: #373241;
+  --accent: #b49ae0;
+  --accent-hover: #c3ace8;
+  --accent-bg: #262033;
+  --mist-pink: #292434;
+  --sea-salt: #2b2536;
+  --caramel: #948caa;
+}
+
+/* 海盐 */
+html[data-palette="sea"] {
+  --bg: #f3f8f7;
+  --bg-raised: #e8f0ee;
+  --ink: #21302d;
+  --ink-2: #647872;
+  --ink-3: #9fb1ac;
+  --rule: #d9e6e3;
+  --accent: #3d9c8f;
+  --accent-hover: #2f8578;
+  --accent-bg: #e5f3f0;
+  --mist-pink: #dee9e6;
+  --sea-salt: #d6e5e1;
+  --caramel: #6c8680;
+}
+
+html[data-palette="sea"].dark {
+  --bg: #181f1e;
+  --bg-raised: #212a28;
+  --ink: #e3eae8;
+  --ink-2: #9aaba6;
+  --ink-3: #6d7d79;
+  --rule: #2f3b39;
+  --accent: #6cc3b4;
+  --accent-hover: #82d0c2;
+  --accent-bg: #1d2a27;
+  --mist-pink: #222c2a;
+  --sea-salt: #242e2c;
+  --caramel: #869894;
+}
+
+/* 琥珀 */
+html[data-palette="amber"] {
+  --bg: #faf7ef;
+  --bg-raised: #f3eddc;
+  --ink: #322b1e;
+  --ink-2: #7d7360;
+  --ink-3: #b5ab94;
+  --rule: #eae1cb;
+  --accent: #b97f1c;
+  --accent-hover: #9f6a0e;
+  --accent-bg: #f9efd8;
+  --mist-pink: #f0e8d2;
+  --sea-salt: #ebe2ca;
+  --caramel: #96835c;
+}
+
+html[data-palette="amber"].dark {
+  --bg: #201d16;
+  --bg-raised: #2a261d;
+  --ink: #ebe6d9;
+  --ink-2: #b0a893;
+  --ink-3: #7f7866;
+  --rule: #3c3729;
+  --accent: #e0a83e;
+  --accent-hover: #ebba5c;
+  --accent-bg: #2c251a;
+  --mist-pink: #2f2a1e;
+  --sea-salt: #312c20;
+  --caramel: #a89a76;
+}
+
+/* 梅酒 */
+html[data-palette="plum"] {
+  --bg: #f9f4f5;
+  --bg-raised: #f1e8ea;
+  --ink: #2f2427;
+  --ink-2: #796a6f;
+  --ink-3: #b1a2a7;
+  --rule: #e9dde0;
+  --accent: #a4506b;
+  --accent-hover: #8d3f59;
+  --accent-bg: #f7e9ee;
+  --mist-pink: #ecdee2;
+  --sea-salt: #e5d8db;
+  --caramel: #8d6f77;
+}
+
+html[data-palette="plum"].dark {
+  --bg: #1f1a1b;
+  --bg-raised: #292223;
+  --ink: #eae2e4;
+  --ink-2: #ada0a4;
+  --ink-3: #7c6e73;
+  --rule: #3a3133;
+  --accent: #d98aa3;
+  --accent-hover: #e39fb5;
+  --accent-bg: #2b2023;
+  --mist-pink: #2d2527;
+  --sea-salt: #2f2729;
+  --caramel: #a08890;
+}
+
+/* 石墨 */
+html[data-palette="graphite"] {
+  --bg: #f7f7f6;
+  --bg-raised: #eeedeb;
+  --ink: #262626;
+  --ink-2: #6e6e6c;
+  --ink-3: #ababa8;
+  --rule: #e0e0de;
+  --accent: #3f3f3e;
+  --accent-hover: #262626;
+  --accent-bg: #ececea;
+  --mist-pink: #e9e9e7;
+  --sea-salt: #e5e5e3;
+  --caramel: #7b7b78;
+}
+
+html[data-palette="graphite"].dark {
+  --bg: #1b1b1a;
+  --bg-raised: #252524;
+  --ink: #e8e8e6;
+  --ink-2: #a5a5a2;
+  --ink-3: #757572;
+  --rule: #353534;
+  --accent: #c9c9c5;
+  --accent-hover: #d8d8d4;
+  --accent-bg: #262625;
+  --mist-pink: #2a2a29;
+  --sea-salt: #2c2c2b;
+  --caramel: #8f8f8c;
+}
+
+/* 可拿铁 */
+html[data-palette="cocoa"] {
+  --bg: #f8f4f0;
+  --bg-raised: #f0e8e1;
+  --ink: #2e2722;
+  --ink-2: #786c62;
+  --ink-3: #b3a89d;
+  --rule: #e7ddd3;
+  --accent: #9a6b4f;
+  --accent-hover: #835539;
+  --accent-bg: #f5e9e0;
+  --mist-pink: #ecdfd4;
+  --sea-salt: #e6d9cd;
+  --caramel: #8a6f5b;
+}
+
+html[data-palette="cocoa"].dark {
+  --bg: #1e1a17;
+  --bg-raised: #282320;
+  --ink: #eae4dd;
+  --ink-2: #aca199;
+  --ink-3: #7b7169;
+  --rule: #3a332e;
+  --accent: #cd9878;
+  --accent-hover: #daa98c;
+  --accent-bg: #2a211c;
+  --mist-pink: #2d2721;
+  --sea-salt: #2f2923;
+  --caramel: #a08d7c;
+}
+
+/* 天青 */
+html[data-palette="azure"] {
+  --bg: #f4f8fb;
+  --bg-raised: #e9f1f7;
+  --ink: #223038;
+  --ink-2: #62737e;
+  --ink-3: #a0b0ba;
+  --rule: #dbe7ee;
+  --accent: #3b82c4;
+  --accent-hover: #2e6ba5;
+  --accent-bg: #e7f1f9;
+  --mist-pink: #e0ebf2;
+  --sea-salt: #d8e6ef;
+  --caramel: #6d8090;
+}
+
+html[data-palette="azure"].dark {
+  --bg: #172026;
+  --bg-raised: #202a31;
+  --ink: #e3eaef;
+  --ink-2: #99a8b3;
+  --ink-3: #6b7a85;
+  --rule: #2e3a42;
+  --accent: #74b3e0;
+  --accent-hover: #88c1e8;
+  --accent-bg: #1d2830;
+  --mist-pink: #222c34;
+  --sea-salt: #243038;
+  --caramel: #8496a3;
+}

@@ -99,10 +99,38 @@ spec:
             - label: 深色
               value: dark
           value: system
+        - $formkit: select
+          name: color_palette
+          label: 主题配色
+          options:
+            - label: 暖屿 · 赤陶（默认）
+              value: warm-island
+            - label: 抹茶
+              value: matcha
+            - label: 黛蓝
+              value: indigo
+            - label: 樱粉
+              value: sakura
+            - label: 暮紫
+              value: violet
+            - label: 海盐
+              value: sea
+            - label: 琥珀
+              value: amber
+            - label: 梅酒
+              value: plum
+            - label: 石墨
+              value: graphite
+            - label: 可拿铁
+              value: cocoa
+            - label: 天青
+              value: azure
+          value: warm-island
+          help: 整套官方预调配色（含深浅两套色板）；下方的强调色留空时跟随所选配色，填写后将覆盖配色中的强调色
         - $formkit: color
           name: accent_color
           label: 强调色
-          value: "#d4764e"
+          help: 自定义强调色；留空使用「主题配色」自带的强调色
         - $formkit: select
           name: border_radius
           label: 圆角风格
@@ -329,11 +357,37 @@ spec:
         - $formkit: color
           name: hero_subtitle_color_light
           label: 浅色模式副标题颜色
-          help: Hero 副标题和一言文字颜色（浅色模式）；留空使用主题默认
+          help: Hero 副标题文字颜色（浅色模式）；留空使用主题默认
         - $formkit: color
           name: hero_subtitle_color_dark
           label: 深色模式副标题颜色
-          help: Hero 副标题和一言文字颜色（深色模式）；留空使用主题默认
+          help: Hero 副标题文字颜色（深色模式）；留空使用主题默认
+        - $formkit: color
+          name: hero_quote_color_light
+          label: 浅色模式一言颜色
+          help: 一言（描述文案来源为"一言"时）的文字颜色（浅色模式）；留空使用主题默认
+        - $formkit: color
+          name: hero_quote_color_dark
+          label: 深色模式一言颜色
+          help: 一言的文字颜色（深色模式）；留空使用主题默认
+        - $formkit: select
+          name: hero_text_effect
+          label: 文字显示效果
+          options:
+            - label: 无效果（默认）
+              value: none
+            - label: 阴影
+              value: shadow
+            - label: 光晕
+              value: glow
+            - label: 半透明遮罩层
+              value: scrim
+            - label: 渐变遮罩
+              value: gradient
+            - label: 容器（半透明边框圆角矩形）
+              value: frame
+          value: none
+          help: 为 Hero 文字（标题/副标题/一言）叠加的辅助可读效果；默认无效果。遮罩类与容器类会在文字背后垫一层衬底并增加留白
     - group: home
       label: 首页
       formSchema:

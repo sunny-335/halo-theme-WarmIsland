@@ -13,7 +13,17 @@ Hero 首屏是 WarmIsland 主题的标志性区域，占据首页首屏的全部
 | `hero_hitokoto_api` | URL | `https://v1.hitokoto.cn/` | 一言 API 地址 |
 | `hero_hitokoto_categories` | 多选 | `d, i, k` | 一言句子类型 |
 | `hero_custom_description` | 多行文本 | — | 自定义描述文案 |
+| `hero_hitokoto_auto_refresh` | 开关 | `false` | 一言自动刷新 |
+| `hero_hitokoto_refresh_interval` | 下拉 | `10000` | 一言刷新间隔（秒） |
 | `hero_background_image` | 附件 | — | 背景图片 |
+| `hero_background_image_dark` | 附件 | — | 深色模式背景图片 |
+| `hero_title_color_light` | 颜色 | — | 大标题颜色（浅色模式），留空使用主题默认 |
+| `hero_title_color_dark` | 颜色 | — | 大标题颜色（深色模式），留空使用主题默认 |
+| `hero_subtitle_color_light` | 颜色 | — | 副标题颜色（浅色模式），留空使用主题默认 |
+| `hero_subtitle_color_dark` | 颜色 | — | 副标题颜色（深色模式），留空使用主题默认 |
+| `hero_quote_color_light` | 颜色 | — | 一言文字颜色（浅色模式），留空使用主题默认 |
+| `hero_quote_color_dark` | 颜色 | — | 一言文字颜色（深色模式），留空使用主题默认 |
+| `hero_text_effect` | 下拉 | `none` | 文字显示效果：`none` / `shadow` / `glow` / `scrim` / `gradient` / `frame` |
 
 ## 详细说明
 
@@ -100,6 +110,31 @@ hero_custom_description: "用文字记录生活，用代码构建世界。"
 
 ::: warning
 背景图片会自动应用模糊和暗化处理，以确保前景文字的可读性。建议选择色彩柔和、不包含大量细节的图片作为背景，避免干扰文案阅读。
+:::
+
+### 文字颜色
+
+标题、副标题、一言的颜色均可分别配置浅色 / 深色模式的取值，留空使用主题默认：
+
+- **`hero_title_color_light` / `hero_title_color_dark`** — 大标题颜色。
+- **`hero_subtitle_color_light` / `hero_subtitle_color_dark`** — 副标题颜色。
+- **`hero_quote_color_light` / `hero_quote_color_dark`** — 一言文字颜色（`hero_description_mode` 为 `hitokoto` 或 `custom` 时生效）。
+
+### 文字显示效果（hero_text_effect）
+
+为 Hero 文字（标题 / 副标题 / 一言）叠加辅助可读效果。**默认 `none` 不使用任何效果**——v1.2.0 起，文字周围默认不再有淡淡的白色散光投影：
+
+| 值 | 效果 | 说明 |
+| --- | --- | --- |
+| `none` | 无效果（默认） | 纯净文字，无任何附加投影与衬底 |
+| `shadow` | 阴影 | 文字下方叠加柔和的深色投影，适合复杂背景图 |
+| `glow` | 光晕 | 文字周围叠加白色光晕，暗色背景图上更醒目 |
+| `scrim` | 半透明遮罩层 | 文字背后垫一块毛玻璃圆角衬底，整体提升可读性 |
+| `gradient` | 渐变遮罩 | 文字背后垫斜向渐变衬底，左深右浅自然过渡 |
+| `frame` | 容器 | 把文字"装"进一个带半透明边框的圆角矩形，加大内边距与字距留白 |
+
+::: tip
+遮罩类（`scrim` / `gradient`）与容器（`frame`）作用于整个文字区块，浅色模式为白色系衬底、深色模式为黑色系衬底；`frame` 会在浅色模式下使用墨色描边、深色模式下使用白色描边。
 :::
 
 ## 视觉效果

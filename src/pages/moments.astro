@@ -411,6 +411,8 @@ import LightGallery from "../components/LightGallery.astro";
     position: relative;
     width: 100%;
     height: clamp(220px, 30vw, 380px);
+    /* 顶图与首条瞬间的卡片边框不能贴死：留出与页面头部一致的呼吸间距 */
+    margin-bottom: var(--space-2xl);
     overflow: hidden;
     background: var(--bg-raised);
   }

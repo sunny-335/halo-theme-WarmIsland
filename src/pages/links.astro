@@ -54,8 +54,7 @@ import Layout from "../layouts/Layout.astro";
             rel="noopener noreferrer"
             class="wi-links__card"
             th:with="verification=${link.status?.verification},
-                     accessState=${verification?.access?.state != null ? verification.access.state.name() : null},
-                     backlinkState=${verification?.backlink != null and verification.backlink.state != null ? verification.backlink.state.name() : null}"
+                     accessState=${verification?.access?.state != null ? verification.access.state.name() : null}"
           >
             <div class="wi-links__card-glow"></div>
             <div class="wi-links__card-inner">
@@ -74,16 +73,16 @@ import Layout from "../layouts/Layout.astro";
                     th:text="${#strings.substring(link.spec.displayName, 0, 1)}"
                   ></span>
                 </div>
-                <!-- 反链 / 可达性检测徽章（plugin-links 后台「友链检测」产生，未检测过则不显示） -->
+                <!-- 可达性检测徽章（plugin-links 后台「友链检测」产生）：绿点=可访问，红点=异常，未检测不显示 -->
                 <span
                   class="wi-links__check wi-links__check--ok"
-                  th:if="${accessState == 'ACCESSIBLE' and backlinkState != 'MISSING'}"
-                  th:title="${backlinkState == 'FOUND' ? '访问正常 · 反链有效' : '访问正常'}"
+                  th:if="${accessState == 'ACCESSIBLE'}"
+                  th:title="'站点访问正常'"
                 ></span>
                 <span
                   class="wi-links__check wi-links__check--bad"
-                  th:if="${accessState == 'INACCESSIBLE' or backlinkState == 'MISSING'}"
-                  th:title="${accessState == 'INACCESSIBLE' ? '站点访问异常' : '未检测到反链'}"
+                  th:if="${accessState == 'INACCESSIBLE'}"
+                  th:title="'站点访问异常'"
                 ></span>
               </span>
               <div class="wi-links__info">
@@ -523,8 +522,9 @@ import Layout from "../layouts/Layout.astro";
     border-radius: 16px;
     text-decoration: none;
     color: inherit;
-    overflow: hidden;
     display: flex;
+    /* 注意：这里绝不能加 overflow:hidden —— 悬浮时内层卡片会上移 4px 并投射大范围
+       阴影，裁切会把阴影切出一条"断开的光带"、卡片顶部被削平（v1.2.0 修复） */
   }
 
   .wi-links__card-glow {

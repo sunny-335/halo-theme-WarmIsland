@@ -24,6 +24,7 @@ const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
   class={home ? 'wi-home-snap' : ''}
   style="overflow-x:hidden"
   th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'"
+  th:attr="data-palette=${theme.config?.style?.color_palette ?: 'warm-island'}"
   xmlns:th={layoutFragment ? "https://www.thymeleaf.org" : undefined}
   th:fragment={fragmentAttr}
 >
@@ -32,7 +33,7 @@ const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#faf7f2" />
     <meta th:if="${theme.config?.basic?.site_description}" name="description" th:content="${theme.config?.basic?.site_description}" />
-    <script is:inline th:attr="data-scheme=${theme.config?.style?.color_scheme}">
+    <script is:inline th:inline="none" th:attr="data-scheme=${theme.config?.style?.color_scheme}">
       (function () {
         var stored = localStorage.getItem("wi-theme");
         var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -55,14 +56,30 @@ const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
         if (isDark) {
           document.documentElement.classList.add("dark");
           document.documentElement.setAttribute("data-color-scheme", "dark");
-          var tc = document.querySelector('meta[name="theme-color"]');
-          if (tc) tc.setAttribute("content", "#1e1c1a");
         } else {
           document.documentElement.classList.remove("dark");
           document.documentElement.setAttribute("data-color-scheme", "light");
-          var tc = document.querySelector('meta[name="theme-color"]');
-          if (tc) tc.setAttribute("content", "#faf7f2");
         }
+        /* 浏览器地址栏颜色跟随当前配色（含主题配色系统） */
+        var paletteBg = {
+          "warm-island": ["#faf7f2", "#1e1c1a"],
+          "matcha": ["#f6f8f1", "#1b1f1a"],
+          "indigo": ["#f5f7fa", "#191d23"],
+          "sakura": ["#faf5f6", "#201b1c"],
+          "violet": ["#f7f5fa", "#1c1a21"],
+          "sea": ["#f3f8f7", "#181f1e"],
+          "amber": ["#faf7ef", "#201d16"],
+          "plum": ["#f9f4f5", "#1f1a1b"],
+          "graphite": ["#f7f7f6", "#1b1b1a"],
+          "cocoa": ["#f8f4f0", "#1e1a17"],
+          "azure": ["#f4f8fb", "#172026"]
+        };
+        var pal = document.documentElement.getAttribute("data-palette");
+        var pair = (pal && paletteBg[pal]) || paletteBg["warm-island"];
+        var tc = document.querySelector('meta[name="theme-color"]');
+        if (tc) tc.setAttribute("content", isDark ? pair[1] : pair[0]);
+        /* 供 ThemeSwitcher 切换深浅色时取当前配色的背景色 */
+        window.WI_PALETTE_BG = { light: pair[0], dark: pair[1] };
       })();
     </script>
     <link

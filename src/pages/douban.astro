@@ -119,68 +119,68 @@ import Layout from "../layouts/Layout.astro";
         <article
           class="wi-douban__card"
           th:each="item : ${doubans.items}"
-          th:if="${!hasGenre or #sets.contains(item.spec?.genres, currentGenre)}"
+          th:if="${!hasGenre or #sets.contains(item.genres, currentGenre)}"
           th:attr="data-type=${currentType}"
         >
           <a
             class="wi-douban__card-link"
-            th:if="${!#strings.isEmpty(item.spec?.link)}"
-            th:href="${item.spec?.link}"
+            th:if="${!#strings.isEmpty(item.link)}"
+            th:href="${item.link}"
             target="_blank"
             rel="noopener noreferrer"
             tabindex="-1"
             aria-hidden="true"
           ></a>
-          <div class="wi-douban__poster" th:if="${!#strings.isEmpty(item.spec?.poster)}">
+          <div class="wi-douban__poster" th:if="${!#strings.isEmpty(item.poster)}">
             <img
-              th:src="${item.spec?.poster}"
-              th:alt="${item.spec?.name}"
+              th:src="${item.poster}"
+              th:alt="${item.name}"
               class="wi-douban__poster-img"
               loading="lazy"
               decoding="async"
             />
           </div>
-          <div class="wi-douban__poster wi-douban__poster--placeholder" th:if="${#strings.isEmpty(item.spec?.poster)}">
-            <span th:text="${#strings.substring(item.spec?.name ?: '', 0, 1)}"></span>
+          <div class="wi-douban__poster wi-douban__poster--placeholder" th:if="${#strings.isEmpty(item.poster)}">
+            <span th:text="${#strings.substring(item.name ?: '', 0, 1)}"></span>
           </div>
           <div class="wi-douban__body">
-            <h3 class="wi-douban__name" th:text="${item.spec?.name}"></h3>
+            <h3 class="wi-douban__name" th:text="${item.name}"></h3>
             <p
               class="wi-douban__subtitle"
-              th:if="${!#strings.isEmpty(item.spec?.cardSubtitle)}"
-              th:text="${item.spec?.cardSubtitle}"
+              th:if="${!#strings.isEmpty(item.cardSubtitle)}"
+              th:text="${item.cardSubtitle}"
             ></p>
             <div class="wi-douban__meta">
               <span
                 class="wi-douban__score"
-                th:if="${!#strings.isEmpty(item.spec?.score) and item.spec?.score != '0'}"
+                th:if="${!#strings.isEmpty(item.score) and item.score != '0'}"
               >
                 <svg class="wi-douban__star" viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                <th:block th:text="${item.spec?.score}"></th:block>
+                <th:block th:text="${item.score}"></th:block>
               </span>
               <span
                 class="wi-douban__my-score"
-                th:if="${!#strings.isEmpty(item.faves?.score)}"
+                th:if="${!#strings.isEmpty(item.favesScore)}"
               >
-                <span th:text="'我的：'">My:</span><th:block th:text="${item.faves?.score}"></th:block>
+                <span th:text="'我的：'">My:</span><th:block th:text="${item.favesScore}"></th:block>
               </span>
               <span
                 class="wi-douban__year"
-                th:if="${!#strings.isEmpty(item.spec?.year)}"
-                th:text="${item.spec?.year}"
+                th:if="${!#strings.isEmpty(item.year)}"
+                th:text="${item.year}"
               ></span>
             </div>
-            <div class="wi-douban__tags" th:if="${item.spec?.genres != null and !#sets.isEmpty(item.spec?.genres)}">
+            <div class="wi-douban__tags" th:if="${item.genres != null and !#sets.isEmpty(item.genres)}">
               <span
                 class="wi-douban__tag"
-                th:each="genre : ${item.spec?.genres}"
+                th:each="genre : ${item.genres}"
                 th:text="${genre}"
               ></span>
             </div>
             <p
               class="wi-douban__remark"
-              th:if="${!#strings.isEmpty(item.faves?.remark)}"
-              th:text="${item.faves?.remark}"
+              th:if="${!#strings.isEmpty(item.favesRemark)}"
+              th:text="${item.favesRemark}"
             ></p>
           </div>
         </article>

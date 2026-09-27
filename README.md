@@ -7,6 +7,7 @@
 ## 环境要求
 
 - Halo **2.26.0 及以上**（页面布局契约、微信读书页面均依赖 2.26 的新能力）
+- v1.2.0 起内置主题配色系统（纯 CSS 变量实现）；更低版本的 Halo 请使用主题 v1.1.x
 
 ## 特点
 
@@ -30,7 +31,7 @@
 | [友情链接](https://halo.run/store/apps/app-hfbQg) | `PluginLinks` | `/links` | 友链展示页面，支持随机排列、随机传送门、评论区开关 |
 | [朋友圈](https://github.com/halo-sigs/plugin-friends) | `plugin-friends` | `/friends` | RSS 订阅朋友圈页面 |
 | [装备管理](https://github.com/chengzhongxue/plugin-equipment) | `equipment` | `/equipments` | 装备展示页面，按分组展示，支持封面图 |
-| [豆瓣](https://github.com/chengzhongxue/plugin-douban) | `plugin-douban` | `/douban` | 豆瓣记录页面，支持类型/状态/标签筛选，默认电影 |
+| [豆瓣](https://github.com/chengzhongxue/plugin-douban) | `plugin-douban` | `/douban` | 豆瓣记录页面，支持类型/状态/标签筛选，默认音乐；需插件 **v1.2.6+**（SQLite 数据结构） |
 | [Steam 信息展示](https://github.com/Tim0x0/halo-plugin-steam) | `PluginSteam` | `/steam` | Steam 游戏库页面，含用户资料、统计数据、最近游玩、游戏库分页 |
 | [微信读书](https://github.com/yeora26/halo-weread-plugin) | `halo-weread-plugin` | 自定义页面 | 书架展示页面，见下方「自定义页面模板」 |
 | [记得](https://github.com/yyliucha/plugin-important-dates) | `plugin-important-dates` | `/important-dates` | 重要日期 / 牵挂的人 / 爱车双视图页面，见下方「扩展页面」 |
