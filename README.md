@@ -97,6 +97,11 @@
 2. 进入 Halo 后台 → 主题管理 → 安装主题 → 上传 ZIP 包
 3. 安装完成后点击「启用」
 
+> **升级后如果整站没了样式**：Halo 页面缓存或前置反向代理里可能还留着上一版本的 HTML，
+> 它引用的 CSS 文件名带内容哈希，升级后已被删除，请求会直接 500。
+> 先在 Halo 后台执行一次「清理缓存」（并刷新 CDN / Nginx 缓存）即可。
+> 主题从 v1.2.1 起会把历史版本的哈希资源一并发进安装包，旧 HTML 也不会请求失败。
+
 或从源码构建：
 
 ```bash
@@ -117,9 +122,20 @@ pnpm install
 # 开发模式（监听文件变化，自动构建到 templates/）
 pnpm dev
 
-# 构建
+# 构建（输出到 templates/，并自动合并历史版本的静态资源）
 pnpm build
+
+# 把本次构建的哈希资源快照进 compat/assets（发版前必做）
+pnpm snapshot
+
+# 打包 dist/warm-island-<version>.zip
+pnpm package
+
+# 点击特效脚本冒烟测试
+pnpm smoke
 ```
+
+发版流程：`pnpm build` → `pnpm snapshot` → `pnpm package`，并把 `compat/assets` 的新增文件一起提交。
 
 ### 目录结构
 
@@ -129,16 +145,24 @@ pnpm build
 │   ├── layouts/       # Layout.astro（含页面布局契约渲染模式）
 │   ├── pages/         # 页面模板（构建后输出到 templates/）
 │   └── styles/        # SCSS 样式（正文样式在 _content.scss，全局生效）
+├── compat/
+│   └── assets/        # 历史版本哈希静态资源，构建时合并进 templates/assets
+├── scripts/           # 构建后置、资源快照、打包、冒烟测试
 ├── templates/         # 构建产物，Halo 实际加载的模板
-├── settings.yaml      # 后台设置项定义（16 分组 / 117 项）
+├── settings.yaml      # 后台设置项定义
 └── theme.yaml         # 主题清单与自定义页面模板注册
 ```
 
 ### 主题开发注意事项
 
+- **静态资源文件名带内容哈希**：升级后旧文件被删除，被缓存的 HTML 仍会请求旧文件名并触发 500，
+  所以每个版本的哈希文件都要留一份（见 `compat/assets` 与 `pnpm snapshot`）
 - **Thymeleaf 字符串字面量必须加单引号**：`th:text="'文本'"`，裸中文遇到逗号/空格/emoji 会导致页面 500
+- **`th:attr` 只用简单表达式**（取属性、Elvis 默认值、三元、拼接、等值比较），表达式对象方法调用会被受限求值器拒绝
+- **凡是与后台开关绑定的模板表达式都要给默认值**：`?: '默认值'`，配置未落库时属性会被整体移除，功能会静默失效
 - **正文样式必须写在全局样式表**（`src/styles/_content.scss`）：Astro scoped 样式对 Thymeleaf 运行时注入的内容无效
 - **内联脚本统一加 `th:inline="none"`**：避免 Thymeleaf 解析脚本中的 `[[` / `[(` / `${}`
+- **新插入的动画元素要强制回流**（读一次 `offsetWidth`）：否则初态与终态在同一帧被合并，transition 不触发
 - 修改主题外观无需单独维护 `layout.astro`：页面布局契约复用 `Layout.astro`，构建时自动生成
 
 ## 技术栈
