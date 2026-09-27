@@ -236,24 +236,17 @@
   }
 
   function processMomentsMedia(container) {
+    // 注意：不要用 <a> 包裹瞬间图片。九宫格布局依赖
+    // .wi-moments-page__card-media 的直接子元素数量（:has/:nth-child/:only-child），
+    // 每张图各自包一层 <a> 后，img 永远是「唯一子元素」，全部图片都会退化成单列大图。
+    // 直接把 img 本身作为 lightgallery 项即可（data-src 提供原图）。
     var images = container.querySelectorAll('img');
     images.forEach(function(img) {
       var src = img.getAttribute('src');
       if (!src) return;
-
-      var parentA = img.closest('a');
-      if (parentA) {
-        parentA.classList.add('wi-lightgallery-item');
-        if (!parentA.getAttribute('data-src')) {
-          parentA.setAttribute('data-src', src);
-        }
-      } else {
-        var a = document.createElement('a');
-        a.setAttribute('href', src);
-        a.setAttribute('data-src', src);
-        a.classList.add('wi-lightgallery-item');
-        img.parentNode.insertBefore(a, img);
-        a.appendChild(img);
+      img.classList.add('wi-lightgallery-item');
+      if (!img.getAttribute('data-src')) {
+        img.setAttribute('data-src', src);
       }
     });
   }

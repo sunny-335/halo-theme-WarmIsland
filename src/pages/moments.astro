@@ -715,8 +715,9 @@ import LightGallery from "../components/LightGallery.astro";
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .wi-moments-page__masonry-media:has(.wi-moments-page__masonry-image:nth-child(4)) {
-    grid-template-columns: repeat(3, 1fr);
+  /* 微信九宫格规则：4 张时 2x2 排布 */
+  .wi-moments-page__masonry-media:has(.wi-moments-page__masonry-image:nth-child(4)):not(:has(.wi-moments-page__masonry-image:nth-child(5))) {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .wi-moments-page__masonry-footer {

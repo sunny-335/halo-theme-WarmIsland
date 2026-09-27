@@ -1,0 +1,21 @@
+/* ==========================================================================
+   「文章组件」插件（plugin-content-widgets）主题适配
+   --------------------------------------------------------------------------
+   插件自带样式与挂载逻辑，主题只需要把它的 --xhhao-com-* 变量
+   映射到主题变量上：组件即可自动跟随主题的暖色 / 暗色模式。
+   变量清单见插件 README：https://github.com/acanyo/plugin-content-widgets
+   ========================================================================== */
+
+:root {
+  --xhhao-com-text-1: var(--ink);
+  --xhhao-com-text-2: var(--ink-2);
+  --xhhao-com-bg: var(--bg);
+  --xhhao-com-bg-card: var(--bg-raised);
+  --xhhao-com-bg-2: var(--bg-raised);
+  --xhhao-com-border: var(--rule);
+  --xhhao-com-primary: var(--accent);
+  --xhhao-com-shadow: rgb(15 23 42 / 0.08);
+}
+
+/* 组件自带的浅色 fallback 偏冷灰，暗色下显突兀；
+   变量跟随主题后，暗色模式自动生效，无需单独覆盖。 */

@@ -150,7 +150,7 @@ import Layout from "../layouts/Layout.astro";
             <article
               class="wi-id__car"
               th:each="c : ${cars}"
-              th:classappend="${(carSkinEnabled != null and carSkinEnabled) ? 'wi-id__car--' + c.skin : 'wi-id__car--neutral'}"
+              th:classappend="${carSkinEnabled != null and carSkinEnabled ? 'wi-id-skin-' + c.skin : 'wi-id-skin-neutral'}"
             >
               <div class="wi-id__car-head">
                 <button
@@ -332,7 +332,11 @@ import Layout from "../layouts/Layout.astro";
         </p>
 
         <div class="wi-id__grid" th:unless="${#lists.isEmpty(people)}">
-          <article class="wi-id__memo" th:each="p : ${people}">
+          <article class="wi-id__memo wi-id__memo--person" th:each="p : ${people}">
+            <div class="wi-id__memo-days" th:if="${p.daysUntil >= 0}">
+              <strong th:text="${p.daysUntil}">61</strong>
+              <span th:text="'天后'">天后</span>
+            </div>
             <div class="wi-id__person">
               <span class="wi-id__avatar">
                 <span
@@ -367,22 +371,14 @@ import Layout from "../layouts/Layout.astro";
                 </p>
               </div>
             </div>
-            <div class="wi-id__memo-foot">
-              <span class="wi-id__memo-date">
-                生日 <span th:text="${p.birthdayText}">1999-10-**</span>
-                <span
-                  th:if="${p.nextSolarDate != null}"
-                  th:text="|（${p.nextSolarDate}）|"
-                  >（2026-10-**）</span
-                >
-              </span>
+            <p class="wi-id__memo-date wi-id__memo-date--foot">
+              生日 <span th:text="${p.birthdayText}">1999-10-**</span>
               <span
-                class="wi-id__memo-count"
-                th:if="${p.daysUntil >= 0}"
-                th:text="|${p.daysUntil} 天后|"
-                >61 天后</span
+                th:if="${p.nextSolarDate != null}"
+                th:text="|（${p.nextSolarDate}）|"
+                >（2026-10-**）</span
               >
-            </div>
+            </p>
           </article>
         </div>
       </section>
@@ -732,14 +728,14 @@ import Layout from "../layouts/Layout.astro";
 
   .wi-id__title {
     font-size: var(--text-4xl);
-    margin-bottom: var(--space-xs);
+    margin-bottom: var(--space-sm);
   }
 
   .wi-id__subtitle {
     font-size: var(--text-sm);
     color: var(--ink-3);
     letter-spacing: var(--tracking-wide);
-    margin-block-end: 0;
+    margin-bottom: var(--space-sm);
   }
 
   .wi-page-accent {
@@ -879,8 +875,20 @@ import Layout from "../layouts/Layout.astro";
 
   .wi-id__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-md);
+  }
+
+  @media (max-width: 900px) {
+    .wi-id__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .wi-id__grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   /* ===== 便签卡片（重要日期 / 人） ===== */
@@ -984,6 +992,11 @@ import Layout from "../layouts/Layout.astro";
     color: var(--ink-3);
   }
 
+  .wi-id__memo--person .wi-id__person {
+    /* 右上角是倒计时数字，人物行留出空间避免重叠 */
+    padding-right: 56px;
+  }
+
   .wi-id__person {
     display: flex;
     align-items: center;
@@ -1022,23 +1035,12 @@ import Layout from "../layouts/Layout.astro";
     font-size: 1rem;
   }
 
-  .wi-id__memo-foot {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    margin-top: 10px;
-  }
-
-  .wi-id__memo-foot .wi-id__memo-date {
-    margin: 0;
-  }
-
-  .wi-id__memo-count {
-    flex: none;
-    font-size: var(--text-sm);
-    font-weight: 700;
-    color: var(--accent);
+  /* 生日一行放下：日期本身不折行，放不下时整行换行而不是把日期拆开 */
+  .wi-id__memo-date--foot {
+    margin: 12px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .wi-id__badges {
@@ -1206,53 +1208,53 @@ import Layout from "../layouts/Layout.astro";
   }
 
   /* 皮肤（插件设置「座驾卡片皮肤」开启时生效） */
-  .wi-id__car--cool {
+  .wi-id-skin-cool {
     background: linear-gradient(150deg, #111827, #0f172a 55%, #1e3a8a);
     color: #e5e7eb;
     border-color: rgba(148, 163, 184, 0.4);
   }
 
-  .wi-id__car--cool .wi-id__car-name,
-  .wi-id__car--cool .wi-id__car-sub,
-  .wi-id__car--cool .wi-id__badge {
+  .wi-id-skin-cool .wi-id__car-name,
+  .wi-id-skin-cool .wi-id__car-sub,
+  .wi-id-skin-cool .wi-id__badge {
     color: #e5e7eb;
     border-color: rgba(147, 197, 253, 0.6);
   }
 
-  .wi-id__car--cool .wi-id__event {
+  .wi-id-skin-cool .wi-id__event {
     background: rgba(96, 165, 250, 0.18);
     color: #bfdbfe;
   }
 
-  .wi-id__car--cool .wi-id__event.is-soon {
+  .wi-id-skin-cool .wi-id__event.is-soon {
     background: rgba(251, 191, 36, 0.18);
     color: #fde68a;
   }
 
-  .wi-id__car--cool .wi-id__event.is-overdue {
+  .wi-id-skin-cool .wi-id__event.is-overdue {
     background: rgba(248, 113, 113, 0.2);
     color: #fecaca;
   }
 
-  .wi-id__car--cute {
+  .wi-id-skin-cute {
     background: linear-gradient(150deg, #fff1f7, #ffe4ef 55%, #fdf2f8);
     color: #831843;
     border-color: rgba(244, 114, 182, 0.4);
   }
 
-  .wi-id__car--cute .wi-id__car-name,
-  .wi-id__car--cute .wi-id__car-sub,
-  .wi-id__car--cute .wi-id__badge {
+  .wi-id-skin-cute .wi-id__car-name,
+  .wi-id-skin-cute .wi-id__car-sub,
+  .wi-id-skin-cute .wi-id__badge {
     color: #831843;
     border-color: rgba(236, 72, 153, 0.55);
   }
 
-  .wi-id__car--cute .wi-id__event {
+  .wi-id-skin-cute .wi-id__event {
     background: rgba(236, 72, 153, 0.12);
     color: #9d174d;
   }
 
-  .wi-id__car--neutral {
+  .wi-id-skin-neutral {
     background: var(--bg-raised);
   }
 
@@ -1348,13 +1350,16 @@ import Layout from "../layouts/Layout.astro";
   }
 
   @media (max-width: 640px) {
-    .wi-id__grid,
     .wi-id__cars {
       grid-template-columns: 1fr;
     }
 
     .wi-id__memo-title {
       margin-right: 56px;
+    }
+
+    .wi-id__memo--person .wi-id__memo-title {
+      margin-right: 0;
     }
   }
 </style>

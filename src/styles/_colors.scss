@@ -21,24 +21,25 @@
 }
 
 html.dark {
-  --bg: #1a1614;
-  --bg-raised: #26211d;
-  --bg-overlay: rgba(26, 22, 20, 0.85);
-  --ink: #ede6de;
-  --ink-2: #a2978c;
+  /* 暗色基准：偏中性、只保留一丝暖意，避免大面积黄褐底色带来的闷感 */
+  --bg: #1e1c1a;
+  --bg-raised: #292623;
+  --bg-overlay: rgba(30, 28, 26, 0.85);
+  --ink: #e9e4dd;
+  --ink-2: #aaa096;
   /* 深色背景下人眼对低对比更敏感，次要文字与分隔线比浅色模式略提亮 */
-  --ink-3: #6f6459;
-  --rule: #38322b;
-  --accent: #e8955f;
-  --accent-hover: #f0a872;
-  --accent-bg: #2a1e16;
-  --mist-pink: #2e2420;
-  --sea-salt: #2e2822;
-  --caramel: #a08878;
-  --glass-bg: rgba(26, 22, 20, 0.72);
-  --glass-border: rgba(46, 40, 34, 0.5);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 40px rgba(232, 149, 95, 0.12);
+  --ink-3: #7c7268;
+  --rule: #3b362f;
+  --accent: #e89a64;
+  --accent-hover: #f2ad79;
+  --accent-bg: #2c231b;
+  --mist-pink: #2e2823;
+  --sea-salt: #302b26;
+  --caramel: #a38b7b;
+  --glass-bg: rgba(30, 28, 26, 0.72);
+  --glass-border: rgba(59, 54, 47, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 40px rgba(232, 154, 100, 0.12);
 }

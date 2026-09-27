@@ -33,37 +33,37 @@
   }
 
   h1 {
-    font-size: clamp(1.45rem, 1.3rem + 0.7vw, 1.75rem);
+    font-size: clamp(1.6rem, 1.4rem + 1vw, 2rem);
     margin-top: 2em;
     margin-bottom: 0.7em;
   }
 
   h2 {
-    font-size: clamp(1.3rem, 1.2rem + 0.5vw, 1.5rem);
+    font-size: clamp(1.42rem, 1.3rem + 0.6vw, 1.68rem);
     margin-top: 1.9em;
     margin-bottom: 0.65em;
   }
 
   h3 {
-    font-size: clamp(1.15rem, 1.08rem + 0.35vw, 1.28rem);
+    font-size: clamp(1.24rem, 1.16rem + 0.4vw, 1.4rem);
     margin-top: 1.7em;
     margin-bottom: 0.6em;
   }
 
   h4 {
-    font-size: clamp(1.05rem, 1rem + 0.25vw, 1.13rem);
+    font-size: clamp(1.1rem, 1.05rem + 0.25vw, 1.2rem);
     margin-top: 1.5em;
     margin-bottom: 0.5em;
   }
 
   h5 {
-    font-size: 1rem;
+    font-size: 1.04rem;
     margin-top: 1.4em;
     margin-bottom: 0.45em;
   }
 
   h6 {
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 600;
     color: var(--ink-3);
     margin-top: 1.4em;

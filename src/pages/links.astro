@@ -53,23 +53,39 @@ import Layout from "../layouts/Layout.astro";
             target="_blank"
             rel="noopener noreferrer"
             class="wi-links__card"
+            th:with="verification=${link.status?.verification},
+                     accessState=${verification?.access?.state != null ? verification.access.state.name() : null},
+                     backlinkState=${verification?.backlink != null and verification.backlink.state != null ? verification.backlink.state.name() : null}"
           >
             <div class="wi-links__card-glow"></div>
             <div class="wi-links__card-inner">
-              <img
-                th:if="${link.spec.logo}"
-                th:src="${link.spec.logo}"
-                th:alt="${link.spec.displayName}"
-                class="wi-links__avatar"
-              />
-              <div
-                th:unless="${link.spec.logo}"
-                class="wi-links__avatar wi-links__avatar--placeholder"
-              >
+              <span class="wi-links__avatar-wrap">
+                <img
+                  th:if="${link.spec.logo}"
+                  th:src="${link.spec.logo}"
+                  th:alt="${link.spec.displayName}"
+                  class="wi-links__avatar"
+                />
+                <div
+                  th:unless="${link.spec.logo}"
+                  class="wi-links__avatar wi-links__avatar--placeholder"
+                >
+                  <span
+                    th:text="${#strings.substring(link.spec.displayName, 0, 1)}"
+                  ></span>
+                </div>
+                <!-- 反链 / 可达性检测徽章（plugin-links 后台「友链检测」产生，未检测过则不显示） -->
                 <span
-                  th:text="${#strings.substring(link.spec.displayName, 0, 1)}"
+                  class="wi-links__check wi-links__check--ok"
+                  th:if="${accessState == 'ACCESSIBLE' and backlinkState != 'MISSING'}"
+                  th:title="${backlinkState == 'FOUND' ? '访问正常 · 反链有效' : '访问正常'}"
                 ></span>
-              </div>
+                <span
+                  class="wi-links__check wi-links__check--bad"
+                  th:if="${accessState == 'INACCESSIBLE' or backlinkState == 'MISSING'}"
+                  th:title="${accessState == 'INACCESSIBLE' ? '站点访问异常' : '未检测到反链'}"
+                ></span>
+              </span>
               <div class="wi-links__info">
                 <span
                   class="wi-links__name"
@@ -112,7 +128,7 @@ import Layout from "../layouts/Layout.astro";
         <p
           class="wi-links__apply-result"
           th:if="${applied != null}"
-          th:classappend="${applied == 'success'} ? 'wi-links__apply-result--ok' : 'wi-links__apply-result--error'"
+          th:classappend="${applied == 'success'} ? 'wi-links-check-ok' : 'wi-links-check-error'"
           th:text="${applyMsg != null ? applyMsg : '申请已提交，等待站长审核 🌙'}"
           role="status"
         ></p>
@@ -184,7 +200,7 @@ import Layout from "../layouts/Layout.astro";
                 loading="lazy"
                 title="点击刷新验证码"
                 onclick="this.src=this.src.split('?')[0]+'?ts='+Date.now()"
-                th:onerror="|this.closest('.wi-links__apply').classList.add('wi-links__apply--unavailable')|"
+                onerror="var c=this.closest('.wi-links__apply');if(c)c.classList.add('wi-links__apply--unavailable')"
               />
             </div>
           </div>
@@ -330,15 +346,18 @@ import Layout from "../layouts/Layout.astro";
     margin-bottom: var(--space-md);
   }
 
-  .wi-links__apply-result--ok {
+  .wi-links__apply-result--ok,
+  .wi-links-check-ok {
     color: var(--accent);
   }
 
-  .wi-links__apply-result--error {
+  .wi-links__apply-result--error,
+  .wi-links-check-error {
     color: #e6162d;
   }
 
-  html.dark .wi-links__apply-result--error {
+  html.dark .wi-links__apply-result--error,
+  html.dark .wi-links-check-error {
     color: #ff6b6b;
   }
 
@@ -549,6 +568,13 @@ import Layout from "../layouts/Layout.astro";
     border-color: color-mix(in srgb, var(--accent) 40%, var(--glass-border));
   }
 
+  .wi-links__avatar-wrap {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    line-height: 1;
+  }
+
   .wi-links__avatar {
     width: 48px;
     height: 48px;
@@ -557,6 +583,26 @@ import Layout from "../layouts/Layout.astro";
     flex-shrink: 0;
     box-shadow: var(--shadow-sm);
     transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  /* 反链 / 可达性检测徽章：绿色正常，红色异常 */
+  .wi-links__check {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .wi-links__check--ok {
+    background: #22c55e;
+  }
+
+  .wi-links__check--bad {
+    background: #ef4444;
   }
 
   .wi-links__card:hover .wi-links__avatar {
