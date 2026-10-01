@@ -538,19 +538,22 @@ import LightGallery from "../components/LightGallery.astro";
 
   .wi-moments-page__card-item {
     background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    /* 不用 backdrop-filter：Chromium 下带 backdrop-filter 的元素一发生
+       transform（悬浮上移），合成层就会吃掉顶部 1px 边框；卡片背后是
+       纯页面背景，毛玻璃模糊本身没有可见效果，去掉即可修复 */
     border: 1px solid var(--glass-border);
     border-radius: 16px;
     padding: var(--space-xl);
     transition:
       box-shadow var(--duration-normal) var(--ease-out-expo),
-      transform var(--duration-normal) var(--ease-out-expo);
+      transform var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-normal) var(--ease-out-expo);
   }
 
   .wi-moments-page__card-item:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-3px);
+    border-color: var(--accent);
   }
 
   /* 朋友圈式布局：头像在左，昵称/正文/九宫格在右 */

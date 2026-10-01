@@ -102,7 +102,8 @@
     &:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(212, 118, 78, 0.15);
+      /* 跟随当前配色/自定义强调色，不再硬编码默认赤陶色 */
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
     }
 
     &::placeholder {
@@ -198,7 +199,7 @@ html.dark .halo-comment-widget {
   .comment-input,
   .comment-textarea {
     &:focus {
-      box-shadow: 0 0 0 3px rgba(232, 149, 95, 0.15);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
     }
   }
 

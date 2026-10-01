@@ -98,18 +98,31 @@ const THEME_VERSION = readThemeVersion();
 </footer>
 
 <style>
+  /*
+   * 页脚不要创建高于内容的绘制层级：
+   * - 之前 z-index:1 与 .wi-main 同级且靠后，会盖住内容区的弹层（如评论区翻页下拉）
+   * - 渐变背景（background-image）无法参与过渡，导致深浅色切换时页脚瞬变、
+   *   内容区还在渐变，看起来"不同步"；改为 background-color + 遮罩渐隐的
+   *   伪色层，两者都能随 .wi-theme-transition 平滑过渡
+   */
   footer {
     position: relative;
-    z-index: 1;
     border-top: 1px solid var(--rule);
-    background: linear-gradient(
-      to bottom,
-      var(--bg),
-      color-mix(in srgb, var(--bg) 97%, var(--accent) 3%)
-    );
+    background-color: var(--bg);
+  }
+
+  footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-color: color-mix(in srgb, var(--bg) 97%, var(--accent) 3%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000);
+    mask-image: linear-gradient(to bottom, transparent, #000);
   }
 
   .footer-inner {
+    position: relative;
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;

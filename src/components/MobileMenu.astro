@@ -13,23 +13,24 @@
       <th:block th:if="${menuFinder != null}">
         <th:block th:with="menu = ${menuFinder.getPrimary()}">
           <th:block th:if="${menu != null and menu.menuItems != null and not #lists.isEmpty(menu.menuItems)}">
-            <a
-              th:each="menuItem : ${menu.menuItems}"
-              th:href="@{${menuItem.status.href}}"
-              th:target="${menuItem.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
-              th:text="${menuItem.status.displayName}"
-              class="wi-mobile-menu__link"
-              th:data-href="${menuItem.status.href}"
-            ></a>
-            <th:block th:if="${not #lists.isEmpty(menuItem.children)}">
+            <th:block th:each="menuItem : ${menu.menuItems}">
               <a
-                th:each="child : ${menuItem.children}"
-                th:href="@{${child.status.href}}"
-                th:target="${child.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
-                th:text="${'| ' + child.status.displayName}"
-                class="wi-mobile-menu__link wi-mobile-menu__link--sub"
-                th:data-href="${child.status.href}"
+                th:href="@{${menuItem.status.href}}"
+                th:target="${menuItem.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
+                th:text="${menuItem.status.displayName}"
+                class="wi-mobile-menu__link"
+                th:data-href="${menuItem.status.href}"
               ></a>
+              <th:block th:if="${not #lists.isEmpty(menuItem.children)}">
+                <a
+                  th:each="child : ${menuItem.children}"
+                  th:href="@{${child.status.href}}"
+                  th:target="${child.spec?.target?.value == '_blank'} ? '_blank' : '_self'"
+                  th:text="${child.status.displayName}"
+                  class="wi-mobile-menu__link wi-mobile-menu__link--sub"
+                  th:data-href="${child.status.href}"
+                ></a>
+              </th:block>
             </th:block>
           </th:block>
         </th:block>

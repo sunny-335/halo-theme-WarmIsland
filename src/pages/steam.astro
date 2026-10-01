@@ -63,24 +63,29 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </div>
 
-    <div class="wi-steam__stats" th:if="${stats != null}">
+    <div class="wi-steam__stats">
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.totalGames} ?: 0">0</span>
+        <span class="wi-steam__stat-value" th:text="${stats != null and stats.totalGames != null ? stats.totalGames : '-'}">-</span>
         <span class="wi-steam__stat-label" th:text="'拥有游戏'">拥有游戏</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.totalPlaytimeFormatted} ?: '0 hours'">0 hours</span>
+        <span class="wi-steam__stat-value" th:text="${stats != null and stats.totalPlaytimeFormatted != null ? stats.totalPlaytimeFormatted : '-'}">-</span>
         <span class="wi-steam__stat-label" th:text="'总游玩时长'">总游玩时长</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${stats.recentPlaytimeFormatted} ?: '0 hours'">0 hours</span>
+        <span class="wi-steam__stat-value" th:text="${stats != null and stats.recentPlaytimeFormatted != null ? stats.recentPlaytimeFormatted : '-'}">-</span>
         <span class="wi-steam__stat-label" th:text="'近两周'">近两周</span>
       </div>
       <div class="wi-steam__stat-card">
-        <span class="wi-steam__stat-value" th:text="${badges != null and badges.totalBadges != null ? badges.totalBadges : 0}">0</span>
+        <span class="wi-steam__stat-value" th:text="${badges != null and badges.totalBadges != null ? badges.totalBadges : '-'}">-</span>
         <span class="wi-steam__stat-label" th:text="'徽章'">徽章</span>
       </div>
     </div>
+    <p
+      class="wi-steam__stats-hint"
+      th:if="${stats == null or badges == null}"
+      th:text="'Steam 统计数据暂时没有加载成功：可能是 Steam 接口超时、游戏库隐私设置为私密或插件配置有误，稍后刷新重试。'"
+    ></p>
 
     <div class="wi-steam__section" th:if="${recentGames != null and !recentGames.isEmpty()}">
       <h3 class="wi-steam__section-title" th:text="'最近游玩'">最近游玩</h3>
@@ -111,8 +116,10 @@ import Layout from "../layouts/Layout.astro";
               <span
                 class="wi-steam__recent-achievements"
                 th:if="${game.achievementProgressText != null}"
-                th:text="${game.achievementProgressText}"
-              ></span>
+              >
+                <svg class="wi-steam__achieve-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                <span th:text="${game.achievementProgressText}"></span>
+              </span>
             </div>
           </div>
         </article>
@@ -331,6 +338,9 @@ import Layout from "../layouts/Layout.astro";
     border: 1px solid var(--rule);
     border-radius: 12px;
     min-height: 80px;
+    /* 容器查询的容器必须是被查询元素的祖先：
+       放在 .wi-steam__stat-value 自身上时 @container 永远不命中 */
+    container-type: inline-size;
   }
 
   .wi-steam__stat-value {
@@ -342,7 +352,6 @@ import Layout from "../layouts/Layout.astro";
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
-    container-type: inline-size;
   }
 
   @container (max-width: 120px) {
@@ -456,6 +465,8 @@ import Layout from "../layouts/Layout.astro";
 
   .wi-steam__recent-meta {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
     font-size: var(--text-xs);
     color: var(--ink-3);
@@ -466,8 +477,25 @@ import Layout from "../layouts/Layout.astro";
     font-weight: 500;
   }
 
+  /* 成就进度固定靠右展示，带奖杯标识 */
   .wi-steam__recent-achievements {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     color: #f59e0b;
+    font-weight: 500;
+  }
+
+  .wi-steam__achieve-icon {
+    flex: none;
+  }
+
+  /* 统计数据加载失败时的提示 */
+  .wi-steam__stats-hint {
+    margin: calc(-1 * var(--space-sm)) 0 var(--space-2xl);
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+    text-align: center;
   }
 
   .wi-steam__games-grid {

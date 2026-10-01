@@ -31,5 +31,6 @@ pnpm-debug.log*
 
 # AI working artifacts
 llms.txt
+.tmp-*
 
 .workbuddy/

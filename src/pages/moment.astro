@@ -1,0 +1,407 @@
+---
+/**
+ * 瞬间详情页（templates/moment.html，覆盖 plugin-moments 默认模板）
+ * ---------------------------------------------------------------
+ * 插件默认模板没有套主题样式，排版松散。这里复用瞬间列表页的
+ * 「朋友圈式卡片」视觉：头像 + 昵称 + 时间 + 正文 + 九宫格媒体 + 点赞，
+ * 评论区默认展开，底部保留返回列表入口。
+ *
+ * 插件路由传入的模型变量：moment（MomentVo）、title、haloCommentEnabled。
+ * moment 取不到（已删除/链接错误）时显示空态，避免 SpEL 取 null 属性 500。
+ */
+import Layout from "../layouts/Layout.astro";
+import LightGallery from "../components/LightGallery.astro";
+---
+
+<Layout>
+  <Fragment slot="head">
+    <title th:text="|${title} - ${site.title}|">瞬间</title>
+  </Fragment>
+
+  <section class="wi-moment-detail">
+    <h1 class="wi-moment-detail__sr-only" th:text="'瞬间详情'">瞬间详情</h1>
+    <div class="wi-moment-detail__topbar">
+      <a class="wi-moment-detail__back" href="/moments" th:href="@{/moments}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        <span th:text="'返回瞬间列表'">返回瞬间列表</span>
+      </a>
+    </div>
+
+    <th:block th:if="${moment != null}">
+      <article class="wi-moment-detail__card" th:with="detailContent=${moment.spec?.content}">
+        <div class="wi-moment-detail__layout">
+          <img
+            th:if="${moment.owner != null and !#strings.isEmpty(moment.owner.avatar)}"
+            class="wi-moment-detail__avatar"
+            th:src="${moment.owner.avatar}"
+            th:alt="''"
+            loading="eager"
+            decoding="async"
+          />
+          <div
+            th:unless="${moment.owner != null and !#strings.isEmpty(moment.owner.avatar)}"
+            class="wi-moment-detail__avatar wi-moment-detail__avatar--fallback"
+            aria-hidden="true"
+          >
+            <span th:text="${#strings.substring(site.title, 0, 1)}"></span>
+          </div>
+
+          <div class="wi-moment-detail__main">
+            <div class="wi-moment-detail__head">
+              <span
+                class="wi-moment-detail__name"
+                th:text="${moment.owner != null and !#strings.isEmpty(moment.owner.displayName) ? moment.owner.displayName : site.title}"
+              ></span>
+              <time
+                class="wi-moment-detail__date"
+                th:datetime="${moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp}"
+                th:text="${#dates.format(moment.spec?.releaseTime ?: moment.metadata?.creationTimestamp, 'yyyy-MM-dd HH:mm')}"
+              ></time>
+            </div>
+
+            <div class="wi-moment-detail__text" th:utext="${detailContent?.html ?: detailContent?.raw ?: ''}"></div>
+
+            <div
+              class="wi-moment-detail__media wi-moments-page__card-media"
+              th:if="${detailContent != null and detailContent.medium != null and !#lists.isEmpty(detailContent.medium)}"
+            >
+              <th:block th:each="medium : ${detailContent.medium}">
+                <img
+                  th:if="${medium.type.name == 'PHOTO'}"
+                  class="wi-moment-detail__image"
+                  th:src="${medium.url}"
+                  th:alt="''"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <video
+                  th:if="${medium.type.name == 'VIDEO'}"
+                  class="wi-moment-detail__video"
+                  th:src="${medium.url}"
+                  controls
+                  preload="metadata"
+                ></video>
+                <audio
+                  th:if="${medium.type.name == 'AUDIO'}"
+                  class="wi-moment-detail__audio"
+                  th:src="${medium.url}"
+                  controls
+                  preload="metadata"
+                ></audio>
+              </th:block>
+            </div>
+
+            <div class="wi-moment-detail__actions">
+              <button
+                class="wi-moment-detail__like-btn"
+                type="button"
+                aria-label="点赞"
+                th:attr="data-moment-name=${moment.metadata.name}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                <span class="wi-moment-detail__like-count" th:text="${moment.stats?.upvote ?: 0}">0</span>
+              </button>
+              <span class="wi-moment-detail__comment-hint">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span th:text="${moment.stats?.approvedComment ?: 0}">0</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <section class="wi-moment-detail__comments" th:if="${haloCommentEnabled}">
+        <halo:comment
+          group="moment.halo.run"
+          kind="Moment"
+          th:attr="name=${moment.metadata.name}"
+        />
+      </section>
+    </th:block>
+
+    <th:block th:if="${moment == null}">
+      <div class="wi-moment-detail__empty">
+        <p th:text="'这条瞬间不存在，或已经被删除了 🌙'">这条瞬间不存在，或已经被删除了 🌙</p>
+      </div>
+    </th:block>
+  </section>
+
+  <LightGallery />
+</Layout>
+
+<script is:inline th:inline="none">
+  (function () {
+    /* 页面加载时恢复已点赞状态（与 moments.astro 列表页一致） */
+    document.querySelectorAll(".wi-moment-detail__like-btn").forEach(function (btn) {
+      var name = btn.getAttribute("data-moment-name");
+      if (name && localStorage.getItem("wi-moment-liked-" + name)) {
+        btn.classList.add("wi-moment-detail__like-btn--liked");
+        btn.setAttribute("aria-pressed", "true");
+      }
+    });
+
+    document.addEventListener("click", function (e) {
+      var likeBtn = e.target.closest(".wi-moment-detail__like-btn");
+      if (!likeBtn) return;
+      var momentName = likeBtn.getAttribute("data-moment-name");
+      if (!momentName) return;
+      var likedKey = "wi-moment-liked-" + momentName;
+      var countEl = likeBtn.querySelector(".wi-moment-detail__like-count");
+      if (localStorage.getItem(likedKey)) return;
+      if (likeBtn.classList.contains("wi-moment-detail__like-btn--liked")) return;
+      fetch("/apis/api.halo.run/v1alpha1/trackers/upvote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json;charset=UTF-8" },
+        body: JSON.stringify({
+          group: "moment.halo.run",
+          plural: "moments",
+          name: momentName,
+        }),
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error("Like failed");
+          likeBtn.classList.add("wi-moment-detail__like-btn--liked");
+          likeBtn.setAttribute("aria-pressed", "true");
+          if (countEl) {
+            countEl.textContent = parseInt(countEl.textContent || "0", 10) + 1;
+          }
+          localStorage.setItem(likedKey, "1");
+        })
+        .catch(function (err) {
+          console.error("Like error:", err);
+        });
+    });
+  })();
+</script>
+
+<style>
+  .wi-moment-detail {
+    padding-block: 1rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* 仅供屏幕阅读器的页面级标题 */
+  .wi-moment-detail__sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .wi-moment-detail__topbar {
+    margin-bottom: var(--space-lg);
+  }
+
+  .wi-moment-detail__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    text-decoration: none;
+    background: var(--bg-raised);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-moment-detail__back:hover {
+    color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .wi-moment-detail__card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: var(--space-xl);
+  }
+
+  .wi-moment-detail__layout {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+  }
+
+  .wi-moment-detail__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .wi-moment-detail__avatar--fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-bg);
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    font-weight: 700;
+  }
+
+  .wi-moment-detail__main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wi-moment-detail__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+  }
+
+  .wi-moment-detail__name {
+    font-size: var(--text-md);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .wi-moment-detail__date {
+    font-size: var(--text-xs);
+    color: var(--ink-3);
+  }
+
+  .wi-moment-detail__text {
+    margin-top: var(--space-sm);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--ink);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .wi-moment-detail__text :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  .wi-moment-detail__media {
+    margin-top: var(--space-md);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  /* 与列表页一致的微信九宫格规则：单图自然比例，2 图两列，4 图 2x2 */
+  .wi-moment-detail__media:has(.wi-moment-detail__image:only-child) {
+    grid-template-columns: 1fr;
+  }
+
+  .wi-moment-detail__media:has(.wi-moment-detail__image:only-child) .wi-moment-detail__image {
+    aspect-ratio: auto;
+    max-height: 300px;
+    max-width: 400px;
+  }
+
+  .wi-moment-detail__media:has(.wi-moment-detail__image:nth-child(2):last-child) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wi-moment-detail__media:has(.wi-moment-detail__image:nth-child(4)):not(:has(.wi-moment-detail__image:nth-child(5))) {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 72%;
+  }
+
+  .wi-moment-detail__media:has(.wi-moment-detail__image:nth-child(3)) {
+    max-width: 100%;
+  }
+
+  .wi-moment-detail__image {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: zoom-in;
+    transition: transform 0.2s ease;
+  }
+
+  .wi-moment-detail__image:hover {
+    transform: scale(1.02);
+  }
+
+  .wi-moment-detail__video {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .wi-moment-detail__audio {
+    width: 100%;
+  }
+
+  .wi-moment-detail__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--rule);
+  }
+
+  .wi-moment-detail__like-btn,
+  .wi-moment-detail__comment-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border: 1px solid var(--rule);
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--ink-2);
+    font-size: var(--text-xs);
+    transition:
+      color var(--duration-fast) var(--ease-out-quart),
+      border-color var(--duration-fast) var(--ease-out-quart),
+      background var(--duration-fast) var(--ease-out-quart);
+  }
+
+  .wi-moment-detail__like-btn {
+    cursor: pointer;
+  }
+
+  .wi-moment-detail__comment-hint {
+    cursor: default;
+  }
+
+  .wi-moment-detail__like-btn:hover,
+  .wi-moment-detail__like-btn--liked {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .wi-moment-detail__comments {
+    margin-top: var(--space-xl);
+  }
+
+  .wi-moment-detail__empty {
+    text-align: center;
+    padding: var(--space-4xl) var(--space-xl);
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 640px) {
+    .wi-moment-detail__card {
+      padding: var(--space-lg);
+    }
+
+    .wi-moment-detail__avatar {
+      width: 38px;
+      height: 38px;
+    }
+  }
+</style>

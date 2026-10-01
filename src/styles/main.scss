@@ -196,7 +196,10 @@ table {
   z-index: 1;
   background-color: var(--bg);
   width: 100%;
+  /* clip 与 hidden 同样裁掉横向溢出，但不会把元素变成滚动容器，
+     避免内容底部的弹层（如评论区翻页下拉）被纵向裁掉 */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .wi-main--wide.wi-main--home {
@@ -207,6 +210,7 @@ table {
   max-width: 100%;
   margin: 0;
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .wi-content-wrap {
@@ -214,6 +218,7 @@ table {
   margin: 0 auto;
   padding-inline: clamp(1rem, 3vw, 2rem);
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 .wi-content-wrap--wide {
