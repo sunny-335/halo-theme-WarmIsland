@@ -28,7 +28,7 @@ spec:
         description: 微信读书书架（依赖微信读书插件）
         screenshot:
         file: weread.html
-  version: "1.2.2"
+  version: "1.2.3"
   requires: ">=2.26.0"
   license:
     - name: "GPL-3.0"

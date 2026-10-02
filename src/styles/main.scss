@@ -211,6 +211,15 @@ table {
   margin: 0;
   overflow-x: hidden;
   overflow-x: clip;
+  /* 首页必须取消 main 的层叠上下文（z-index: auto + 无其他触发属性）：
+     Hero 是 position:fixed 的全屏背景（z-index:0）且位于 main 内部，
+     main 若保持 z-index:1，整个 main（含 Hero）会被抬到页脚之上——
+     滚动到页面底部时页脚被固定 Hero 盖住，只看到模糊的 Hero 背景。
+     取消后 Hero 落回根层级（z-index:0，先绘制），页脚在 DOM 中靠后
+     （z-index:auto）自然盖住 Hero；内容区 .wi-home-content 仍有
+     z-index:1，滚动时照常覆盖 Hero。其他页面维持 z-index:1 不变，
+     评论区翻页下拉仍高于页脚。 */
+  z-index: auto;
 }
 
 .wi-content-wrap {
