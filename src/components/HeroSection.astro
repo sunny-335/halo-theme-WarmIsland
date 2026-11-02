@@ -197,7 +197,14 @@
   .hero {
     position: fixed;
     inset: 0;
-    z-index: 0;
+    /* 固定全屏背景必须沉到最底层（z-index:-1）：
+       它是 position:fixed 的全屏英雄区，滚动时永远铺满视口。
+       若不设负值，它会被绘制在普通流/定位元素（如页脚）之上，
+       滚到页底时盖住页脚。负值让它处于根层叠上下文的「负 z」层，
+       在所有正常内容（含页脚）之下；首屏内容区 .wi-home-content
+       用 margin-top:100vh + 不透明背景盖住它，符合设计意图。
+       同时页脚保持无 z-index，不会回退到之前「页脚盖住评论区翻页」的问题。 */
+    z-index: -1;
     display: flex;
     align-items: center;
     justify-content: center;

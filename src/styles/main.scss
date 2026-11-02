@@ -212,12 +212,13 @@ table {
   overflow-x: hidden;
   overflow-x: clip;
   /* 首页必须取消 main 的层叠上下文（z-index: auto + 无其他触发属性）：
-     Hero 是 position:fixed 的全屏背景（z-index:0）且位于 main 内部，
-     main 若保持 z-index:1，整个 main（含 Hero）会被抬到页脚之上——
-     滚动到页面底部时页脚被固定 Hero 盖住，只看到模糊的 Hero 背景。
-     取消后 Hero 落回根层级（z-index:0，先绘制），页脚在 DOM 中靠后
-     （z-index:auto）自然盖住 Hero；内容区 .wi-home-content 仍有
-     z-index:1，滚动时照常覆盖 Hero。其他页面维持 z-index:1 不变，
+     Hero 是 position:fixed 的全屏背景（z-index:-1），位于 main 内部。
+     若 main 保持 z-index:1，它会成为层叠上下文，把内部负值 z 的 Hero
+     困在自己上下文底部，而 main 整体又被抬到页脚之上——滚动到页底时
+     页脚仍被 Hero 盖住。取消 main 的层叠上下文后，Hero 的 z-index:-1
+     会落入<strong>根</strong>层叠上下文的负 z 层（绘制在一切正常内容之下），
+     页脚（无 z-index、DOM 靠后）自然盖住它；内容区 .wi-home-content
+     仍有 z-index:1，滚动时照常覆盖 Hero。其他页面维持 z-index:1 不变，
      评论区翻页下拉仍高于页脚。 */
   z-index: auto;
 }
