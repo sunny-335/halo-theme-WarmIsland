@@ -277,105 +277,151 @@ import WelcomePopup from "../components/WelcomePopup.astro";
 
     if (!hero || !blurOverlay) return;
 
-    var maxBlur = 20;
-    var triggerDistance = 300;
+    /* 首屏滚动渐隐只写 opacity / transform 这类合成属性。
+       旧实现每帧改写全屏 backdrop-filter 的模糊半径，Chromium 每帧都要
+       重做一次全屏背景采样 + 高斯模糊，是首页滚动掉帧的主因。 */
     var fadeStart = 200;
     var fadeEnd = 500;
     var ticking = false;
+    var lastProgress = -1;
+    var lastHidden = null;
+    var content = document.querySelector(".wi-home-content--with-hero");
+    var contentTop = window.innerHeight;
+    var reduceMotion =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* 内容区顶部位置只在初始化 / resize 时测量，避免滚动帧里读布局 */
+    function measure() {
+      if (content) {
+        contentTop = content.getBoundingClientRect().top + (window.scrollY || window.pageYOffset);
+      }
+    }
+
+    function update() {
+      ticking = false;
+      var scrollY = window.scrollY || window.pageYOffset;
+
+      /* 滚过首屏后 Hero 已被不透明内容区完全盖住，直接隐藏：
+         光球动画、模糊层都不再绘制，长页面后半段零额外开销。 */
+      var hidden = scrollY >= contentTop - 1;
+      if (hidden !== lastHidden) {
+        lastHidden = hidden;
+        hero.classList.toggle("wi-hero--offscreen", hidden);
+      }
+      if (hidden) return;
+
+      var progress = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
+      if (progress === lastProgress) return;
+      lastProgress = progress;
+
+      /* 模糊半径固定，只调整整层不透明度：GPU 合成，无需重新采样背景 */
+      blurOverlay.style.opacity = String(Math.min(1, scrollY / 300));
+      if (heroContent) {
+        heroContent.style.opacity = String(1 - progress);
+        if (!reduceMotion) {
+          heroContent.style.transform = "translateY(" + (-20 * progress) + "px)";
+        }
+      }
+      if (scrollIndicator) {
+        scrollIndicator.style.opacity = String(1 - progress);
+      }
+    }
 
     function onScroll() {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(function () {
-        ticking = false;
-        var scrollY = window.scrollY || window.pageYOffset;
+      requestAnimationFrame(update);
+    }
 
-        var currentBlur = Math.min(scrollY / triggerDistance * maxBlur, maxBlur);
-        blurOverlay.style.backdropFilter = "blur(" + currentBlur + "px)";
-        blurOverlay.style.webkitBackdropFilter = "blur(" + currentBlur + "px)";
-
-        if (heroContent) {
-          var progress = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
-          heroContent.style.opacity = String(1 - progress);
-          heroContent.style.transform = "translateY(" + (-20 * progress) + "px)";
-        }
-
-        if (scrollIndicator) {
-          var indicatorProgress = Math.max(0, Math.min(1, (scrollY - fadeStart) / (fadeEnd - fadeStart)));
-          scrollIndicator.style.opacity = String(1 - indicatorProgress);
-        }
-      });
+    function onResize() {
+      measure();
+      onScroll();
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-  })();
-</script>
+    window.addEventListener("resize", onResize, { passive: true });
+    measure();
+    update();
 
-<script is:inline th:inline="none">
-  (function () {
-    var hero = document.getElementById("wi-hero");
-    var content = document.querySelector(".wi-home-content--with-hero");
-    if (!hero || !content) return;
+    /* ---- 首屏整屏吸附：只接管 0 ↔ 内容区顶部这一个边界 ----
+       纯 CSS scroll-snap 表达不了这个行为：内容区顶部是唯一吸附点，页面
+       顶部 0 没有吸附点，proximity 几乎不会触发；改成 mandatory 又会在
+       长内容的每一次滚动后把页面拉回内容区顶部，导致正文无法阅读。
+       因此只在首屏边界接管一次滚轮 / 触摸，进入内容区后完全交给原生滚动。
+       掉帧主因（逐帧改写 backdrop-filter）已在上面的 update() 中修复，
+       这里只做一次 scrollTo，不参与滚动帧绘制。 */
+    var snapping = false;
+    var snapTimer = null;
+    var SNAP_EDGE = 8;
 
-    var isSnapping = false;
-    var heroHeight = window.innerHeight;
-
-    window.addEventListener("resize", function () {
-      heroHeight = window.innerHeight;
-    }, { passive: true });
-
-    function snapTo(targetY) {
-      if (isSnapping) return;
-      isSnapping = true;
-      window.scrollTo({ top: targetY, behavior: "smooth" });
-      var timer = setTimeout(function () {
-        isSnapping = false;
-      }, 800);
-      if ("onscrollend" in window) {
-        window.addEventListener(
-          "scrollend",
-          function () {
-            clearTimeout(timer);
-            isSnapping = false;
-          },
-          { once: true }
-        );
+    function endSnap() {
+      snapping = false;
+      if (snapTimer) {
+        clearTimeout(snapTimer);
+        snapTimer = null;
       }
+      window.removeEventListener("scrollend", endSnap);
     }
 
-    window.addEventListener("wheel", function (e) {
-      if (isSnapping) {
-        e.preventDefault();
-        return;
+    function snapTo(top) {
+      if (snapping) return;
+      snapping = true;
+      window.scrollTo({ top: top, behavior: reduceMotion ? "auto" : "smooth" });
+      /* scrollend 精确解锁；短定时器兜底，避免不支持 scrollend 时锁死输入 */
+      if ("onscrollend" in window) {
+        window.addEventListener("scrollend", endSnap, { once: true });
       }
-      var y = window.scrollY;
-      if (y < heroHeight && e.deltaY > 0) {
+      snapTimer = setTimeout(endSnap, reduceMotion ? 100 : 600);
+    }
+
+    window.addEventListener(
+      "wheel",
+      function (e) {
+        if (!content || e.ctrlKey || e.defaultPrevented) return;
+        var y = window.scrollY || window.pageYOffset;
+        /* 内容区内部不再干预，保留原生惯性与长文阅读体验 */
+        if (y > contentTop + SNAP_EDGE) return;
+        if (snapping) {
+          e.preventDefault();
+          return;
+        }
+        if (Math.abs(e.deltaY) < 2) return;
+        var target = e.deltaY > 0 ? contentTop : 0;
+        if (Math.abs(target - y) < 2) return;
         e.preventDefault();
-        snapTo(heroHeight);
-      } else if (y > 0 && y <= heroHeight && e.deltaY < 0) {
-        e.preventDefault();
-        snapTo(0);
-      }
-    }, { passive: false });
+        snapTo(target);
+      },
+      { passive: false }
+    );
 
     var touchStartY = 0;
-    window.addEventListener("touchstart", function (e) {
-      touchStartY = e.touches[0].clientY;
-    }, { passive: true });
+    window.addEventListener(
+      "touchstart",
+      function (e) {
+        touchStartY = e.touches[0].clientY;
+      },
+      { passive: true }
+    );
 
-    window.addEventListener("touchend", function (e) {
-      if (isSnapping) return;
-      var diff = touchStartY - e.changedTouches[0].clientY;
-      var y = window.scrollY;
-      if (y < heroHeight && diff > 30) {
-        snapTo(heroHeight);
-      } else if (y > 0 && y <= heroHeight && diff < -30) {
-        snapTo(0);
-      }
-    }, { passive: true });
+    window.addEventListener(
+      "touchend",
+      function (e) {
+        if (!content || snapping) return;
+        var y = window.scrollY || window.pageYOffset;
+        if (y > contentTop + SNAP_EDGE) return;
+        var diff = touchStartY - e.changedTouches[0].clientY;
+        if (Math.abs(diff) < 30) return;
+        var target = diff > 0 ? contentTop : 0;
+        if (Math.abs(target - y) < 2) return;
+        snapTo(target);
+      },
+      { passive: true }
+    );
   })();
 </script>
+
+<!-- 首屏整屏吸附由上面的脚本在 0 ↔ 内容区顶部边界接管；
+     CSS 侧不再设置 scroll-snap，避免与 scrollTo 平滑动画互相抢夺滚动位置。 -->
 
 <style>
   .wi-home-content {

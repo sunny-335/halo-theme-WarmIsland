@@ -27,7 +27,7 @@ WarmIsland（暖屿）是一款为 [Halo](https://halo.run) 打造的博客主�
 
 ### 方式二：本地上传安装
 
-1. 从 [GitHub Releases](https://github.com/nxxy335top/halo-theme-WarmIsland/releases) 下载最新版本的 `.zip` 安装包
+1. 从 [源码仓库](https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland) 的 Releases / 发行版页面下载最新版本的 `.zip` 安装包
 2. 登录 Halo 后台管理控制台
 3. 进入 **主题** → **安装** → 选择 **本地上传**
 4. 上传下载的 `.zip` 文件

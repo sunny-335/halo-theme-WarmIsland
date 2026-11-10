@@ -27,6 +27,15 @@ html {
   hanging-punctuation: first last;
 }
 
+/* 首页整屏吸附由 src/pages/index.astro 的边界吸附脚本处理：CSS scroll-snap
+   无法只吸附 0 ↔ 内容区顶部这一个边界（见脚本注释）。这里只保留全局平滑滚动。 */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   margin: 0;
   padding: 0;

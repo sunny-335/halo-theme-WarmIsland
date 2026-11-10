@@ -10,8 +10,8 @@ spec:
   description: 暖如灯火，静如留白。暖屿以柔和的色调和舒缓的节奏回归内容本身，为记录与阅读留出一方安静从容的角落。
   logo: /themes/warm-island/assets/logo.png
   homepage: https://nxxy335.top/WarmIsland/
-  repo: https://github.com/sunny-335/halo-theme-WarmIsland
-  issues: https://github.com/sunny-335/halo-theme-WarmIsland/issues
+  repo: https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland
+  issues: https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland/issues
   settingName: "warm-island-setting"
   configMapName: "warm-island-configMap"
   customTemplates:
@@ -28,8 +28,8 @@ spec:
         description: 微信读书书架（依赖微信读书插件）
         screenshot:
         file: weread.html
-  version: "1.2.4"
-  requires: ">=2.26.0"
+  version: "1.2.5"
+  requires: ">=2.27.0"
   license:
     - name: "GPL-3.0"
       url: "https://www.gnu.org/licenses/gpl-3.0.en.html"

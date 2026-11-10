@@ -80,7 +80,7 @@ ICP 备案号通常需要链接到工信部的备案查询页面。主题会自�
 footer_socials:
   - platform: GitHub
     icon: fa-brands fa-github
-    url: https://github.com/your-username
+    url: https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland
   - platform: 微博
     icon: fa-brands fa-weibo
     url: https://weibo.com/your-username

@@ -229,10 +229,26 @@
     position: absolute;
     inset: 0;
     z-index: 1;
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-    will-change: backdrop-filter;
+    /* 模糊半径固定，滚动时只改这层的 opacity（合成层操作）。
+       逐帧改写 backdrop-filter 的 px 值会让浏览器每帧重做全屏背景采样，
+       是首页滚动掉帧的主因；固定值 + opacity 可复用已合成的结果。 */
+    background: color-mix(in srgb, var(--bg) 26%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    will-change: opacity;
     pointer-events: none;
+  }
+
+  /* 滚过首屏后 Hero 已被不透明内容区完全盖住，隐藏它可停掉
+     光球动画与模糊层的持续绘制（由首页滚动脚本切换 wi-hero--offscreen） */
+  .hero.wi-hero--offscreen {
+    visibility: hidden;
+  }
+
+  .hero.wi-hero--offscreen .hero__orb,
+  .hero.wi-hero--offscreen .hero__scroll-indicator {
+    animation-play-state: paused;
   }
 
   .hero__orb {
@@ -452,6 +468,17 @@
 
   .hero--no-breath .hero__orb {
     animation: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__orb,
+    .hero__scroll-indicator {
+      animation: none;
+    }
+
+    .hero__content {
+      transition: none;
+    }
   }
 
   html.dark .hero {

@@ -80,7 +80,7 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/nxxy335top/halo-theme-WarmIsland' }
+      { icon: 'github', link: 'https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland', ariaLabel: '源码仓库' }
     ],
 
     search: {

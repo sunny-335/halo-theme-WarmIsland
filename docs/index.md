@@ -13,8 +13,8 @@ hero:
       text: 配置项
       link: /config/basic
     - theme: alt
-      text: GitHub
-      link: https://github.com/nxxy335top/halo-theme-WarmIsland
+      text: 源码仓库
+      link: https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland
 
 features:
   - title: 🎨 精致视觉

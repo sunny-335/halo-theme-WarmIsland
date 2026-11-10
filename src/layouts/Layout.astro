@@ -21,7 +21,6 @@ const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
 <!doctype html>
 <html
   lang="zh-CN"
-  class={home ? 'wi-home-snap' : ''}
   style="overflow-x:hidden"
   th:classappend="${theme.config?.animation?.animation_enabled == false} ? 'wi-no-animations'"
   th:attr="data-palette=${theme.config?.style?.color_palette ?: 'warm-island'}"

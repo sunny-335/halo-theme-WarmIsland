@@ -97,29 +97,34 @@ import ThemeSwitcher from "./ThemeSwitcher.astro";
   const navbar = document.getElementById("wi-navbar");
   let lastScrollY = window.scrollY;
   let ticking = false;
+  /* 缓存状态：只在状态真正变化时才写 class，避免每个滚动帧都触发样式重算 */
+  let scrolled = null;
+  let hidden = null;
 
   function onScroll() {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        const currentScrollY = window.scrollY;
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const currentScrollY = window.scrollY;
+      const nextScrolled = currentScrollY > 20;
+      const nextHidden =
+        currentScrollY > lastScrollY && currentScrollY > 80
+          ? true
+          : currentScrollY < lastScrollY
+            ? false
+            : hidden;
 
-        if (currentScrollY > 20) {
-          navbar?.classList.add("wi-navbar--scrolled");
-        } else {
-          navbar?.classList.remove("wi-navbar--scrolled");
-        }
-
-        if (currentScrollY > lastScrollY && currentScrollY > 80) {
-          navbar?.classList.add("wi-navbar--hidden");
-        } else if (currentScrollY < lastScrollY) {
-          navbar?.classList.remove("wi-navbar--hidden");
-        }
-
-        lastScrollY = currentScrollY;
-        ticking = false;
-      });
-      ticking = true;
-    }
+      if (nextScrolled !== scrolled) {
+        scrolled = nextScrolled;
+        navbar?.classList.toggle("wi-navbar--scrolled", scrolled);
+      }
+      if (nextHidden !== hidden) {
+        hidden = nextHidden;
+        navbar?.classList.toggle("wi-navbar--hidden", !!hidden);
+      }
+      lastScrollY = currentScrollY;
+    });
   }
 
   window.addEventListener("scroll", onScroll, { passive: true });

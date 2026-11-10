@@ -24,7 +24,7 @@ ZIP 里缺少 `templates/index.html` 时，渲染首页找不到 `index` 模板�
 
 检查以下几点：
 
-1. 确认 Halo 版本 >= 2.26.0
+1. 确认 Halo 版本 >= 2.27.0
 2. 确认主题已启用
 3. 清除浏览器缓存后重试（Ctrl+Shift+R 强制刷新）
 4. 检查 Halo 后台日志是否有报错
@@ -170,7 +170,7 @@ v1.2.1 起安装包会保留各版本的哈希资源（v1.1.7 之后全部覆盖
 
 ### 如何报告 Bug？
 
-请在 [GitHub Issues](https://github.com/sunny-335/halo-theme-WarmIsland/issues) 中提交，包含以下信息：
+请在 [源码仓库 Issues](https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland/issues) 中提交，包含以下信息：
 
 - Halo 版本
 - 主题版本
