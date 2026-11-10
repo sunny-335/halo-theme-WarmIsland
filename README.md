@@ -97,6 +97,9 @@
 2. 进入 Halo 后台 → 主题管理 → 安装主题 → 上传 ZIP 包
 3. 安装完成后点击「启用」
 
+> **升级后首页 404「资源不存在 / Template index was not found」**：说明上传的 ZIP 里没有 `templates/`
+> 模板文件（从源码仓库打包时漏了构建步骤）。请换用完整安装包重新上传，详见 [FAQ 安装相关](docs/faq.md)。
+>
 > **升级后如果整站没了样式**：Halo 页面缓存或前置反向代理里可能还留着上一版本的 HTML，
 > 它引用的 CSS 文件名带内容哈希，升级后已被删除，请求会直接 500。
 > 先在 Halo 后台执行一次「清理缓存」（并刷新 CDN / Nginx 缓存）即可。
@@ -112,10 +115,11 @@
 git clone https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland.git
 cd halo-theme-WarmIsland
 pnpm install
-pnpm build
+pnpm release    # build → snapshot → package
 ```
 
-构建产物在 `templates/` 目录下，同时会生成 `dist/` 内的安装包。
+`pnpm build` 只生成 `templates/`（模板 + 静态资源），不会产出 ZIP；
+安装包由 `pnpm package` 生成到 `dist/warm-island-<version>.zip`。
 
 ## 开发
 
@@ -139,7 +143,9 @@ pnpm package
 pnpm smoke
 ```
 
-发版流程：`pnpm build` → `pnpm snapshot` → `pnpm package`，并把 `compat/assets` 的新增文件一起提交。
+发版流程：`pnpm release`（等价于 `pnpm build` → `pnpm snapshot` → `pnpm package`），
+并把 `compat/assets` 的新增文件一起提交。`pnpm package` 会校验模板、资源目录与版本号一致性，
+产物缺失时直接报错，避免打出不含 `templates/` 的空壳安装包。
 
 ### 目录结构
 
@@ -172,7 +178,7 @@ pnpm smoke
 ## 技术栈
 
 - [Halo](https://halo.run) 2.26+
-- [Astro](https://astro.build) + [vite-plugin-halo-theme](https://github.com/halo-sigs/vite-plugin-halo-theme)
+- [Astro](https://astro.build) 6（构建输出 Thymeleaf 模板）
 - [Thymeleaf](https://www.thymeleaf.org) 模板引擎
 - [Sass](https://sass-lang.com/) 样式
 

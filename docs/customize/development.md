@@ -6,8 +6,8 @@
 
 | 工具 | 最低版本 | 推荐版本 |
 |------|----------|----------|
-| Node.js | 18.x | 20.x LTS |
-| pnpm | 8.x | 9.x |
+| Node.js | 22.12.x | 22.x LTS |
+| pnpm | 12.x | 12.x |
 | Git | 2.x | 最新 |
 
 ### 安装 pnpm
@@ -19,8 +19,8 @@ npm install -g pnpm
 ### 验证环境
 
 ```bash
-node -v    # v20.x.x
-pnpm -v    # 9.x.x
+node -v    # v22.x.x（需 >= 22.12.0）
+pnpm -v    # 12.x.x
 git --version  # git version 2.x.x
 ```
 
@@ -34,25 +34,10 @@ pnpm install
 
 ## 开发模式
 
-### 启动开发服务器
-
-```bash
-pnpm dev
-```
-
-启动后，Astro 开发服务器会在 `http://localhost:4321` 运行，支持热更新。
-
-### 使用 Halo DevTools
-
-WarmIsland 使用 `vite-plugin-halo-theme` 插件，可以与 Halo 实例联动开发：
-
-1. 确保本地 Halo 实例正在运行
-2. 在 Halo 后台安装主题的开发版本
-3. 修改源码后，主题会自动重新构建并推送到 Halo
-
-```bash
-pnpm dev:halo
-```
+`pnpm dev` 用 nodemon 监听 `src/`、`public/`、`settings.yaml` 等文件的变化，
+每次变化自动执行一次 `astro build`，把结果写入 `templates/`。
+本项目是「静态模板产物 + Halo 运行时渲染」模式，没有 Astro 开发服务器，
+也不依赖 `vite-plugin-halo-theme`；本地预览请直接用 Halo 实例加载 `templates/`。
 
 ## 构建
 
@@ -62,15 +47,24 @@ pnpm dev:halo
 pnpm build
 ```
 
-构建产物位于 `dist/` 目录，包含所有模板文件和静态资源。
+构建产物位于 **`templates/`**（21 个 `.html` 模板 + `assets/` 静态资源），
+并由 `scripts/postbuild.mjs` 合并 `compat/assets` 中的历史哈希资源、校验资源引用。
+注意：`pnpm build` **不会**生成 ZIP 安装包。
 
 ### 打包主题
 
 ```bash
-pnpm package
+pnpm release          # 推荐：build → snapshot → package
+# 或分步：pnpm build && pnpm snapshot && pnpm package
 ```
 
-生成 `.zip` 主题包，可直接在 Halo 后台上传安装。
+生成 `dist/warm-island-<version>.zip`，可直接在 Halo 后台上传安装。
+ZIP 根目录直接放 `theme.yaml` / `settings.yaml` / `templates/`，不要额外套一层目录。
+
+> **`templates/` 被 `.gitignore` 忽略**，克隆仓库后默认不存在。若跳过 `pnpm build`
+> 直接 `pnpm package`，过去会产出不含任何模板的空壳包，上传后 Halo 报
+> `Template index was not found.` 并让首页 404。现在打包脚本会先校验
+> `index.html` 等模板、资源目录与版本号，不满足即报错退出。
 
 ## 项目结构
 
@@ -163,7 +157,8 @@ WarmIsland 使用 Astro 编写组件，构建后输出为 Thymeleaf 模板供 Ha
 
 ### Astro 组件 → Thymeleaf 模板
 
-Astro 组件中的前端代码会被 `vite-plugin-halo-theme` 转换为 Thymeleaf 模板：
+Astro 组件里直接书写 Thymeleaf 属性（`th:*`），构建时原样保留并输出成 `.html` 模板，
+由 Halo 在运行时渲染：
 
 ```astro
 ---

@@ -137,6 +137,33 @@ const INCLUDE_ROOT = [
 const INCLUDE_DIRS = ["templates"];
 const EXCLUDE_DIRS = new Set([".git", "node_modules", "src", "dist", "compat", ".astro"]);
 
+/* ---------------- 构建产物前置校验 ----------------
+ * templates/ 被 .gitignore 忽略，克隆仓库或清理工作区后默认不存在。
+ * 旧逻辑里 walk() 对不存在的目录只是静默跳过，于是会打出只含
+ * theme.yaml / settings.yaml 的"空壳包"；上传到 Halo 后旧主题被覆盖，
+ * 找不到 index 模板，首页直接 404「Template index was not found.」。
+ * 这里 fail fast，禁止产出这种包。
+ */
+function fail(message) {
+  console.error(`[package] ${message}`);
+  console.error("[package] 请先执行 pnpm build（或直接 pnpm release）生成完整模板产物后再打包。");
+  process.exit(1);
+}
+
+const templatesDir = path.join(root, "templates");
+if (!fs.existsSync(templatesDir)) fail("未找到 templates/ 目录");
+
+const htmlTemplates = fs.readdirSync(templatesDir).filter((name) => name.endsWith(".html"));
+for (const required of ["index.html", "post.html", "page.html", "archives.html"]) {
+  if (!htmlTemplates.includes(required)) fail(`缺少必需模板 templates/${required}`);
+}
+if (htmlTemplates.length < 10) {
+  fail(`模板数量异常（仅 ${htmlTemplates.length} 个 .html），疑似构建不完整`);
+}
+if (!fs.existsSync(path.join(templatesDir, "assets"))) {
+  fail("未找到 templates/assets/ 静态资源目录");
+}
+
 const entries = [];
 
 for (const name of INCLUDE_ROOT) {
@@ -164,9 +191,22 @@ for (const dir of INCLUDE_DIRS) {
   if (fs.existsSync(full)) walk(full, dir);
 }
 
+if (!entries.some((entry) => entry.name === "templates/index.html")) {
+  fail("打包清单中缺少 templates/index.html");
+}
+
 const version = readThemeVersion();
+const pkgVersion = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8")).version;
+if (pkgVersion !== version) {
+  fail(`版本号不一致：package.json=${pkgVersion}，theme.yaml=${version}`);
+}
+
 const outFile = path.join(root, "dist", `warm-island-${version}.zip`);
 buildZip(entries, outFile);
 
+const assetCount = entries.filter((entry) => entry.name.startsWith("templates/assets/")).length;
 const sizeMB = (fs.statSync(outFile).size / 1024 / 1024).toFixed(2);
-console.log(`[package] dist/warm-island-${version}.zip（${entries.length} 个文件，${sizeMB}MB）`);
+console.log(
+  `[package] dist/warm-island-${version}.zip（${entries.length} 个文件：` +
+    `${htmlTemplates.length} 个模板 / ${assetCount} 个资源，${sizeMB}MB）`
+);

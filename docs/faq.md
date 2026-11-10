@@ -2,6 +2,24 @@
 
 ## 安装相关
 
+### 升级主题后首页 404「资源不存在 / Template index was not found」？
+
+这是**安装包里没有模板文件**，不是主题代码或 Halo 版本问题。Halo 升级主题会用新包覆盖原主题目录，
+ZIP 里缺少 `templates/index.html` 时，渲染首页找不到 `index` 模板，直接返回 404。
+
+**如何确认**：解压待上传的 ZIP，根目录应有 `theme.yaml`、`settings.yaml` 和 `templates/` 目录，
+其中有 `index.html`、`post.html` 等 20+ 个 `.html`。若只有几个 `.yaml`，就是「空壳包」——
+`templates/` 被 `.gitignore` 忽略，从源码仓库打包前没执行 `pnpm build` 就会这样。
+
+**处理**：
+
+1. 用完整安装包（Release 里的 ZIP）在 Halo 后台 → 主题管理 → 重新上传升级
+2. 或本地执行 `pnpm release`（build → snapshot → package）重新生成 `dist/warm-island-<version>.zip`
+3. 升级完成后清理一次 Halo 页面缓存 / CDN 缓存
+
+当前版本的 `pnpm package` 会校验 `templates/index.html`、模板数量、资源目录与版本号一致性，
+构建产物缺失或不完整时直接报错退出，不会再产出空壳包。
+
 ### 主题安装后页面空白？
 
 检查以下几点：
