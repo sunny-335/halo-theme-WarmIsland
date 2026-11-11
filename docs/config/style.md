@@ -14,7 +14,8 @@
 | `animation_enabled` | 开关 | `true` | 全局动画总开关 |
 | `animation_breath` | 开关 | `true` | 呼吸动画效果 |
 | `animation_scroll_reveal` | 开关 | `true` | 滚动渐入动画 |
-| `animation_cursor_glow` | 开关 | `false` | 光感跟随效果 |
+| `click_effect_enabled` | 开关 | `false` | 鼠标点击效果总开关 |
+| `click_effect_type` | 下拉 | `values` | 点击效果类型（8 种效果 + 关闭，仅在总开关开启时显示） |
 | `custom_css` | 代码 | — | 自定义 CSS 代码 |
 
 ## 详细说明
@@ -121,13 +122,11 @@ WarmIsland 提供了丰富的动画效果，所有动画都可以独立开关：
 滚动渐入动画基于 Intersection Observer API 实现，对性能影响极小。如果页面内容较多，建议保持开启以提升浏览体验。
 :::
 
-#### 光感跟随（animation_cursor_glow）
+#### 鼠标点击效果（click_effect_enabled / click_effect_type）
 
-启用后，鼠标移动时会在光标附近产生柔和的光晕跟随效果，为页面增添灵动感。
-
-::: warning
-光感跟随效果在移动端不会生效（因为移动端没有鼠标光标）。在低端设备上可能会影响渲染性能，如遇卡顿建议关闭。
-:::
+`click_effect_enabled` 默认关闭；开启后 `click_effect_type` 才会显示，可选 8 种效果：
+社会主义核心价值观、随机彩色爱心、烟花、烟花波纹、粒子、星星、星星拖尾、粒子拖尾，
+另可选「关闭」。特效在访客点击时由浏览器本地绘制，不加载远程脚本、不发送任何数据。
 
 ### 自定义 CSS（custom_css）
 

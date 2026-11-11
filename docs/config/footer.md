@@ -12,6 +12,12 @@
 | `footer_show_powered` | 开关 | `true` | 显示「Powered by Halo」 |
 | `footer_show_theme` | 开关 | `true` | 显示主题版本 |
 | `footer_custom_html` | 代码 | — | 自定义 HTML（统计代码等） |
+| `footer_show_stats` | 开关 | `true` | 在页脚显示全站统计 |
+| `footer_stats_items` | 多选 | `post,category,comment,visit` | 统计项：`post` 文章 / `category` 分类 / `comment` 评论 / `visit` 访问 / `upvote` 点赞 / `word` 总字数（总字数依赖「API 扩展包」，未安装时自动隐藏） |
+| `footer_show_icp` | 开关 | `false` | 显示 ICP 备案号（开启后 `footer_icp` 才会显示） |
+| `footer_show_mps` | 开关 | `false` | 显示公网安备号与徽标 |
+| `footer_mps` | 文本 | — | 公网安备号（需开启上方开关） |
+| `footer_mps_url` | 文本 | — | 公网安备跳转链接，留空默认 `https://beian.mps.gov.cn/` |
 
 ## 详细说明
 

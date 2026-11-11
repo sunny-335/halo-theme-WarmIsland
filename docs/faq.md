@@ -116,9 +116,22 @@ v1.2.1 起安装包会保留各版本的哈希资源（v1.1.7 之后全部覆盖
 | 瞬间 | [PluginMoments](https://www.halo.run/store/apps/app-SnwWD) |
 | 图库 | [PluginPhotos](https://www.halo.run/store/apps/app-BmQJW) |
 | 友链 | [PluginLinks](https://www.halo.run/store/apps/app-hfbQg) |
-| 朋友圈 | [PluginFriends](https://www.halo.run/store/apps/app-yISsV) |
+| 订阅动态 | 同为 [PluginLinks](https://www.halo.run/store/apps/app-hfbQg) 的 RSS 订阅能力，需选择「订阅」自定义模板 |
 
 安装并启用插件后，页面会自动显示内容。未安装插件时页面会显示友好的提示信息。
+
+**「朋友圈」插件已不再提供**：feed / RSS 聚合已由官方「链接管理」插件的订阅取代，
+主题保留 `friends.html` 模板与「朋友圈」设置分组仅用于兼容旧站点。新站点请新建页面并选择
+「订阅」自定义模板，详见 README「自定义页面模板」与[订阅页面](https://nxxy335.top/WarmIsland/pages/subscriptions.html)。
+
+### 原来的「朋友圈」页面不能用了，怎么迁移？
+
+1. 安装 / 启用官方「链接管理」（PluginLinks）插件，把 RSS 订阅源迁到该插件的订阅中
+2. Halo 后台 → 页面 → 新建 → 自定义模板选择「订阅」（`page_subscriptions.html`）
+3. 在主题设置 → 订阅中调整每页条数、分页 / 下滑加载与列表 / 网格布局
+4. 确认动态正常展示后，删除旧的 `/friends` 页面与菜单项
+
+旧的 `friends.html` 检测不到 `plugin-friends` 时只会显示空状态，不会影响站点其他页面。
 
 ### 主题会向第三方服务发请求吗？
 
@@ -128,14 +141,14 @@ v1.2.1 起安装包会保留各版本的哈希资源（v1.1.7 之后全部覆盖
 
 1. 访客**主动点击**分享按钮 / 备案链接 / 应用市场链接时才跳转到对应站点；
 2. 站点管理员在主题设置里**显式填写**了「自定义一言 API」或「自定义 IP 定位 API」——
-   后者会把访客 IP 发送给该第三方服务换取地理位置，**需自行在站点隐私说明中披露**，
-   详见 README「外部资源与隐私」。
+   后者会把访客 IP 发送给该第三方服务换取地理位置；数据流向与披露要求见
+   README「外部资源与隐私」。
 
 可选接口地址（仅作候选，主题不会自动请求）：
 
 | 能力 | 可选地址 |
 | --- | --- |
-| 一言 | `https://v1.hitokoto.cn/`（选择「一言」时自动填入） |
+| 一言 | `https://v1.hitokoto.cn/`（默认预填，仅「一言」模式生效） |
 | IP 定位主 / 备选 API | `https://myip.ipip.net/json`、`https://r.inews.qq.com/api/ip2city?otype=json` |
 
 完整逐项说明见 README 的「外部资源与隐私」章节。发版前可运行 `pnpm audit:external` 复核。
@@ -144,10 +157,11 @@ v1.2.1 起安装包会保留各版本的哈希资源（v1.1.7 之后全部覆盖
 
 1. Hero「描述文案来源」**默认为「无」**，此时不显示描述文案、不渲染一言元素，零外部请求；
    想显示句子请改为「一言」
-2. 选择「一言」后会自动填入 `https://v1.hitokoto.cn/`，此时才会产生外部请求；
+2. 「自定义一言 API」字段在「描述文案来源」非「无」时显示，且默认预填 `https://v1.hitokoto.cn/`，
+   选择「一言」后该值才生效并产生外部请求；
    **把该字段清空即回退到主题内置的 `assets/data/hitokoto.json` 本地句子库（零外部请求）**，
-   直接编辑该 JSON 即可替换文案。只有填写后才会向该地址发起请求，需自行在站点隐私说明中披露，
-   详见 README「外部资源与隐私」
+   直接编辑该 JSON 即可替换文案。只有填写后才会向该地址发起请求，数据流向与披露要求见
+   README「外部资源与隐私」
 3. 「自定义」模式显示「自定义描述文案」中的静态文本，不发起任何请求；
    「句子类型」筛选仅对填写了 API 的一言模式生效
 

@@ -120,8 +120,35 @@
     border: 1px solid var(--rule);
   }
 
+  /* ---------- 引用块 ----------
+     全局 blockquote 的 padding 与正文 p 的 margin-bottom 会在块内叠加，
+     文字下方因此出现一整条空白。这里把引用块内外间距收敛为单一节奏：
+     块内子元素不再各自产生外边距，多段之间只保留一个较小的段间距。 */
   blockquote {
-    margin-block: 2em;
+    margin-block: 1.25em;
+    padding-block: 0.7em;
+    padding-inline: 1.25em;
+
+    /* :is() 把特异性提到 0,1,2，确保移动端 .wi-post__body p 规则不会让空白回归 */
+    > :is(p, ul, ol, pre, figure, table, h1, h2, h3, h4, h5, h6) {
+      margin-block: 0;
+    }
+
+    /* 与上面的归零规则保持同等特异性，靠顺序生效，避免多段引用挤在一起 */
+    > :is(p, ul, ol, pre, figure, table, h1, h2, h3, h4, h5, h6) + * {
+      margin-block-start: 0.55em;
+    }
+
+    /* 编辑器常在引用块末尾留下空段落，避免再撑出一段空白 */
+    > p:empty {
+      display: none;
+    }
+
+    /* 仅含一个 <br> 的空段落单独成规则：旧浏览器不支持 :has() 时
+       只会丢弃这一条，不影响上面 p:empty 的兜底 */
+    > p:has(> br:only-child) {
+      display: none;
+    }
   }
 
   :is(ul, ol) {

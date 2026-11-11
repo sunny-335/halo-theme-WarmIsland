@@ -125,7 +125,7 @@ WarmIsland/
 │   │                     # LightGallery / ClickEffect / ScrollReveal / ThemeSwitcher 等
 │   ├── layouts/           # Layout.astro（含页面布局契约渲染模式）
 │   ├── pages/            # index / post / page / archives / categories / category /
-│   │                     # tags / tag / links / friends / moments / moment / photos /
+│   │                     # tags / tag / links / friends（历史兼容）/ moments / moment / photos /
 │   │                     # douban / equipments / important-dates / steam / weread /
 │   │                     # page_messageboard / page_subscriptions / layout
 │   └── styles/           # main.scss + 12 个 _*.scss 片段
@@ -154,7 +154,7 @@ WarmIsland/
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| [Halo](https://www.halo.run/) | 2.27+ | 博客运行时，提供 Finder API 与主题渲染 |
+| [Halo](https://www.halo.run/) | 2.27.0+ | 博客运行时，提供 Finder API 与主题渲染 |
 | [Astro](https://astro.build) | 6.x | 组件开发，构建输出静态 `.html` 模板 |
 | [Thymeleaf](https://www.thymeleaf.org/) | - | Halo 服务端模板引擎（源码里直接写 `th:*`） |
 

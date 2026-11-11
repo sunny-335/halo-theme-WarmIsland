@@ -6,8 +6,12 @@
 
 | 配置项 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `links_apply_form_enabled` | 开关 | `true` | 页底显示友链申请表单；需插件开启「友链申请」，否则自动隐藏 |
 | `links_page_title` | 文本 | `友情链接` | 页面标题 |
 | `links_style` | 下拉 | `cards` | 展示样式：`grid` / `list` / `cards` |
+| `links_show_comment` | 开关 | `false` | 页面底部显示评论区 |
+| `links_random_order` | 开关 | `false` | 友链卡片随机排列 |
+| `links_random_portal` | 开关 | `true` | 页面右上角显示「随机传送」按钮 |
 
 ## 前置依赖
 
@@ -15,6 +19,9 @@
 友情链接功能依赖 Halo 的 **PluginLinks** 插件。如果未安装此插件，友情链接页面将无法正常工作。
 
 安装方式：Halo 后台 → **插件** → **安装** → 搜索「链接管理」→ 安装并启用。
+
+同一个插件还提供 **RSS 订阅能力**（原「朋友圈」插件的 feed 聚合功能已由它取代），
+对应主题的[订阅配置](/config/subscriptions)与[订阅页面](/pages/subscriptions)。
 :::
 
 ## 详细说明
@@ -65,6 +72,7 @@ PluginLinks 支持链接分组功能。你可以将友链按不同类别分组�
 
 ## 相关页面
 
-- [朋友圈](/config/friends) — 朋友圈页面配置
+- [订阅配置](/config/subscriptions) — 同一插件提供的 RSS 订阅动态
+- [订阅页面](/pages/subscriptions) — 博友文章动态页面
 - [页脚](/config/footer) — 页脚社交链接配置
 - [友情链接页面](/pages/links) — 友链模板与结构说明

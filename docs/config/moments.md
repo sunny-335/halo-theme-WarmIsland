@@ -10,6 +10,7 @@
 | `moments_style` | 下拉 | `cards` | 展示样式：`cards` / `masonry` |
 | `moments_loading_mode` | 下拉 | `infinite_scroll` | 加载方式：`infinite_scroll` / `pagination` |
 | `moments_page_size` | 数字 | `10` | 每页显示数量 |
+| `moments_cover` | 附件 | — | 瞬间页顶部封面图，建议尺寸 1500×500 |
 
 ## 前置依赖
 

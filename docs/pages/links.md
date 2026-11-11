@@ -29,3 +29,5 @@
 ## 相关配置
 
 - [友情链接配置](/config/links) — 展示样式
+- [订阅配置](/config/subscriptions) — 同一插件提供的 RSS 订阅动态
+- [订阅页面](/pages/subscriptions) — 博友文章动态页面

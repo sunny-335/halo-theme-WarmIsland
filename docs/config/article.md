@@ -22,6 +22,8 @@
 | `article_related_title` | 文本 | `相关推荐` | 相关文章标题 |
 | `article_show_share` | 开关 | `true` | 显示分享按钮 |
 | `article_share_title` | 文本 | `分享` | 分享区域标题 |
+| `article_extra_spacing` | 开关 | `true` | 中英文混排自动加空格；依赖「API 扩展包」，插件未安装时自动跳过 |
+| `article_extra_highlight` | 开关 | `false` | 服务端代码高亮；依赖「API 扩展包」全量版（含 JS 运行时），开启后替代主题自带配色，环境不支持请勿开启 |
 
 ## 详细说明
 

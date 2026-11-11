@@ -5,7 +5,8 @@
  *  - 1.4  远程执行与动态加载：禁止远程加载核心代码 / 动态拉取并执行组件
  *  - 4.4.4 性能与外部资源：不得预连接外部 CDN、加载远程脚本样式、打包无关大资源
  *  - 4.4.2 内容渲染安全：不得把站点内容用 th:utext 拼进 <script> 原始文本
- *  - 5.2 / 2.2：第三方字体必须随包携带许可证全文；上架说明数字必须与配置定义一致
+ *  - 5.1 / 5.2 / 2.2：第三方字体必须随包携带许可证全文；可选 API 的数据流向与隐私披露
+ *    由 README「外部资源与隐私」及文档站承载；上架说明数字必须与配置定义一致
  *  - 4.6 / 2.2：不得出现占位内容、无效链接
  *
  * 检查项：
@@ -16,6 +17,7 @@
  *  5. README 中的相对链接必须在安装包清单中真实存在
  *  6. 任何 <script> 开标签不得带 th:utext；字体许可证全文必须在制品清单中；
  *     README 的设置分组 / 配置项数量必须与 settings.yaml 一致
+ *  7. 三个可选 API 字段存在且 help 为精简功能说明；隐私披露文案不得回潮到设置界面（5.1）
  *
  * 说明：<a href="https://..."> 这类需要访客主动点击的分享 / 备案 / 应用市场外链是允许的，
  * 不属于「自动外部请求」，但已在 README「外部资源与隐私」章节逐项披露。
@@ -181,6 +183,7 @@ export function auditCompliance(entryNames = null) {
   const readmePath = path.join(root, "README.md");
   let groupCount = 0;
   let fieldCount = 0;
+  let conciseCount = 0;
   if (fs.existsSync(settingsPath) && fs.existsSync(readmePath)) {
     const settings = fs.readFileSync(settingsPath, "utf8");
     const readme = fs.readFileSync(readmePath, "utf8");
@@ -190,9 +193,44 @@ export function auditCompliance(entryNames = null) {
     if (!readme.includes(expected)) {
       problems.push(`README 配置数量与 settings.yaml 不一致，应为「${expected}」（2.2）`);
     }
+
+    // 4. 5.1 隐私披露：完整的数据流向说明统一由 README「外部资源与隐私」章节及文档站承载，
+    //    设置界面的三个可选 API 字段只保留精简功能说明，不得回潮出现冗长披露文案。
+    const apiFields = [
+      "welcome_popup_api",
+      "welcome_popup_fallback_api",
+      "hero_hitokoto_api",
+    ];
+    const bannedSnippets = [
+      "需自行在站点隐私说明中披露",
+      "填写后会把访客 IP 发送给该第三方服务换取地理位置",
+      "填写后同样会把访客 IP 发送给该第三方服务换取地理位置",
+      "只有填写后才会向该地址发起请求",
+    ];
+    const blocks = settings.split(/(?=^[ \t]*-[ \t]+\$formkit:)/m).slice(1);
+    for (const name of apiFields) {
+      const block = blocks.find((b) => new RegExp(`^\\s+name:[ \\t]*${name}[ \\t]*$`, "m").test(b));
+      if (!block) {
+        problems.push(`settings.yaml 缺少可选 API 配置项 ${name}（5.1 隐私披露）`);
+        continue;
+      }
+      const helpLine = block.split(/\r?\n/).find((line) => /^\s+help:/.test(line)) || "";
+      if (!helpLine.trim()) {
+        problems.push(`${name} 缺少 help 功能说明（5.1）`);
+        continue;
+      }
+      if (bannedSnippets.some((snippet) => helpLine.includes(snippet))) {
+        problems.push(`${name} 的 help 出现了已移除的隐私披露文案（5.1）`);
+      } else {
+        conciseCount++;
+      }
+    }
+    if (!readme.includes("外部资源与隐私") || !readme.includes("访客 IP")) {
+      problems.push("README 缺少可选 API 的隐私披露章节（5.1）");
+    }
   }
 
-  return { problems, groupCount, fieldCount };
+  return { problems, groupCount, fieldCount, conciseCount };
 }
 
 function report(label, problems) {
@@ -214,7 +252,7 @@ if (isCli) {
     templates.problems
   );
   failures += report(
-    `合规审计 4.4.2 / 5.2 / 2.2（${compliance.groupCount} 组 / ${compliance.fieldCount} 配置项）`,
+    `合规审计 4.4.2 / 5.1 / 5.2 / 2.2（${compliance.groupCount} 组 / ${compliance.fieldCount} 配置项 / ${compliance.conciseCount} 条精简提示）`,
     compliance.problems
   );
   /* 独立运行时按当前磁盘上的打包清单口径检查 README 链接 */

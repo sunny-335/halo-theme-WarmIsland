@@ -202,6 +202,7 @@ else if (!stored && prefersDark) { isDark = true; }
 | `animation_enabled` | 启用动效 | `true` |
 | `animation_breath` | 呼吸动画 | `true` |
 | `animation_scroll_reveal` | 滚动渐入 | `true` |
-| `animation_cursor_glow` | 光感跟随 | `false` |
+| `click_effect_enabled` | 鼠标点击效果 | `false` |
+| `click_effect_type` | 点击效果类型（8 种 + 关闭） | `values` |
 
 关闭动效时，`html` 元素添加 `wi-no-animations` 类名。

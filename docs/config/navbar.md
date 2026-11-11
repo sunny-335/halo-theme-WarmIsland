@@ -9,6 +9,9 @@
 | `navbar_style` | 下拉 | `glass` | 导航栏样式：`glass` / `minimal` / `float` |
 | `navbar_show_search` | 开关 | `true` | 显示搜索按钮 |
 | `navbar_show_theme_switch` | 开关 | `true` | 显示主题切换按钮 |
+| `navbar_brand_type` | 下拉 | `title` | 左侧显示：`title` 站点名称 / `logo` Logo |
+| `navbar_logo` | 附件 | — | 导航栏 Logo；仅在「Logo」模式下显示，留空回退到基础设置的自定义 Logo |
+| `navbar_logo_radius` | 下拉 | `rounded` | Logo 圆角：`square` / `rounded` / `circle`（Logo 模式下生效） |
 
 ## 详细说明
 
