@@ -1,0 +1,77 @@
+/* WarmIsland 自托管代码配色（Cold / 深色，参考 Prism Tomorrow 配色）
+   - 仅定义 .token.* 语法着色，供 Halo 代码高亮插件或「API 扩展包」服务端高亮输出使用。
+   - 主题本身不再加载 Prism.js / autoloader / 任何远程脚本。
+   - 本文件随主题分发，不含 @import、url()、远程字体或外部请求。
+*/
+pre[class*="language-"],
+code[class*="language-"] {
+  color: #cccccc;
+  background: none;
+  text-shadow: none;
+}
+
+pre[class*="language-"] {
+  background: #2d2d2d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #999999;
+}
+
+.token.punctuation {
+  color: #cccccc;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #f2777a;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #99cc99;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  color: #f99157;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #cc99cc;
+}
+
+.token.function,
+.token.class-name {
+  color: #6699cc;
+}
+
+.token.regex,
+.token.important {
+  color: #ffcc66;
+}
+
+.token.bold {
+  font-weight: 600;
+}
+
+.token.italic {
+  font-style: italic;
+}

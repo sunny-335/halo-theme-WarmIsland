@@ -45,7 +45,7 @@ import LightGallery from "../components/LightGallery.astro";
                         class="wi-moments-page__avatar wi-moments-page__avatar--fallback"
                         aria-hidden="true"
                       >
-                        <span th:text="${#strings.substring(site.title, 0, 1)}"></span>
+                        <span th:text="${!#strings.isEmpty(site.title) ? #strings.substring(site.title, 0, 1) : '·'}"></span>
                       </div>
 
                       <div class="wi-moments-page__main">

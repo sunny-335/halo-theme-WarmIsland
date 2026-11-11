@@ -1,6 +1,6 @@
 /**
  * 构建后置处理：
- * 1. 复制 logo.png 到 assets（保留历史行为）
+ * 1. 校验主题 logo 存在且只保留一份（public/assets/logo.png → templates/assets/logo.png）
  * 2. 合并 compat/assets 下的历史版本静态资源，避免站点/代理缓存中的旧 HTML
  *    仍然引用上一版本的哈希文件名时出现 500（FileNotFoundException）
  * 3. 校验所有 templates/*.html 引用的静态资源真实存在，缺失即构建失败
@@ -16,11 +16,13 @@ const templatesDir = path.join(root, "templates");
 
 fs.mkdirSync(assetsDir, { recursive: true });
 
-// 1. logo
-const logoSrc = path.join(templatesDir, "logo.png");
-if (fs.existsSync(logoSrc)) {
-  fs.copyFileSync(logoSrc, path.join(assetsDir, "logo.png"));
+// 1. logo：旧实现把 templates/logo.png 再复制一份到 assets，安装包里会有两份 1.5MB 大图。
+//    现在源文件统一放在 public/assets/logo.png（256x256 压缩版），这里只做存在性校验。
+if (!fs.existsSync(path.join(assetsDir, "logo.png"))) {
+  console.error("[postbuild] 未找到 templates/assets/logo.png（public/assets/logo.png 应随构建复制）");
+  process.exit(1);
 }
+console.log("[postbuild] logo.png 已去重，仅保留 templates/assets/logo.png");
 
 // 2. 历史资源合并（已存在的同名文件以当前构建为准，不覆盖）
 if (fs.existsSync(compatDir)) {

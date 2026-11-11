@@ -194,9 +194,11 @@ import LightGallery from "../components/LightGallery.astro";
         <button class="wi-wechat-qr__close" type="button" aria-label="Close">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
-        <div class="wi-wechat-qr__title" th:text="'微信扫码分享'">微信扫码分享</div>
-        <canvas class="wi-wechat-qr__canvas" id="wi-wechat-qr-canvas"></canvas>
-        <div class="wi-wechat-qr__hint" th:text="'打开微信，扫描二维码即可分享'">打开微信，扫描二维码即可分享</div>
+        <div class="wi-wechat-qr__title" th:text="'微信分享'">微信分享</div>
+        <!-- 微信分享不加载任何远程二维码库：改为复制文章链接，由访客在微信内分享 -->
+        <input class="wi-wechat-qr__url" id="wi-wechat-qr-url" type="text" readonly="readonly" aria-label="文章链接" />
+        <button class="wi-wechat-qr__copy" id="wi-wechat-qr-copy" type="button" th:text="'复制链接'">复制链接</button>
+        <div class="wi-wechat-qr__hint" th:text="'复制链接后，在微信中发送给好友'">复制链接后，在微信中发送给好友</div>
       </div>
     </div>
 
@@ -295,36 +297,19 @@ import LightGallery from "../components/LightGallery.astro";
 
   <LightGallery />
 
+  <!-- 代码高亮：主题不再加载远程语法高亮运行时与自动加载插件（后者会按代码语言
+       从 CDN 动态拉取并执行组件，属于远程动态加载）。语法高亮改由应用市场的
+       代码高亮插件或「API 扩展包」服务端高亮输出，主题只自托管两套 token 配色。 -->
   <link
     th:if="${theme.config?.article?.article_code_theme == 'cold'}"
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"
+    href="/themes/warm-island/assets/vendor/prism-cold.css"
   />
   <link
     th:if="${theme.config?.article?.article_code_theme != 'cold'}"
     rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css"
+    href="/themes/warm-island/assets/vendor/prism-warm.css"
   />
-
-  <script th:if="${theme.config?.article?.article_show_share != false and #strings.contains(theme.config?.article?.article_share_channels ?: 'qq,wechat,weibo', 'wechat')}" is:inline defer src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-
-  <script is:inline defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
-  <script is:inline defer src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-  <script is:inline th:inline="none">
-    (function () {
-      if (typeof Prism !== "undefined") {
-        Prism.plugins.autoloader.languages_path = "https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/";
-        var body = document.getElementById("wi-post-body");
-        if (body) {
-          body.querySelectorAll("pre code").forEach(function (block) {
-            if (!block.classList.contains("language-")) {
-              Prism.highlightElement(block);
-            }
-          });
-        }
-      }
-    })();
-  </script>
 
   <script is:inline th:inline="none">
     (function () {
@@ -673,58 +658,45 @@ import LightGallery from "../components/LightGallery.astro";
 
       var wechatBtn = document.querySelector(".wi-post__share-btn--wechat");
       var wechatQr = document.getElementById("wi-wechat-qr");
-      var wechatQrCanvas = document.getElementById("wi-wechat-qr-canvas");
+      var wechatUrlInput = document.getElementById("wi-wechat-qr-url");
+      var wechatCopyBtn = document.getElementById("wi-wechat-qr-copy");
       var wechatQrClose = wechatQr ? wechatQr.querySelector(".wi-wechat-qr__close") : null;
-      var wechatQrGenerated = false;
 
-      function generateQr(text, canvas) {
-        var size = 200;
-        var cellSize = 5;
-        var qr = null;
-        try {
-          var typeNumber = 0;
-          var errorCorrectionLevel = "M";
-          var qrData = [];
-          for (var i = 0; i < text.length; i++) {
-            qrData.push(text.charCodeAt(i));
-          }
-          qr = qrcode(typeNumber, errorCorrectionLevel);
-          qr.addData(text);
-          qr.make();
-        } catch (e) {
-          return;
-        }
-        var moduleCount = qr.getModuleCount();
-        var margin = 4;
-        var totalCells = moduleCount + margin * 2;
-        var canvasSize = totalCells * cellSize;
-        canvas.width = canvasSize;
-        canvas.height = canvasSize;
-        var ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvasSize, canvasSize);
-        ctx.fillStyle = "#000000";
-        for (var row = 0; row < moduleCount; row++) {
-          for (var col = 0; col < moduleCount; col++) {
-            if (qr.isDark(row, col)) {
-              ctx.fillRect((col + margin) * cellSize, (row + margin) * cellSize, cellSize, cellSize);
-            }
-          }
+      function resolveShareUrl() {
+        var rawUrl = (wechatBtn && wechatBtn.getAttribute("data-url")) || window.location.pathname;
+        return rawUrl.startsWith("http") ? rawUrl : window.location.origin + rawUrl;
+      }
+
+      /* 复制链接后由访客在微信内分享，零远程脚本 */
+      function copyShareUrl() {
+        var url = resolveShareUrl();
+        if (wechatUrlInput) wechatUrlInput.value = url;
+        var done = function () {
+          if (!wechatCopyBtn) return;
+          wechatCopyBtn.textContent = "已复制";
+          setTimeout(function () {
+            wechatCopyBtn.textContent = "复制链接";
+          }, 1800);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done, function () {
+            if (wechatUrlInput) wechatUrlInput.select();
+          });
+        } else if (wechatUrlInput) {
+          wechatUrlInput.select();
+          try {
+            document.execCommand("copy");
+            done();
+          } catch (e) {}
         }
       }
 
       if (wechatBtn && wechatQr) {
         wechatBtn.addEventListener("click", function () {
           wechatQr.classList.add("wi-wechat-qr--visible");
-          if (!wechatQrGenerated && wechatQrCanvas) {
-            var rawUrl = wechatBtn.getAttribute("data-url") || window.location.pathname;
-            var url = rawUrl.startsWith("http") ? rawUrl : window.location.origin + rawUrl;
-            if (typeof qrcode !== "undefined") {
-              generateQr(url, wechatQrCanvas);
-              wechatQrGenerated = true;
-            }
-          }
+          if (wechatUrlInput) wechatUrlInput.value = resolveShareUrl();
         });
+        if (wechatCopyBtn) wechatCopyBtn.addEventListener("click", copyShareUrl);
         if (wechatQrClose) {
           wechatQrClose.addEventListener("click", function () {
             wechatQr.classList.remove("wi-wechat-qr--visible");
@@ -1255,12 +1227,36 @@ import LightGallery from "../components/LightGallery.astro";
     margin-bottom: var(--space-md);
   }
 
-  .wi-wechat-qr__canvas {
+  .wi-wechat-qr__url {
     display: block;
-    margin: 0 auto var(--space-md);
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 var(--space-sm, 0.5rem);
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
     border-radius: var(--radius-sm, 8px);
-    background: #fff;
-    padding: 8px;
+    background: var(--bg-raised);
+    color: var(--ink);
+    font-size: var(--text-sm);
+    text-overflow: ellipsis;
+  }
+
+  .wi-wechat-qr__copy {
+    display: block;
+    width: 100%;
+    margin: 0 0 var(--space-md);
+    padding: 10px 12px;
+    border: none;
+    border-radius: var(--radius-sm, 8px);
+    background: var(--accent);
+    color: #fff;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .wi-wechat-qr__copy:hover {
+    opacity: 0.88;
   }
 
   .wi-wechat-qr__hint {

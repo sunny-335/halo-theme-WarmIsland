@@ -341,7 +341,7 @@ import Layout from "../layouts/Layout.astro";
               <span class="wi-id__avatar">
                 <span
                   class="wi-id__avatar-fallback"
-                  th:text="${#strings.substring(p.displayName, 0, 1)}"
+                  th:text="${!#strings.isEmpty(p.displayName) ? #strings.substring(p.displayName, 0, 1) : '·'}"
                   >老</span
                 >
                 <img
@@ -407,7 +407,7 @@ import Layout from "../layouts/Layout.astro";
                 <span class="wi-id__avatar">
                   <span
                     class="wi-id__avatar-fallback"
-                    th:text="${#strings.substring(p.displayName, 0, 1)}"
+                    th:text="${!#strings.isEmpty(p.displayName) ? #strings.substring(p.displayName, 0, 1) : '·'}"
                     >老</span
                   >
                   <img
@@ -466,7 +466,7 @@ import Layout from "../layouts/Layout.astro";
                   <span class="wi-id__avatar">
                     <span
                       class="wi-id__avatar-fallback"
-                      th:text="${#strings.substring(p.displayName, 0, 1)}"
+                      th:text="${!#strings.isEmpty(p.displayName) ? #strings.substring(p.displayName, 0, 1) : '·'}"
                       >张</span
                     >
                     <img

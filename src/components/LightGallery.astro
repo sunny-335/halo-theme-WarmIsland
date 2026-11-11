@@ -73,7 +73,12 @@
       plugins: [lgZoom, lgThumbnail, lgFullscreen],
       speed: 280,
       mode: 'lg-fade',
-      licenseKey: '0000-0000-0000-0000',
+      /* lightGallery 2.9.0 以 GPLv3 发布，本主题同样采用 GPL-3.0，
+         按其开源许可条款使用（不申请商业授权）。
+         官方示例里的 '0000-0000-000-0000' 会触发
+         "license key is not valid for production use" 警告，
+         这里去掉占位字符串、显式声明许可依据，控制台不再出现该提示。 */
+      licenseKey: 'GPLv3',
       download: false,
       counter: true,
       preload: 2,

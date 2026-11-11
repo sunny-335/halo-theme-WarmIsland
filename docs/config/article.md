@@ -84,7 +84,7 @@
 
 ### 代码高亮主题（article_code_theme）
 
-WarmIsland 使用 Prism.js 实现代码语法高亮，提供两种主题风格：
+主题不再加载 Prism.js 运行时与 autoloader，**语法高亮由 Halo 应用市场的代码高亮插件或「API 扩展包」服务端高亮输出**。本项只切换主题自托管的两套 `.token` 配色（`assets/vendor/prism-warm.css` / `prism-cold.css`），不产生任何远程请求：
 
 | 值 | 说明 |
 | --- | --- |
@@ -100,7 +100,7 @@ article_code_theme: warm
 ```
 
 ::: tip
-代码高亮支持多种编程语言，包括 JavaScript、Python、Java、Go、Rust、YAML、JSON、Bash 等。语言检测基于代码块的语言标记自动完成。
+支持的语言范围取决于所安装的高亮插件（常见的 JavaScript、Python、Java、Go、Rust、YAML、JSON、Bash 等均可覆盖）。语言识别基于代码块的语言标记，建议始终显式标注。
 :::
 
 ### 目录展开模式（article_toc_expand）
@@ -136,7 +136,7 @@ article_related_title: "猜你喜欢"
 | 平台 | 说明 |
 | --- | --- |
 | QQ | 点击后弹出 QQ 分享窗口，自动携带文章标题和链接 |
-| 微信 | 扫码分享到微信（生成文章完整 URL 的二维码） |
+| 微信 | 弹出文章链接并提供「复制链接」按钮，由访客在微信内分享（不加载二维码库） |
 | 微博 | 分享到新浪微博 |
 | X (Twitter) | 分享到 X |
 | Facebook | 分享到 Facebook |
@@ -157,7 +157,7 @@ article_related_title: "猜你喜欢"
 | Telegram | ❌ |
 
 ::: info 图标来源
-分享按钮图标来自 [Font Awesome](https://fontawesome.com/)（Free v7.2.0，CC BY 4.0 / SIL OFL 1.1 协议）和 [Simple Icons](https://simpleicons.org/)（CC0 协议）。微信图标点击后会弹出二维码弹窗，用户可使用微信扫码分享。
+分享按钮图标来自 [Font Awesome](https://fontawesome.com/)（Free v7.2.0，CC BY 4.0 / SIL OFL 1.1 协议）和 [Simple Icons](https://simpleicons.org/)（CC0 协议）。微信图标点击后会弹出「复制链接」弹层，用户复制后可在微信内分享；二维码由远程库生成的旧实现已移除，主题不再加载任何第三方脚本。
 :::
 
 #### 分享区域标题（article_share_title）
@@ -174,7 +174,7 @@ article_share_channels:
 ```
 
 ::: tip
-分享功能会自动携带文章标题和完整链接，无需手动配置分享内容。微信分享通过二维码实现，二维码内容为文章的完整 URL（包含域名），用户扫码后可直接打开文章。QQ 分享通过弹窗方式打开 QQ 分享页面。移动端会优先显示适合移动端的分享方式。
+分享功能会自动携带文章标题和完整链接，无需手动配置分享内容。微信分享通过「复制链接」实现：弹层显示文章完整 URL（含域名），点击按钮写入剪贴板，全程在浏览器本地完成、不发送外部请求。QQ 分享通过弹窗方式打开 QQ 分享页面。除访客主动点击外，页面加载时不会访问任何第三方平台。
 :::
 
 ## 阅读增强功能

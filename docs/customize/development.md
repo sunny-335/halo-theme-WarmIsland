@@ -54,17 +54,35 @@ pnpm build
 ### 打包主题
 
 ```bash
-pnpm release          # 推荐：build → snapshot → package
-# 或分步：pnpm build && pnpm snapshot && pnpm package
+pnpm release          # 推荐：build → snapshot → package（含合规审计）
+# 或分步：pnpm build && pnpm snapshot && pnpm audit:external && pnpm package
 ```
 
 生成 `dist/warm-island-<version>.zip`，可直接在 Halo 后台上传安装。
-ZIP 根目录直接放 `theme.yaml` / `settings.yaml` / `templates/`，不要额外套一层目录。
+ZIP 根目录直接放 `theme.yaml` / `settings.yaml` / `templates/`，不要额外套一层目录；
+`docs/*.md` 与预览图也会一并打包，保证上架说明里的引用在制品中真实存在。
 
 > **`templates/` 被 `.gitignore` 忽略**，克隆仓库后默认不存在。若跳过 `pnpm build`
 > 直接 `pnpm package`，过去会产出不含任何模板的空壳包，上传后 Halo 报
 > `Template index was not found.` 并让首页 404。现在打包脚本会先校验
 > `index.html` 等模板、资源目录与版本号，不满足即报错退出。
+
+### 上架合规审计
+
+`scripts/audit-external.mjs`（`pnpm audit:external`）在打包前自动执行，对应应用市场审核指南
+1.4 / 4.4.4 / 4.6 / 5.1，检查：
+
+- 模板中不含第三方 `preconnect` / `dns-prefetch` / `preload`
+- 不含 `src` / `href` 指向 http(s) 的远程脚本、样式、图片、媒体
+- 不含硬编码的外部 `fetch()` / 动态 `import()` / CSS `url(https://...)`，
+  也不含 Prism autoloader 之类的动态加载痕迹与被移除的服务域名
+- README 中的相对链接都能在安装包清单里找到对应文件
+- `templates/logo.png` 不存在（只允许一份压缩后的 `templates/assets/logo.png`）
+
+任一不通过，`pnpm package` 直接 `exit 1`，避免打出不合规制品。
+`<a href="https://...">` 这类需要访客主动点击的外链是允许的，但必须在 README
+「外部资源与隐私」章节逐项披露。新增第三方资源时，请先自托管到 `public/assets/`
+并在 README 的许可表中登记来源与协议。
 
 ## 性能与滚动顺滑
 
@@ -98,60 +116,36 @@ ZIP 根目录直接放 `theme.yaml` / `settings.yaml` / `templates/`，不要额
 
 ## 项目结构
 
+以下按磁盘实际文件列出（`src/pages/` 下每个 `.astro` 对应一个输出模板，共 21 个）：
+
 ```
 WarmIsland/
-├── src/                          # 源代码
-│   ├── components/               # Astro 组件
-│   │   ├── HeroSection.astro     # Hero 首屏
-│   │   ├── PostCard.astro        # 文章卡片
-│   │   ├── Pagination.astro      # 分页组件
-│   │   ├── TableOfContents.astro # 目录组件
-│   │   ├── ReadingProgress.astro # 阅读进度条
-│   │   ├── LikeButton.astro      # 点赞按钮
-│   │   ├── CommentSection.astro  # 评论区
-│   │   ├── Footer.astro          # 页脚
-│   │   └── ...
-│   ├── layouts/                  # 布局组件
-│   │   ├── BaseLayout.astro      # 基础布局
-│   │   └── PostLayout.astro      # 文章布局
-│   ├── lib/                      # 工具库
-│   │   ├── pages.ts              # 页面路由定义
-│   │   └── utils.ts              # 工具函数
-│   ├── pages/                    # 页面入口
-│   │   ├── index.astro           # 首页
-│   │   ├── post.astro            # 文章详情
-│   │   ├── archives.astro        # 归档
-│   │   ├── categories.astro      # 分类
-│   │   ├── tags.astro            # 标签
-│   │   ├── moments.astro         # 瞬间
-│   │   ├── photos.astro          # 图库
-│   │   ├── links.astro           # 友情链接
-│   │   ├── friends.astro         # 朋友圈
-│   │   ├── page.astro            # 自定义页面
-│   │   ├── page_messageboard.astro # 留言板
-│   │   ├── douban.astro          # 豆瓣
-│   │   ├── equipments.astro      # 装备
-│   │   ├── footprints.astro      # 足迹
-│   │   └── steam.astro           # Steam
-│   └── styles/                   # 样式文件
-│       ├── main.scss             # 主样式入口
-│       ├── _variables.scss       # SCSS 变量
-│       ├── _colors.scss          # 颜色定义
-│       ├── _typography.scss      # 排版
-│       ├── _spacing.scss         # 间距
-│       ├── _animations.scss      # 动画
-│       ├── _mixins.scss          # 混入
-│       └── components/           # 组件样式
-├── templates/                    # Thymeleaf 模板（构建输出）
-├── public/                       # 静态资源
-│   └── assets/                   # 编译后的 CSS/JS
-├── docs/                         # 文档
-├── theme.yaml                    # 主题元信息
-├── settings.yaml                 # 主题设置定义
-├── astro.config.mjs              # Astro 配置
-├── package.json                  # 项目依赖
-├── tsconfig.json                 # TypeScript 配置
-└── vite.config.ts                # Vite 配置
+├── src/
+│   ├── components/       # 18 个组件：Navbar / Footer / HeroSection / WelcomePopup /
+│   │                     # LightGallery / ClickEffect / ScrollReveal / ThemeSwitcher 等
+│   ├── layouts/           # Layout.astro（含页面布局契约渲染模式）
+│   ├── pages/            # index / post / page / archives / categories / category /
+│   │                     # tags / tag / links / friends / moments / moment / photos /
+│   │                     # douban / equipments / important-dates / steam / weread /
+│   │                     # page_messageboard / page_subscriptions / layout
+│   └── styles/           # main.scss + 12 个 _*.scss 片段
+├── public/
+│   ├── assets/
+│   │   ├── data/         # hitokoto.json 内置本地句子库
+│   │   ├── fonts/        # LXGW WenKai 本地 woff2 分片与 result.css
+│   │   ├── vendor/       # 自托管 prism-warm.css / prism-cold.css
+│   │   └── logo.png      # 主题图标（唯一一份，256×256 压缩版）
+│   ├── error/            # 错误页静态资源
+│   └── favicon.ico
+├── compat/assets/        # 历史版本哈希静态资源，构建时合并进 templates/assets
+├── scripts/              # postbuild / snapshot-assets / package / audit-external / smoke-clickfx
+├── docs/                 # VitePress 文档站（*.md 随安装包分发）
+├── templates/            # 构建产物（被 .gitignore 忽略）
+├── dist/                 # ZIP 安装包（被 .gitignore 忽略）
+├── theme.yaml            # 主题清单与自定义页面模板注册
+├── settings.yaml         # 后台设置项定义
+├── astro.config.mjs / package.json / pnpm-lock.yaml / tsconfig.json
+└── WarmIsland Preview.webp
 ```
 
 ## 技术栈
@@ -170,7 +164,8 @@ WarmIsland/
 |------|------|
 | [SCSS](https://sass-lang.com/) | 样式预处理，CSS 变量驱动的配色系统 |
 | 原生 JavaScript | 滚动、菜单、主题切换、无限滚动等交互，无前端框架运行时 |
-| [LightGallery](https://www.lightgalleryjs.com/) | 图片灯箱（可选） |
+| [LightGallery](https://www.lightgalleryjs.com/) 2.9.0（GPLv3） | 图片灯箱，默认内置；安装 lightgallery.js 插件后自动让位 |
+| [LXGW WenKai](https://github.com/lxgw/LxgwWenKai)（OFL 1.1） | 本地字体分片，随主题自托管，无远程字体请求 |
 | Halo 插件生态 | 评论、代码高亮、服务端字数统计等由 Halo 与可选插件提供 |
 
 ### 构建工具

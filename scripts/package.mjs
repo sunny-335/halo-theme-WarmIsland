@@ -10,6 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
+import { auditTemplates, auditReadmeLinks } from "./audit-external.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -131,11 +132,17 @@ const INCLUDE_ROOT = [
   "settings.yaml",
   "LICENSE",
   "README.md",
+  /* 上架说明引用的预览图必须真实存在于制品中（审核指南 4.6 / 2.2） */
+  "WarmIsland Preview.webp",
   "pnpm-lock.yaml",
   "pnpm-workspace.yaml",
 ];
 const INCLUDE_DIRS = ["templates"];
-const EXCLUDE_DIRS = new Set([".git", "node_modules", "src", "dist", "compat", ".astro"]);
+/* README 引用的 docs/*.md 也要随包分发，避免制品内出现死链 */
+const INCLUDE_DOCS = ["docs"];
+const EXCLUDE_DIRS = new Set([
+  ".git", "node_modules", "src", "dist", "compat", ".astro", ".vitepress",
+]);
 
 /* ---------------- 构建产物前置校验 ----------------
  * templates/ 被 .gitignore 忽略，克隆仓库或清理工作区后默认不存在。
@@ -173,14 +180,16 @@ for (const name of INCLUDE_ROOT) {
   }
 }
 
-function walk(dir, prefix) {
+function walk(dir, prefix, opts = {}) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const abs = path.join(dir, entry.name);
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
       if (EXCLUDE_DIRS.has(entry.name)) continue;
-      walk(abs, rel);
+      walk(abs, rel, opts);
     } else {
+      /* docs 只收 Markdown 源文件，不收 VitePress 构建产物 / 依赖 README */
+      if (opts.mdOnly && !entry.name.endsWith(".md")) continue;
       entries.push({ name: rel, data: fs.readFileSync(abs), date: fs.statSync(abs).mtime });
     }
   }
@@ -189,6 +198,10 @@ function walk(dir, prefix) {
 for (const dir of INCLUDE_DIRS) {
   const full = path.join(root, dir);
   if (fs.existsSync(full)) walk(full, dir);
+}
+for (const dir of INCLUDE_DOCS) {
+  const full = path.join(root, dir);
+  if (fs.existsSync(full)) walk(full, dir, { mdOnly: true });
 }
 
 if (!entries.some((entry) => entry.name === "templates/index.html")) {
@@ -200,6 +213,38 @@ const pkgVersion = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "
 if (pkgVersion !== version) {
   fail(`版本号不一致：package.json=${pkgVersion}，theme.yaml=${version}`);
 }
+
+/* ---------------- 上架合规前置校验 ----------------
+ * 1. 主题不得出现未披露的第三方自动请求 / 远程动态加载（审核指南 1.4 / 4.4.4）
+ * 2. README 的相对链接必须在制品内真实存在（审核指南 4.6 / 2.2）
+ * 3. logo 只保留一份压缩版，避免打包两份 1.5MB 大图
+ */
+const templateAudit = auditTemplates(templatesDir);
+for (const problem of templateAudit.problems) {
+  console.error(`[package] ${problem}`);
+}
+if (templateAudit.problems.length) {
+  fail("外部资源审计未通过：模板仍存在第三方远程加载 / 预连接");
+}
+
+const linkAudit = auditReadmeLinks(new Set(entries.map((entry) => entry.name)));
+for (const problem of linkAudit.problems) {
+  console.error(`[package] ${problem}`);
+}
+if (linkAudit.problems.length) {
+  fail("README 存在指向制品中不存在文件的相对链接");
+}
+
+if (fs.existsSync(path.join(templatesDir, "logo.png"))) {
+  fail("templates/logo.png 仍存在：应只保留压缩后的 templates/assets/logo.png");
+}
+const logoFile = path.join(templatesDir, "assets", "logo.png");
+if (fs.existsSync(logoFile) && fs.statSync(logoFile).size > 300 * 1024) {
+  fail("templates/assets/logo.png 超过 300KB，请先压缩再打包");
+}
+console.log(
+  `[package] 合规审计通过（${templateAudit.htmlCount} 个模板、${linkAudit.checked} 个相对链接、logo 单份压缩）`
+);
 
 const outFile = path.join(root, "dist", `warm-island-${version}.zip`);
 buildZip(entries, outFile);

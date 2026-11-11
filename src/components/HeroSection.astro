@@ -59,7 +59,7 @@
       class="hero__description"
       th:if="${theme.config?.hero?.hero_description_mode == 'hitokoto'}"
       id="wi-hitokoto"
-      th:attr="data-api=${theme.config?.hero?.hero_hitokoto_api ?: 'https://v1.hitokoto.cn/'},data-categories=${theme.config?.hero?.hero_hitokoto_categories},data-auto-refresh=${theme.config?.hero?.hero_hitokoto_auto_refresh == true ? 'true' : 'false'},data-refresh-interval=${theme.config?.hero?.hero_hitokoto_refresh_interval ?: 10000}"
+      th:attr="data-api=${theme.config?.hero?.hero_hitokoto_api ?: ''},data-categories=${theme.config?.hero?.hero_hitokoto_categories},data-auto-refresh=${theme.config?.hero?.hero_hitokoto_auto_refresh == true ? 'true' : 'false'},data-refresh-interval=${theme.config?.hero?.hero_hitokoto_refresh_interval ?: 10000}"
     ></p>
     <p
       class="hero__description"
@@ -125,7 +125,10 @@
     var el = document.getElementById("wi-hitokoto");
     if (!el) return;
 
-    var api = el.getAttribute("data-api") || "https://v1.hitokoto.cn/";
+    /* 默认读取主题内置的本地句子库（同域静态 JSON，零第三方请求）。
+       仅当站点管理员在主题设置里显式填写自定义 API 时，才会产生外部请求。 */
+    var api = el.getAttribute("data-api");
+    var localUrl = "/themes/warm-island/assets/data/hitokoto.json";
     var categories = el.getAttribute("data-categories");
     var autoRefresh = el.getAttribute("data-auto-refresh") === "true";
     var refreshInterval = parseInt(el.getAttribute("data-refresh-interval"), 10) || 10000;
@@ -151,15 +154,24 @@
         el.textContent = "\u2026";
       }
 
-      return fetch(buildUrl())
+      return fetch(api ? buildUrl() : localUrl)
         .then(function (res) {
           if (!res.ok) throw new Error("HTTP " + res.status);
           return res.json();
         })
         .then(function (data) {
-          var text = data.hitokoto || "";
-          var from = data.from || data.from_who || "";
-          if (from) {
+          var text, from;
+          if (!api && data && Array.isArray(data.sentences) && data.sentences.length) {
+            /* 内置词库：随机取一条，避免每次刷新都是同一句 */
+            var item = data.sentences[Math.floor(Math.random() * data.sentences.length)];
+            text = item.text || "";
+            from = item.from || "";
+          } else {
+            /* 站点显式配置的自定义一言 API */
+            text = data.hitokoto || "";
+            from = data.from || data.from_who || "";
+          }
+          if (from && text) {
             text += " \u2014\u2014 " + from;
           }
 

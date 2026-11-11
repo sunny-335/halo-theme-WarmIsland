@@ -70,7 +70,7 @@ import Layout from "../layouts/Layout.astro";
                   class="wi-links__avatar wi-links__avatar--placeholder"
                 >
                   <span
-                    th:text="${#strings.substring(link.spec.displayName, 0, 1)}"
+                    th:text="${!#strings.isEmpty(link.spec.displayName) ? #strings.substring(link.spec.displayName, 0, 1) : '·'}"
                   ></span>
                 </div>
                 <!-- 可达性检测徽章（plugin-links 后台「友链检测」产生）：绿点=可访问，红点=异常，未检测不显示 -->

@@ -9,6 +9,7 @@
     "build": "astro build && node scripts/postbuild.mjs",
     "snapshot": "node scripts/snapshot-assets.mjs",
     "package": "node scripts/package.mjs",
+    "audit:external": "node scripts/audit-external.mjs",
     "release": "pnpm run build && pnpm run snapshot && pnpm run package",
     "smoke": "node scripts/smoke-clickfx.mjs",
     "astro": "astro",

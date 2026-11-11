@@ -86,8 +86,8 @@ const fragmentAttr = layoutFragment ? "html (head, content)" : undefined;
       th:href="${theme.config?.basic?.favicon ?: '/favicon.ico'}"
     />
     <link rel="alternate" type="application/rss+xml" th:title="${site.title}" th:href="@{/feed.xml}" />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <!-- 主题不预连接任何第三方 CDN：所有脚本、样式、字体均随主题自托管。
+         分享链接等外链只在访客主动点击时打开，不产生自动外部请求。 -->
     <link rel="stylesheet" th:href="@{/assets/fonts/LXGWWenKai/result.css}" media="print" onload="this.media='all'" />
     <noscript><link rel="stylesheet" th:href="@{/assets/fonts/LXGWWenKai/result.css}" /></noscript>
     <style is:inline th:if="${theme.config?.style?.accent_color}" th:utext="${':root { --accent: ' + theme.config?.style?.accent_color + '; --accent-hover: ' + theme.config?.style?.accent_color + '; }'}">/*accent*/</style>

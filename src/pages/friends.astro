@@ -41,7 +41,7 @@ import Layout from "../layouts/Layout.astro";
                 class="wi-friends-page__avatar wi-friends-page__avatar--placeholder"
               >
                 <span
-                  th:text="${#strings.substring(spec.author ?: '', 0, 1)}"
+                  th:text="${!#strings.isEmpty(spec.author) ? #strings.substring(spec.author, 0, 1) : '·'}"
                 ></span>
               </div>
               <div class="wi-friends-page__author-info">

@@ -5,7 +5,7 @@
   class="wi-welcome-popup"
   id="wi-welcome-popup"
   th:if="${theme.config?.welcome_popup?.welcome_popup_enabled == true}"
-  th:attr="data-position=${theme.config?.welcome_popup?.welcome_popup_position ?: 'top-center'},data-duration=${theme.config?.welcome_popup?.welcome_popup_duration ?: 5},data-api=${theme.config?.welcome_popup?.welcome_popup_api},data-fallback-api=${theme.config?.welcome_popup?.welcome_popup_fallback_api},data-show-once=${theme.config?.welcome_popup?.welcome_popup_show_once != false ? 'true' : 'false'}"
+  th:attr="data-position=${theme.config?.welcome_popup?.welcome_popup_position ?: 'top-center'},data-duration=${theme.config?.welcome_popup?.welcome_popup_duration ?: 5},data-api=${theme.config?.welcome_popup?.welcome_popup_api ?: ''},data-fallback-api=${theme.config?.welcome_popup?.welcome_popup_fallback_api ?: ''},data-show-once=${theme.config?.welcome_popup?.welcome_popup_show_once != false ? 'true' : 'false'}"
   aria-live="polite"
   aria-atomic="true"
 >
@@ -16,7 +16,7 @@
         <circle cx="12" cy="10" r="3"></circle>
       </svg>
     </div>
-    <div class="wi-welcome-popup__content" id="wi-welcome-popup-text">加载中…</div>
+    <div class="wi-welcome-popup__content" id="wi-welcome-popup-text">欢迎来访，愿你在这里度过一段安静的时光</div>
     <button class="wi-welcome-popup__close" type="button" aria-label="关闭">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
         <path d="M18 6 6 18"></path>
@@ -46,8 +46,12 @@
     var closeBtn = popup.querySelector(".wi-welcome-popup__close");
     var progress = document.getElementById("wi-welcome-popup-progress");
     var duration = parseInt(popup.getAttribute("data-duration"), 10) || 5;
-    var api = popup.getAttribute("data-api") || "https://myip.ipip.net/json";
-    var fallbackApi = popup.getAttribute("data-fallback-api") || "https://r.inews.qq.com/api/ip2city?otype=json";
+    /* 默认零外部请求：主题内置静态欢迎语，不向任何第三方发送访客 IP。
+       仅当站点管理员在主题设置里显式填写自定义 IP 定位 API 时才会 fetch；
+       一旦填写，浏览器会向该服务发送访客 IP，需自行在站点隐私说明中披露
+       （详见 README「外部资源与隐私」）。 */
+    var api = popup.getAttribute("data-api") || "";
+    var fallbackApi = popup.getAttribute("data-fallback-api") || "";
 
     var hideTimer = null;
     var progressRaf = null;
@@ -91,6 +95,14 @@
       hideTimer = setTimeout(hidePopup, duration * 1000);
     }
 
+    function renderWelcome() {
+      if (textEl) {
+        textEl.textContent = "欢迎来访，愿你在这里度过一段安静的时光";
+      }
+      popup.classList.add("wi-welcome-popup--visible");
+      startAutoHide();
+    }
+
     function renderMessage(location) {
       var loc = (location || "").trim();
       if (!loc) loc = "未知星球";
@@ -102,26 +114,24 @@
     }
 
     function fetchLocation() {
-      if (textEl) {
-        textEl.textContent = "加载中…";
-      }
       popup.classList.add("wi-welcome-popup--visible");
 
-      /* 按顺序尝试主 API -> 备选 API */
+      /* 按顺序尝试主 API -> 备选 API；两者都为空则完全不发外部请求 */
       var endpoints = [];
       if (api) endpoints.push(api);
       if (fallbackApi && fallbackApi !== api) endpoints.push(fallbackApi);
 
       if (endpoints.length === 0) {
-        renderMessage("");
+        renderWelcome();
         return;
       }
 
+      if (textEl) textEl.textContent = "正在获取位置…";
       var idx = 0;
 
       function tryNext() {
         if (idx >= endpoints.length) {
-          renderMessage("");
+          renderWelcome();
           return;
         }
         var url = endpoints[idx++];
@@ -167,15 +177,14 @@
         });
     }
 
-    /* 解析多种 IP API 的返回格式：
-       - IPIP: {"ret":"ok","data":{"location":["中国","河北","张家口","","联通"]}}
-       - 腾讯 ip2city: {"ret":0,"province":"河北","city":"张家口",...}
-       - ipapi.co / ip-api.com: {"country":"China","regionName":"Hebei","city":"Zhangjiakou"}
-       - 太平洋: {"pro":"广东省","city":"广州市",...} */
+    /* 解析常见 IP 定位接口的返回格式（仅在管理员显式配置自定义 API 时才会用到）：
+       - { data: { location: [...] } }
+       - { province, city, ... } / { regionName, city, ... }
+       - { pro, city, ... } */
     function parseLocation(data) {
       if (!data) return "";
 
-      /* IPIP: data.data.location 数组 */
+      /* data.location 数组格式 */
       if (data.data && Array.isArray(data.data.location)) {
         var loc = data.data.location
           .filter(function (s) {

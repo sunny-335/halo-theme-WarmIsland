@@ -10,8 +10,8 @@ Hero 首屏是 WarmIsland 主题的标志性区域，占据首页首屏的全部
 | `hero_title` | 文本 | — | 主标题（留空则使用站点标题） |
 | `hero_subtitle` | 文本 | — | 副标题（留空则使用站点副标题） |
 | `hero_description_mode` | 下拉 | `hitokoto` | 描述文案来源：`none` / `hitokoto` / `custom` |
-| `hero_hitokoto_api` | URL | `https://v1.hitokoto.cn/` | 一言 API 地址 |
-| `hero_hitokoto_categories` | 多选 | `d, i, k` | 一言句子类型 |
+| `hero_hitokoto_api` | URL | 留空 | 自定义一言 API；留空使用主题内置本地句子库（零外部请求） |
+| `hero_hitokoto_categories` | 多选 | `d, i, k` | 句子类型筛选，仅对自定义 API 生效 |
 | `hero_custom_description` | 多行文本 | — | 自定义描述文案 |
 | `hero_hitokoto_auto_refresh` | 开关 | `false` | 一言自动刷新 |
 | `hero_hitokoto_refresh_interval` | 下拉 | `10000` | 一言刷新间隔（秒） |
@@ -49,24 +49,28 @@ hero_subtitle: "记录温暖与灵感"
 | 值 | 说明 |
 | --- | --- |
 | `none` | 不显示描述文案 |
-| `hitokoto` | 从一言 API 实时获取随机句子（默认） |
+| `hitokoto` | 从主题内置本地句子库随机取一条（默认，零外部请求） |
 | `custom` | 显示自定义的描述文案 |
 
 ### 一言模式（hitokoto）
 
-选择 `hitokoto` 模式后，Hero 区域会从一言 API 获取随机句子，每次刷新页面都会展示不同的内容。
+选择 `hitokoto` 模式后，Hero 区域**默认读取主题内置的本地句子库** `assets/data/hitokoto.json`
+（随主题自托管的静态 JSON），每次刷新随机展示一条，不依赖任何外部服务，也不会因为第三方接口
+不可用而出现空白。可直接编辑该 JSON 替换成自己喜欢的句子。
 
-#### 一言 API 地址（hero_hitokoto_api）
+#### 自定义一言 API（hero_hitokoto_api）
 
-默认使用官方 API `https://v1.hitokoto.cn/`。如果你部署了一言的私有实例，可以修改为自建 API 地址。
+默认**留空**（零外部请求）。如果需要使用在线一言或自建实例，可在此填写 API 地址；
+填写后浏览器才会向该地址发起 GET 请求，第三方可见访客 IP / User-Agent。
+请自行评估服务商隐私政策，并在站点隐私说明中披露，详见 README「外部资源与隐私」。
 
-::: tip
-自建一言 API 可以提升加载速度并避免第三方服务不稳定的问题。部署方式请参考 [hitokoto 官方文档](https://developer.hitokoto.cn/)。
+::: warning
+这是站点管理员主动开启的可选能力。留空即可随时关闭，无需重装主题。
 :::
 
 #### 一言句子类型（hero_hitokoto_categories）
 
-通过勾选来筛选获取的句子类型，支持多选：
+仅在填写了自定义 API 时生效，用于筛选该接口返回的句子类型，支持多选：
 
 | 值 | 类型 | 说明 |
 | --- | --- | --- |

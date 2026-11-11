@@ -141,7 +141,7 @@ import Layout from "../layouts/Layout.astro";
             />
           </div>
           <div class="wi-douban__poster wi-douban__poster--placeholder" th:if="${#strings.isEmpty(item.poster)}">
-            <span th:text="${#strings.substring(item.name ?: '', 0, 1)}"></span>
+            <span th:text="${!#strings.isEmpty(item.name) ? #strings.substring(item.name, 0, 1) : '·'}"></span>
           </div>
           <div class="wi-douban__body">
             <h3 class="wi-douban__name" th:text="${item.name}"></h3>
