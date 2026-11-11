@@ -59,7 +59,8 @@ import LightGallery from "../components/LightGallery.astro";
               ></time>
             </div>
 
-            <div class="wi-moment-detail__text" th:utext="${detailContent?.html ?: detailContent?.raw ?: ''}"></div>
+            <div class="wi-moment-detail__text" th:if="${detailContent?.html}" th:utext="${detailContent.html}"></div>
+            <div class="wi-moment-detail__text" th:unless="${detailContent?.html}" th:text="${detailContent?.raw ?: ''}"></div>
 
             <div
               class="wi-moment-detail__media wi-moments-page__card-media"

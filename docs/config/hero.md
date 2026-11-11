@@ -9,8 +9,8 @@ Hero 首屏是 WarmIsland 主题的标志性区域，占据首页首屏的全部
 | `hero_enabled` | 开关 | `true` | 启用 Hero 模块 |
 | `hero_title` | 文本 | — | 主标题（留空则使用站点标题） |
 | `hero_subtitle` | 文本 | — | 副标题（留空则使用站点副标题） |
-| `hero_description_mode` | 下拉 | `hitokoto` | 描述文案来源：`none` / `hitokoto` / `custom` |
-| `hero_hitokoto_api` | URL | 留空 | 自定义一言 API；留空使用主题内置本地句子库（零外部请求） |
+| `hero_description_mode` | 下拉 | `none` | 描述文案来源：`none` / `hitokoto` / `custom`，默认不显示描述文案 |
+| `hero_hitokoto_api` | URL | `https://v1.hitokoto.cn/` | 选「一言」时自动填入官方接口；留空则使用内置本地句子库（零外部请求） |
 | `hero_hitokoto_categories` | 多选 | `d, i, k` | 句子类型筛选，仅对自定义 API 生效 |
 | `hero_custom_description` | 多行文本 | — | 自定义描述文案 |
 | `hero_hitokoto_auto_refresh` | 开关 | `false` | 一言自动刷新 |
@@ -44,28 +44,31 @@ hero_subtitle: "记录温暖与灵感"
 
 ### 描述文案来源（hero_description_mode）
 
-控制 Hero 区域主标题下方显示的描述文案，提供三种模式：
+控制 Hero 区域主标题下方显示的描述文案，提供三种模式，**默认为「无」**：
 
 | 值 | 说明 |
 | --- | --- |
-| `none` | 不显示描述文案 |
-| `hitokoto` | 从主题内置本地句子库随机取一条（默认，零外部请求） |
-| `custom` | 显示自定义的描述文案 |
+| `none` | **默认**。不显示描述文案，不渲染一言元素，也不发起任何请求 |
+| `hitokoto` | 显示一句话文案；自动填入官方接口 `https://v1.hitokoto.cn/`，清空该字段则使用内置本地句子库 |
+| `custom` | 显示自定义的描述文案（静态文本，不发起任何请求） |
 
 ### 一言模式（hitokoto）
 
-选择 `hitokoto` 模式后，Hero 区域**默认读取主题内置的本地句子库** `assets/data/hitokoto.json`
-（随主题自托管的静态 JSON），每次刷新随机展示一条，不依赖任何外部服务，也不会因为第三方接口
-不可用而出现空白。可直接编辑该 JSON 替换成自己喜欢的句子。
+默认 `none` 时一言元素不渲染。切换到 `hitokoto` 后，设置项「自定义一言 API」自动填入
+`https://v1.hitokoto.cn/`，浏览器会向该地址发起 GET 请求获取句子（第三方可见访客 IP / User-Agent）。
+若把该字段清空，则回退到主题内置的本地句子库 `assets/data/hitokoto.json`
+（随主题自托管的静态 JSON，零外部请求），每次刷新随机展示一条，也不会因为第三方接口不可用而出现空白。
+可直接编辑该 JSON 替换成自己喜欢的句子。
 
 #### 自定义一言 API（hero_hitokoto_api）
 
-默认**留空**（零外部请求）。如果需要使用在线一言或自建实例，可在此填写 API 地址；
-填写后浏览器才会向该地址发起 GET 请求，第三方可见访客 IP / User-Agent。
-请自行评估服务商隐私政策，并在站点隐私说明中披露，详见 README「外部资源与隐私」。
+选择「一言」或「自定义」后才会显示该设置项。选择「一言」时自动填入 `https://v1.hitokoto.cn/`；
+**选择「一言」或「自定义」后若留空，则使用主题内置的本地句子库（零外部请求）**。
+**只有填写后才会向该地址发起请求**，需自行在站点隐私说明中披露，详见 README「外部资源与隐私」。
+也可换成自建实例或其他兼容接口。
 
 ::: warning
-这是站点管理员主动开启的可选能力。留空即可随时关闭，无需重装主题。
+这是站点管理员主动开启的可选能力。把描述文案来源改回「无」、或清空该字段即可随时停止外部请求，无需重装主题。
 :::
 
 #### 一言句子类型（hero_hitokoto_categories）

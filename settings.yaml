@@ -69,14 +69,14 @@ spec:
           id: welcome_popup_api
           label: 自定义 IP 定位主 API（可选）
           value: ""
-          help: 留空则只显示本地欢迎语。填写后会把访客 IP 发送给该第三方服务换取地理位置，需自行在站点隐私说明中披露，详见 README「外部资源与隐私」
+          help: 留空则只显示本地欢迎语。可选接口 https://myip.ipip.net/json 或 https://r.inews.qq.com/api/ip2city?otype=json。填写后会把访客 IP 发送给该第三方服务换取地理位置，需自行在站点隐私说明中披露，详见 README「外部资源与隐私」
           if: "$get(welcome_popup_enabled).value === true"
         - $formkit: url
           name: welcome_popup_fallback_api
           id: welcome_popup_fallback_api
           label: 自定义 IP 定位备选 API（可选）
           value: ""
-          help: 留空不使用备选；填写后同样会向第三方发送访客 IP
+          help: 留空不使用备选；可填 https://myip.ipip.net/json 或 https://r.inews.qq.com/api/ip2city?otype=json 作为主接口的备选。填写后同样会把访客 IP 发送给该第三方服务换取地理位置，需自行在站点隐私说明中披露，详见 README「外部资源与隐私」
           if: "$get(welcome_popup_enabled).value === true"
         - $formkit: switch
           name: welcome_popup_show_once
@@ -275,12 +275,13 @@ spec:
               value: hitokoto
             - label: 自定义
               value: custom
-          value: hitokoto
+          value: none
         - $formkit: url
           name: hero_hitokoto_api
           label: 自定义一言 API（可选）
-          value: ""
-          help: 留空使用主题内置的本地句子库（零外部请求）；填写后才会向该地址发起请求，需自行在站点隐私说明中披露，详见 README「外部资源与隐私」
+          value: "https://v1.hitokoto.cn/"
+          if: "$get(hero_description_mode).value !== 'none'"
+          help: 选择「一言」时自动填入官方接口 https://v1.hitokoto.cn/；选择「一言」或「自定义」后若留空，则使用主题内置的本地句子库（零外部请求）。只有填写后才会向该地址发起请求，需自行在站点隐私说明中披露，详见 README「外部资源与隐私」
         - $formkit: checkbox
           name: hero_hitokoto_categories
           label: 一言句子类型

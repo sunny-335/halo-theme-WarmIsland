@@ -10,7 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { fileURLToPath } from "node:url";
-import { auditTemplates, auditReadmeLinks } from "./audit-external.mjs";
+import { auditTemplates, auditReadmeLinks, auditCompliance } from "./audit-external.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -235,6 +235,16 @@ if (linkAudit.problems.length) {
   fail("README 存在指向制品中不存在文件的相对链接");
 }
 
+/* 4.4.2 / 5.2 / 2.2：内容渲染安全、字体许可证传递、上架说明数字一致性 */
+const entryNameSet = new Set(entries.map((entry) => entry.name));
+const complianceAudit = auditCompliance(entryNameSet);
+for (const problem of complianceAudit.problems) {
+  console.error(`[package] ${problem}`);
+}
+if (complianceAudit.problems.length) {
+  fail("合规审计未通过（4.4.2 内容渲染安全 / 5.2 许可证传递 / 2.2 上架信息）");
+}
+
 if (fs.existsSync(path.join(templatesDir, "logo.png"))) {
   fail("templates/logo.png 仍存在：应只保留压缩后的 templates/assets/logo.png");
 }
@@ -243,7 +253,8 @@ if (fs.existsSync(logoFile) && fs.statSync(logoFile).size > 300 * 1024) {
   fail("templates/assets/logo.png 超过 300KB，请先压缩再打包");
 }
 console.log(
-  `[package] 合规审计通过（${templateAudit.htmlCount} 个模板、${linkAudit.checked} 个相对链接、logo 单份压缩）`
+  `[package] 合规审计通过（${templateAudit.htmlCount} 个模板、${linkAudit.checked} 个相对链接、` +
+    `${complianceAudit.groupCount} 组 / ${complianceAudit.fieldCount} 配置项、logo 单份压缩、OFL 全文随包）`
 );
 
 const outFile = path.join(root, "dist", `warm-island-${version}.zip`);

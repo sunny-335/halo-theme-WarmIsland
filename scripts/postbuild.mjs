@@ -24,6 +24,17 @@ if (!fs.existsSync(path.join(assetsDir, "logo.png"))) {
 }
 console.log("[postbuild] logo.png 已去重，仅保留 templates/assets/logo.png");
 
+// 1b. 第三方字体许可证全文必须随构建产物分发（审核指南 5.2：许可证传递 / 版权声明保留）
+const oflFile = path.join(assetsDir, "fonts", "LXGWWenKai", "OFL.txt");
+if (!fs.existsSync(oflFile)) {
+  console.error(
+    "[postbuild] 未找到 templates/assets/fonts/LXGWWenKai/OFL.txt" +
+      "（public/assets/fonts/LXGWWenKai/OFL.txt 应随构建复制）"
+  );
+  process.exit(1);
+}
+console.log("[postbuild] LXGW WenKai 的 OFL 1.1 许可证全文已随包");
+
 // 2. 历史资源合并（已存在的同名文件以当前构建为准，不覆盖）
 if (fs.existsSync(compatDir)) {
   let copied = 0;

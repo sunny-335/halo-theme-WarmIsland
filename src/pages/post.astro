@@ -18,22 +18,43 @@ import LightGallery from "../components/LightGallery.astro";
     <meta th:if="${post.spec.cover}" name="twitter:image" th:content="${post.spec.cover}" />
     <meta th:if="${post.status.excerpt}" name="twitter:description" th:content="${post.status.excerpt}" />
     <meta property="article:published_time" th:content="${#dates.format(post.spec.publishTime, 'yyyy-MM-dd')}" />
+    <meta name="author" th:content="${post.contributors != null and !post.contributors.isEmpty() ? post.contributors[0].displayName : site.title}" />
     <th:block th:if="${post.categories != null and !post.categories.isEmpty()}">
       <meta property="article:section" th:content="${post.categories[0].spec.displayName}" />
     </th:block>
     <th:block th:if="${post.tags != null and !post.tags.isEmpty()}">
       <meta th:each="tag : ${post.tags}" property="article:tag" th:content="${tag.spec.displayName}" />
     </th:block>
-    <script type="application/ld+json" th:utext="${'{
-  &quot;@context&quot;: &quot;https://schema.org&quot;,
-  &quot;@type&quot;: &quot;Article&quot;,
-  &quot;headline&quot;: &quot;' + post.spec.title + '&quot;,
-  &quot;datePublished&quot;: &quot;' + #dates.format(post.spec.publishTime, &quot;yyyy-MM-dd&quot;) + '&quot;,
-  &quot;author&quot;: {
-    &quot;@type&quot;: &quot;Person&quot;,
-    &quot;name&quot;: &quot;' + (post.contributors != null and !post.contributors.isEmpty() ? post.contributors[0].displayName : site.title) + '&quot;
-  }' + (!#strings.isEmpty(post.spec.cover) ? ', &quot;image&quot;: &quot;' + post.spec.cover + '&quot;' : '') + (!#strings.isEmpty(post.status.excerpt) ? ', &quot;description&quot;: &quot;' + #strings.replace(post.status.excerpt, '&quot;', '\\&quot;') + '&quot;' : '') + '
-}'}"></script>
+    <!-- 4.4.2：结构化数据不再由模板拼接站点内容后以 th:utext 写进脚本文本。
+         文章标题、摘要、作者、封面等字段先由 Thymeleaf 转义输出到 <meta>，
+         再由 JSON.stringify + textContent 生成合法 JSON-LD；即使内容里含有
+         脚本闭合标签，也只会被当作普通文本，不会被浏览器解析执行。 -->
+    <script type="application/ld+json" id="wi-article-jsonld"></script>
+    <script is:inline th:inline="none">
+      (function () {
+        function meta(selector) {
+          var el = document.querySelector(selector);
+          return el ? el.getAttribute("content") : null;
+        }
+        var data = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: meta('meta[property="og:title"]') || document.title,
+          datePublished: meta('meta[property="article:published_time"]'),
+          author: {
+            "@type": "Person",
+            name: meta('meta[name="author"]') || meta('meta[property="og:site_name"]') || ""
+          },
+          mainEntityOfPage: meta('meta[property="og:url"]')
+        };
+        var image = meta('meta[property="og:image"]');
+        var description = meta('meta[property="og:description"]');
+        if (image) data.image = image;
+        if (description) data.description = description;
+        var target = document.getElementById("wi-article-jsonld");
+        if (target) target.textContent = JSON.stringify(data);
+      })();
+    </script>
   </Fragment>
 
   <div class="wi-reading-progress" id="wi-reading-progress"></div>

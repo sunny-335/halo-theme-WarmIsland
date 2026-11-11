@@ -4,6 +4,8 @@
  * 对应 Halo 应用市场审核指南：
  *  - 1.4  远程执行与动态加载：禁止远程加载核心代码 / 动态拉取并执行组件
  *  - 4.4.4 性能与外部资源：不得预连接外部 CDN、加载远程脚本样式、打包无关大资源
+ *  - 4.4.2 内容渲染安全：不得把站点内容用 th:utext 拼进 <script> 原始文本
+ *  - 5.2 / 2.2：第三方字体必须随包携带许可证全文；上架说明数字必须与配置定义一致
  *  - 4.6 / 2.2：不得出现占位内容、无效链接
  *
  * 检查项：
@@ -12,6 +14,8 @@
  *  3. 模板与静态资源中不得硬编码 fetch("https://...") / import("https://...") / url(https://...)
  *  4. 不得出现历史上被审核点名的第三方服务域名，或 autoloader 动态加载痕迹
  *  5. README 中的相对链接必须在安装包清单中真实存在
+ *  6. 任何 <script> 开标签不得带 th:utext；字体许可证全文必须在制品清单中；
+ *     README 的设置分组 / 配置项数量必须与 settings.yaml 一致
  *
  * 说明：<a href="https://..."> 这类需要访客主动点击的分享 / 备案 / 应用市场外链是允许的，
  * 不属于「自动外部请求」，但已在 README「外部资源与隐私」章节逐项披露。
@@ -134,6 +138,63 @@ export function auditReadmeLinks(entryNames, readmePath = path.join(root, "READM
   return { problems, checked };
 }
 
+/**
+ * 合规审计：审核指南 4.4.2（内容渲染安全）、5.2（许可证传递）、2.2（上架信息准确）
+ *
+ * @param {Set<string>|null} entryNames 打包清单；传入时额外校验许可证确实进了制品
+ */
+export function auditCompliance(entryNames = null) {
+  const problems = [];
+  const templatesDir = path.join(root, "templates");
+  const oflRel = "templates/assets/fonts/LXGWWenKai/OFL.txt";
+
+  // 1. <script> 是原始文本元素，th:utext 不转义且可被脚本闭合标签截断（4.4.2）
+  const scriptTagRe = /<script\b[^>]*>/gi;
+  for (const file of listFiles(templatesDir, [".html"])) {
+    const rel = path.relative(root, file).replace(/\\/g, "/");
+    const text = fs.readFileSync(file, "utf8");
+    scriptTagRe.lastIndex = 0;
+    let hit;
+    while ((hit = scriptTagRe.exec(text)) !== null) {
+      if (/\bth:utext\b/i.test(hit[0])) {
+        problems.push(`${rel}: <script> 开标签使用了 th:utext（4.4.2 内容注入风险）`);
+      }
+    }
+  }
+
+  // 2. SIL OFL 1.1 要求随字体软件附带版权声明与许可证全文（5.2）
+  const oflPath = path.join(root, oflRel);
+  if (entryNames && !entryNames.has(oflRel)) {
+    problems.push(`安装包缺少 ${oflRel}（5.2 字体许可证传递）`);
+  }
+  if (!fs.existsSync(oflPath)) {
+    problems.push(`构建产物缺少 ${oflRel}（5.2 字体许可证传递）`);
+  } else {
+    const ofl = fs.readFileSync(oflPath, "utf8");
+    if (!/SIL OPEN FONT LICENSE Version 1\.1/.test(ofl) || !/Copyright 2021-2026 LXGW/.test(ofl)) {
+      problems.push(`${oflRel} 内容不完整：需包含上游版权声明与 OFL 1.1 全文`);
+    }
+  }
+
+  // 3. 上架说明里的配置数量必须与 settings.yaml 一致（2.2 / 4.6）
+  const settingsPath = path.join(root, "settings.yaml");
+  const readmePath = path.join(root, "README.md");
+  let groupCount = 0;
+  let fieldCount = 0;
+  if (fs.existsSync(settingsPath) && fs.existsSync(readmePath)) {
+    const settings = fs.readFileSync(settingsPath, "utf8");
+    const readme = fs.readFileSync(readmePath, "utf8");
+    groupCount = (settings.match(/^\s*-\s+group:/gm) || []).length;
+    fieldCount = (settings.match(/^\s*-\s+\$formkit:/gm) || []).length;
+    const expected = `${groupCount} 个设置分组、${fieldCount} 个配置项`;
+    if (!readme.includes(expected)) {
+      problems.push(`README 配置数量与 settings.yaml 不一致，应为「${expected}」（2.2）`);
+    }
+  }
+
+  return { problems, groupCount, fieldCount };
+}
+
 function report(label, problems) {
   if (problems.length === 0) {
     console.log(`[audit] PASS ${label}`);
@@ -146,10 +207,15 @@ function report(label, problems) {
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isCli) {
   const templates = auditTemplates();
+  const compliance = auditCompliance();
   let failures = 0;
   failures += report(
     `模板外部资源（${templates.htmlCount} 个 HTML / ${templates.fileCount} 个文件）`,
     templates.problems
+  );
+  failures += report(
+    `合规审计 4.4.2 / 5.2 / 2.2（${compliance.groupCount} 组 / ${compliance.fieldCount} 配置项）`,
+    compliance.problems
   );
   /* 独立运行时按当前磁盘上的打包清单口径检查 README 链接 */
   const distZip = path.join(root, "dist");
@@ -162,6 +228,6 @@ if (isCli) {
   } else {
     console.log("[audit] 提示：README 链接校验在 pnpm package 内执行（当前无安装包）");
   }
-  console.log(`[audit] 模板审计共 ${failures} 项问题`);
+  console.log(`[audit] 审计共 ${failures} 项问题`);
   process.exit(failures ? 1 : 0);
 }
