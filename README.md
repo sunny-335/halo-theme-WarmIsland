@@ -235,3 +235,8 @@ WarmIsland 暖屿为**完全原创**主题：视觉设计、页面结构、Astro
 | [Feather Icons](https://feathericons.com/) | [MIT](https://opensource.org/licenses/MIT) | 导航、界面交互图标 |
 | [Halo](https://halo.run/) | [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) | 主题内置图标 |
 | [LightGallery](https://www.lightgalleryjs.com/) 2.9.0 | GPLv3 | 图片灯箱（npm 依赖随构建打包） |
+
+## 项目地址
+Gitea：https://git.nxxy335.top/nxxy335/halo-theme-WarmIsland.git
+Gitee：https://gitee.com/nxxy335/halo-theme-WarmIsland.git
+GitHub：https://github.com/sunny-335/halo-theme-WarmIsland.git
